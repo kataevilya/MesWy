@@ -9,7 +9,6 @@
     <input type="file" id="fileInput" />
     <button onclick="uploadToPuter()">Загрузить на сервер</button>
 
-    <!-- подключаем библиотеку puter -->
     <script src="https://js.puter.com/v2/"></script>
 
     <script>
@@ -23,14 +22,15 @@
             }
 
             try {
-                // 1. создаем папку, если её нет
+                // 1. Создаем папку, если её нет
                 await puter.fs.mkdir('uploads').catch(() => {});
 
-                // 2. загружаем файл
+                // 2. Загружаем файл
                 const uploadedFile = await puter.fs.write('uploads/' + file.name, file);
                 
-                // 3. получаем публичную ссылку (правильный метод: publicURL)
-                const url = await uploadedFile.publicURL();
+                // 3. Получаем публичную ссылку через метод .url()
+                // Это универсальный способ для актуальной версии Puter.js
+                const url = await uploadedFile.url();
                 
                 console.log('ссылка для скачивания:', url);
                 alert('файл готов! ссылка: ' + url);
