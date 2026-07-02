@@ -9,8 +9,7 @@
     <script src="https://js.puter.com/v2/"></script>
 
     <script>
-        // Используй этот метод для анонимной работы
-async function uploadToPuter() {
+        async function uploadToPuter() {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
 
@@ -20,21 +19,19 @@ async function uploadToPuter() {
     }
 
     try {
-        // Проверяем, авторизован ли пользователь
-        const user = await puter.auth.getUser().catch(() => null);
-        
-        // Если пользователя нет, мы работаем в гостевой сессии
-        // Путь 'uploads/' будет создан автоматически в виртуальном диске сессии
+        // 1. Сначала пытаемся создать папку (если она уже есть, это не вызовет ошибку)
+        await puter.fs.mkdir('uploads').catch(() => {});
+
+        // 2. Теперь загружаем файл
         const uploadedFile = await puter.fs.write('uploads/' + file.name, file);
         
-        // Получаем ссылку
+        // 3. Получаем ссылку
         const url = await puter.fs.urlFor(uploadedFile);
         
         console.log('ссылка:', url);
         alert('файл готов: ' + url);
     } catch (err) {
         console.error('Ошибка:', err);
-        // Если ошибка связана с авторизацией, она здесь отобразится
         alert('ошибка: ' + err.message);
     }
 }
