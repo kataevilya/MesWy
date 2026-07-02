@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузчик файлов</title>
+</head>
 <body>
 
     <input type="file" id="fileInput" />
@@ -10,31 +14,31 @@
 
     <script>
         async function uploadToPuter() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
 
-    if (!file) {
-        alert('выбери файл');
-        return;
-    }
+            if (!file) {
+                alert('выбери файл');
+                return;
+            }
 
-    try {
-        // 1. Сначала пытаемся создать папку (если она уже есть, это не вызовет ошибку)
-        await puter.fs.mkdir('uploads').catch(() => {});
+            try {
+                // 1. создаем папку, если её нет
+                await puter.fs.mkdir('uploads').catch(() => {});
 
-        // 2. Теперь загружаем файл
-        const uploadedFile = await puter.fs.write('uploads/' + file.name, file);
-        
-        // 3. Получаем ссылку
-        const url = await puter.fs.urlFor(uploadedFile);
-        
-        console.log('ссылка:', url);
-        alert('файл готов: ' + url);
-    } catch (err) {
-        console.error('Ошибка:', err);
-        alert('ошибка: ' + err.message);
-    }
-}
+                // 2. загружаем файл
+                const uploadedFile = await puter.fs.write('uploads/' + file.name, file);
+                
+                // 3. получаем публичную ссылку (правильный метод: publicURL)
+                const url = await uploadedFile.publicURL();
+                
+                console.log('ссылка для скачивания:', url);
+                alert('файл готов! ссылка: ' + url);
+            } catch (err) {
+                console.error('Ошибка:', err);
+                alert('ошибка: ' + err.message);
+            }
+        }
     </script>
 </body>
 </html>
