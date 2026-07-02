@@ -7,10 +7,10 @@
 <body>
 
     <input type="file" id="fileInput" />
-    <button onclick="uploadToFileIo()">Загрузить файл</button>
+    <button onclick="uploadToGofile()">Загрузить на сервер</button>
 
     <script>
-        async function uploadToFileIo() {
+        async function uploadToGofile() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
 
@@ -23,23 +23,23 @@
             formData.append('file', file);
 
             try {
-                // Отправляем файл на File.io
-                const response = await fetch('https://file.io', {
+                // Gofile.io лучше работает с CORS
+                const response = await fetch('https://store1.gofile.io/uploadFile', {
                     method: 'POST',
                     body: formData
                 });
 
                 const result = await response.json();
 
-                if (result.success) {
-                    console.log('Ссылка для скачивания:', result.link);
-                    alert('Файл загружен! Ссылка: ' + result.link);
+                if (result.status === 'ok') {
+                    console.log('Ссылка:', result.data.downloadPage);
+                    alert('Файл загружен! Ссылка: ' + result.data.downloadPage);
                 } else {
-                    alert('Ошибка при загрузке: ' + (result.message || 'Неизвестная ошибка'));
+                    alert('Ошибка: ' + result.status);
                 }
             } catch (err) {
                 console.error('Ошибка:', err);
-                alert('Не удалось загрузить файл.');
+                alert('Ошибка сети или CORS. Попробуй с другого браузера.');
             }
         }
     </script>
