@@ -9,31 +9,35 @@
     <script src="https://js.puter.com/v2/"></script>
 
     <script>
-        async function uploadToPuter() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
+        // Используй этот метод для анонимной работы
+async function uploadToPuter() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
 
-            if (!file) {
-                alert('выбери файл сначала');
-                return;
-            }
+    if (!file) {
+        alert('выбери файл');
+        return;
+    }
 
-            try {
-                // загружаем файл в облако puter
-                // файлы сохраняются в папку /uploads/
-                const uploadedFile = await puter.fs.write('uploads/' + file.name, file);
-                
-                // получаем прямую ссылку для скачивания
-                const url = await puter.fs.urlFor(uploadedFile);
-                
-                console.log('файл успешно загружен!');
-                console.log('ссылка для скачивания:', url);
-                alert('готово! ссылка в консоли: ' + url);
-            } catch (err) {
-                console.error('ошибка:', err);
-                alert('не удалось загрузить: ' + err.message);
-            }
-        }
+    try {
+        // Проверяем, авторизован ли пользователь
+        const user = await puter.auth.getUser().catch(() => null);
+        
+        // Если пользователя нет, мы работаем в гостевой сессии
+        // Путь 'uploads/' будет создан автоматически в виртуальном диске сессии
+        const uploadedFile = await puter.fs.write('uploads/' + file.name, file);
+        
+        // Получаем ссылку
+        const url = await puter.fs.urlFor(uploadedFile);
+        
+        console.log('ссылка:', url);
+        alert('файл готов: ' + url);
+    } catch (err) {
+        console.error('Ошибка:', err);
+        // Если ошибка связана с авторизацией, она здесь отобразится
+        alert('ошибка: ' + err.message);
+    }
+}
     </script>
 </body>
 </html>
