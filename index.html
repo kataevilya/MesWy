@@ -19,249 +19,567 @@
             --accent: #6200ee;
             --hover-bg: #e0e0e0;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; outline: none; }
         body { background: var(--bg-color); color: var(--text-color); display: flex; height: 100vh; overflow: hidden; transition: 0.3s; }
         
+        /* Боковая панель (Левая) */
         .sidebar-left {
-            width: 60px;
+            width: 70px;
             background: var(--panel-bg);
-            transition: width 0.3s;
+            transition: width 0.3s ease;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             border-right: 1px solid var(--hover-bg);
             z-index: 10;
         }
-        .sidebar-left:hover { width: 250px; }
+        .sidebar-left:hover { width: 280px; }
         .nav-item {
             display: flex;
             align-items: center;
-            padding: 15px;
+            padding: 20px;
             color: var(--text-color);
             text-decoration: none;
             cursor: pointer;
             white-space: nowrap;
+            transition: 0.2s;
         }
         .nav-item:hover { background: var(--hover-bg); }
-        .nav-item i { min-width: 30px; text-align: center; font-size: 20px; }
-        .nav-item span { margin-left: 15px; opacity: 0; transition: opacity 0.3s; }
+        .nav-item i { min-width: 30px; text-align: center; font-size: 22px; }
+        .nav-item span { margin-left: 15px; opacity: 0; transition: opacity 0.3s; font-size: 16px; font-weight: bold; }
         .sidebar-left:hover .nav-item span { opacity: 1; }
         
+        /* Центральная лента */
         .feed {
             flex-grow: 1;
-            padding: 20px;
+            padding: 30px;
             overflow-y: auto;
             background: var(--bg-color);
+            position: relative;
         }
+        .feed h2 { margin-bottom: 20px; font-size: 28px; }
+        
         .post {
             background: var(--panel-bg);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            border: 1px solid var(--hover-bg);
-        }
-        
-        .sidebar-right {
-            width: 300px;
-            background: var(--panel-bg);
             padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            border: 1px solid var(--hover-bg);
+            max-width: 800px;
+        }
+        .post-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; cursor: pointer; }
+        .post-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: var(--hover-bg); }
+        .post-author { font-size: 18px; font-weight: bold; }
+        .post-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: var(--accent); }
+        .post-desc { font-size: 16px; margin-bottom: 15px; line-height: 1.5; }
+        .post-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; }
+        .post-actions { display: flex; gap: 10px; }
+        
+        /* Кнопки */
+        .btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        .btn:hover { opacity: 0.8; transform: scale(0.98); }
+        .btn-danger { background: #ff4444; }
+        .btn-google { background: #fff; color: #000; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        /* Профиль (Правая панель) */
+        .sidebar-right {
+            width: 400px;
+            background: var(--panel-bg);
+            padding: 30px;
             border-left: 1px solid var(--hover-bg);
-            display: flex;
+            display: none; /* Скрыто по умолчанию */
             flex-direction: column;
             align-items: center;
-            background-size: cover;
-            background-position: center;
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            z-index: 20;
+            overflow-y: auto;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
         }
-        .profile-icon { font-size: 50px; margin-bottom: 10px; color: var(--accent); background: rgba(0,0,0,0.5); border-radius: 50%; padding: 20px; }
-        .profile-name { font-size: 24px; font-weight: bold; margin-bottom: 10px; text-shadow: 1px 1px 2px #000; }
+        .close-profile {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: 0.2s;
+        }
+        .close-profile:hover { color: var(--accent); }
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            background: var(--hover-bg);
+            border: 4px solid var(--accent);
+        }
+        .profile-name { font-size: 28px; font-weight: bold; margin-bottom: 30px; text-align: center; }
+        .profile-posts-container { width: 100%; }
+        .profile-posts-container h3 { font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid var(--hover-bg); padding-bottom: 10px; }
         
+        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.85);
             justify-content: center;
             align-items: center;
             z-index: 100;
         }
         .modal-content {
             background: var(--panel-bg);
-            padding: 20px;
-            border-radius: 10px;
-            width: 400px;
+            padding: 40px;
+            border-radius: 25px;
+            width: 500px;
+            max-width: 90%;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
-        .modal-content input, .modal-content select {
-            padding: 10px;
+        .modal-content h3 { font-size: 26px; text-align: center; margin-bottom: 10px; }
+        .modal-content input[type="text"], .modal-content textarea {
+            padding: 15px;
             background: var(--bg-color);
-            border: 1px solid var(--hover-bg);
+            border: 2px solid var(--hover-bg);
             color: var(--text-color);
-            border-radius: 5px;
+            border-radius: 15px;
+            width: 100%;
+            font-size: 16px;
         }
-        .modal-content button {
-            padding: 10px;
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 5px;
+        .modal-content input[type="text"]:focus, .modal-content textarea:focus { border-color: var(--accent); }
+        
+        /* Кастомные инпуты для файлов с закруглениями */
+        .file-upload-wrapper { position: relative; width: 100%; text-align: center; }
+        .file-upload-wrapper input[type="file"] { display: none; }
+        .file-upload-label {
+            display: block;
+            padding: 20px;
+            background: var(--bg-color);
+            border: 2px dashed var(--accent);
+            color: var(--text-color);
+            border-radius: 20px;
             cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
         }
-        .modal-content button:hover { opacity: 0.8; }
+        .file-upload-label:hover { background: rgba(187, 134, 252, 0.1); transform: translateY(-2px); }
+        .file-upload-label i { font-size: 28px; margin-bottom: 10px; display: block; color: var(--accent); }
+        .file-name-display { margin-top: 10px; font-size: 14px; color: var(--accent); }
+
+        /* Лоадер */
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 999;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            flex-direction: column;
+            font-weight: bold;
+        }
+        .spinner {
+            border: 6px solid var(--hover-bg);
+            border-top: 6px solid var(--accent);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
+    <!-- Лоадер -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <span id="loadingText">Загрузка...</span>
+    </div>
+
+    <!-- Левое меню -->
     <nav class="sidebar-left">
         <div class="nav-item" onclick="openUploadModal()">
-            <i class="fa-solid fa-plus"></i>
-            <span>загрузить сохранение</span>
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Загрузить сохранение</span>
         </div>
-        <div class="nav-item" onclick="showMyProfile()">
-            <i class="fa-solid fa-user"></i>
-            <span>мой профиль</span>
+        <div class="nav-item" onclick="openMyProfile()">
+            <i class="fa-solid fa-user-circle"></i>
+            <span>Мой профиль</span>
         </div>
-        <div class="nav-item" onclick="openEditModal()">
-            <i class="fa-solid fa-pen-to-square"></i>
-            <span>настроить профиль</span>
+        <div class="nav-item" onclick="openEditProfileModal()">
+            <i class="fa-solid fa-user-pen"></i>
+            <span>Настроить профиль</span>
         </div>
         <div class="nav-item" onclick="changeTheme()">
             <i class="fa-solid fa-palette"></i>
-            <span>смена темы</span>
+            <span>Смена темы</span>
         </div>
         <a class="nav-item" href="https://t.me/ryzik348" target="_blank">
-            <i class="fa-solid fa-headset"></i>
-            <span>поддержка</span>
+            <i class="fa-brands fa-telegram"></i>
+            <span>Поддержка</span>
         </a>
+        <div class="nav-item" onclick="logout()" style="margin-top: auto; color: #ff4444;">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Выйти</span>
+        </div>
     </nav>
 
+    <!-- Лента -->
     <main class="feed">
-        <h2>лента сохранений</h2>
-        <br>
-        <div class="post" onclick="viewUserProfile('гость', 'fa-ghost', '')">
-            <h3>гость <i class="fa-solid fa-ghost"></i></h3>
-            <p>мое крутое сохранение для игры</p>
-            <div style="background:#333; height:150px; border-radius:5px; margin-top:10px; display:flex; align-items:center; justify-content:center;">скриншот.png</div>
+        <h2>Лента сохранений</h2>
+        <div id="feedContainer">
+            <!-- Посты будут тут -->
         </div>
     </main>
 
+    <!-- Правая панель (Профиль) -->
     <aside class="sidebar-right" id="profilePanel">
-        <i class="fa-solid fa-user profile-icon" id="profileIcon"></i>
-        <div class="profile-name" id="profileNameDisplay">загрузка</div>
-        <p style="background:rgba(0,0,0,0.5); padding:5px; border-radius:5px;">статус: онлайн</p>
+        <i class="fa-solid fa-xmark close-profile" onclick="closeProfile()"></i>
+        <img src="" id="profileAvatar" class="profile-avatar-large" alt="Аватар" onerror="this.src='https://via.placeholder.com/120?text=Аватар'">
+        <div class="profile-name" id="profileName">Имя пользователя</div>
+        
+        <div class="profile-posts-container">
+            <h3>Посты пользователя</h3>
+            <div id="profilePostsList"></div>
+        </div>
     </aside>
 
-    <div id="setupModal" class="modal">
+    <!-- Модалка Авторизации -->
+    <div id="authModal" class="modal" style="display: flex;">
         <div class="modal-content">
-            <h3>добро пожаловать в meswy</h3>
-            <p>введите ваше имя для первой настройки</p>
-            <input type="text" id="setupNameInput" placeholder="ваше имя">
-            <button onclick="saveInitialName()">войти</button>
+            <h3>Добро пожаловать в MesWy</h3>
+            <p style="text-align: center; color: #ccc;">Войдите, чтобы сохранять и делиться файлами</p>
+            <button class="btn btn-google" onclick="loginGoogle()">
+                <i class="fa-brands fa-google" style="font-size: 20px;"></i> Войти через Google
+            </button>
         </div>
     </div>
 
-    <div id="editModal" class="modal">
+    <!-- Модалка Редактирования Профиля -->
+    <div id="editProfileModal" class="modal">
         <div class="modal-content">
-            <h3>настройки профиля</h3>
-            <input type="text" id="editNameInput" placeholder="ваше имя">
-            <input type="text" id="editBgInput" placeholder="ссылка на фон профиля (url)">
-            <select id="editIconSelect">
-                <option value="fa-user">обычный юзер</option>
-                <option value="fa-star">звезда</option>
-                <option value="fa-fire">огонь</option>
-                <option value="fa-bolt">молния</option>
-                <option value="fa-crown">корона</option>
-                <option value="fa-gamepad">геймер</option>
-            </select>
-            <button onclick="saveProfileChanges()">сохранить профиль</button>
-            <button onclick="closeModals()" style="background:var(--hover-bg)">отмена</button>
+            <h3>Настройки профиля</h3>
+            <input type="text" id="editProfileName" placeholder="Ваше имя">
+            
+            <div class="file-upload-wrapper">
+                <label for="editProfileAvatarInput" class="file-upload-label">
+                    <i class="fa-solid fa-image-portrait"></i>
+                    Выберите новую аватарку
+                </label>
+                <input type="file" id="editProfileAvatarInput" accept="image/*" onchange="updateFileName('editProfileAvatarInput', 'avatarFileName')">
+                <div id="avatarFileName" class="file-name-display"></div>
+            </div>
+
+            <button class="btn" onclick="saveProfileChanges()">Сохранить профиль</button>
+            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">Отмена</button>
         </div>
     </div>
 
+    <!-- Модалка Загрузки Сохранения -->
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h3>новое сохранение</h3>
-            <label>скриншот сохранения:</label>
-            <input type="file" accept="image/*">
-            <label>файл сохранения (.pc):</label>
-            <input type="file" accept=".pc">
-            <button onclick="fakeUpload()">загрузить</button>
-            <button onclick="closeModals()" style="background:var(--hover-bg)">отмена</button>
+            <h3>Новое сохранение</h3>
+            
+            <input type="text" id="postTitleInput" placeholder="Название игры / сохранения">
+            <textarea id="postDescInput" placeholder="Описание вашего сохранения" rows="3"></textarea>
+            
+            <div class="file-upload-wrapper">
+                <label for="postImageInput" class="file-upload-label">
+                    <i class="fa-solid fa-image"></i>
+                    Скриншот игры
+                </label>
+                <input type="file" id="postImageInput" accept="image/*" onchange="updateFileName('postImageInput', 'imgFileName')">
+                <div id="imgFileName" class="file-name-display"></div>
+            </div>
+
+            <div class="file-upload-wrapper">
+                <label for="postFileInput" class="file-upload-label">
+                    <i class="fa-solid fa-file-zipper"></i>
+                    Файл сохранения (.pc, .zip, .rar)
+                </label>
+                <input type="file" id="postFileInput" onchange="updateFileName('postFileInput', 'fileFileName')">
+                <div id="fileFileName" class="file-name-display"></div>
+            </div>
+
+            <button class="btn" onclick="uploadPost()">Опубликовать</button>
+            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">Отмена</button>
         </div>
     </div>
 
-    <script>
-        let currentUser = { name: '', icon: 'fa-user', bg: '' };
+    <!-- FIREBASE СКРИПТЫ (Модульная версия 10) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        window.onload = () => {
-            const saved = localStorage.getItem('meswyUser');
-            if (saved) {
-                currentUser = JSON.parse(saved);
-                updateProfilePanel(currentUser.name, currentUser.icon, currentUser.bg);
-            } else {
-                document.getElementById('setupModal').style.display = 'flex';
-            }
+        // КОНФИГ ИЗ ТВОЕГО ЗАПРОСА
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
+            authDomain: "meswy-web.firebaseapp.com",
+            projectId: "meswy-web",
+            storageBucket: "meswy-web.firebasestorage.app",
+            messagingSenderId: "802423553668",
+            appId: "1:802423553668:web:64be6aae3f34b2d0f88cd1",
+            measurementId: "G-PYS9ELGKDE"
         };
 
-        function saveInitialName() {
-            const name = document.getElementById('setupNameInput').value;
-            if (!name) return;
-            currentUser.name = name;
-            localStorage.setItem('meswyUser', JSON.stringify(currentUser));
-            document.getElementById('setupModal').style.display = 'none';
-            updateProfilePanel(currentUser.name, currentUser.icon, currentUser.bg);
-        }
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
 
-        function updateProfilePanel(name, icon, bg) {
-            document.getElementById('profileNameDisplay').innerText = name;
-            document.getElementById('profileIcon').className = 'fa-solid ' + icon + ' profile-icon';
-            if (bg) {
-                document.getElementById('profilePanel').style.backgroundImage = 'url(' + bg + ')';
+        let currentUser = null;
+        let allPosts = [];
+
+        // Показ имени файла при выборе
+        window.updateFileName = (inputId, displayId) => {
+            const input = document.getElementById(inputId);
+            const display = document.getElementById(displayId);
+            if(input.files.length > 0) {
+                display.innerText = "Выбран файл: " + input.files[0].name;
             } else {
-                document.getElementById('profilePanel').style.backgroundImage = 'none';
+                display.innerText = "";
             }
         }
 
-        function showMyProfile() {
-            updateProfilePanel(currentUser.name, currentUser.icon, currentUser.bg);
+        // Управление лоадером
+        const showLoading = (text) => {
+            document.getElementById('loadingText').innerText = text;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        const hideLoading = () => { document.getElementById('loadingOverlay').style.display = 'none'; }
+
+        // АВТОРИЗАЦИЯ
+        window.loginGoogle = async () => {
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                alert("Ошибка входа: " + error.message);
+            }
         }
 
-        function viewUserProfile(name, icon, bg) {
-            updateProfilePanel(name, icon, bg);
+        window.logout = async () => {
+            await signOut(auth);
+            window.location.reload();
         }
 
-        function openEditModal() {
-            document.getElementById('editNameInput').value = currentUser.name;
-            document.getElementById('editBgInput').value = currentUser.bg || '';
-            document.getElementById('editIconSelect').value = currentUser.icon;
-            document.getElementById('editModal').style.display = 'flex';
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('authModal').style.display = 'none';
+                loadFeed();
+            } else {
+                document.getElementById('authModal').style.display = 'flex';
+            }
+        });
+
+        // ЗАГРУЗКА ЛЕНТЫ
+        async function loadFeed() {
+            showLoading('Загрузка ленты...');
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                allPosts = [];
+                querySnapshot.forEach((doc) => {
+                    allPosts.push({ id: doc.id, ...doc.data() });
+                });
+                renderPosts(allPosts, 'feedContainer');
+            } catch (e) {
+                console.error("Ошибка загрузки постов:", e);
+            }
+            hideLoading();
         }
 
-        function saveProfileChanges() {
-            currentUser.name = document.getElementById('editNameInput').value || currentUser.name;
-            currentUser.bg = document.getElementById('editBgInput').value;
-            currentUser.icon = document.getElementById('editIconSelect').value;
-            localStorage.setItem('meswyUser', JSON.stringify(currentUser));
-            updateProfilePanel(currentUser.name, currentUser.icon, currentUser.bg);
-            closeModals();
+        function renderPosts(postsArray, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            if(postsArray.length === 0) {
+                container.innerHTML = '<p style="color:#aaa;">Здесь пока пусто.</p>';
+                return;
+            }
+
+            postsArray.forEach(post => {
+                const isAuthor = currentUser && post.authorId === currentUser.uid;
+                const postEl = document.createElement('div');
+                postEl.className = 'post';
+                postEl.innerHTML = `
+                    <div class="post-header" onclick="openProfile('${post.authorId}', '${post.authorName}', '${post.authorAvatar}')">
+                        <img src="${post.authorAvatar || 'https://via.placeholder.com/50?text=U'}" class="post-avatar">
+                        <div class="post-author">${post.authorName}</div>
+                    </div>
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-desc">${post.desc}</div>
+                    ${post.imgUrl ? `<img src="${post.imgUrl}" class="post-img">` : ''}
+                    <div class="post-actions">
+                        <a href="${post.fileUrl}" target="_blank" class="btn"><i class="fa-solid fa-download"></i> Скачать файл</a>
+                        ${isAuthor ? `<button class="btn btn-danger" onclick="deletePost('${post.id}')"><i class="fa-solid fa-trash"></i> Удалить</button>` : ''}
+                    </div>
+                `;
+                container.appendChild(postEl);
+            });
         }
 
-        function openUploadModal() {
+        // СОЗДАНИЕ ПОСТА
+        window.uploadPost = async () => {
+            const title = document.getElementById('postTitleInput').value.trim();
+            const desc = document.getElementById('postDescInput').value.trim();
+            const imageFile = document.getElementById('postImageInput').files[0];
+            const saveFile = document.getElementById('postFileInput').files[0];
+
+            if(!title || !saveFile) {
+                alert("Укажите название и выберите файл сохранения!");
+                return;
+            }
+
+            showLoading('Публикация...');
+            try {
+                let imgUrl = "";
+                if (imageFile) {
+                    const imgRef = ref(storage, `images/${Date.now()}_${imageFile.name}`);
+                    await uploadBytes(imgRef, imageFile);
+                    imgUrl = await getDownloadURL(imgRef);
+                }
+
+                const fileRef = ref(storage, `files/${Date.now()}_${saveFile.name}`);
+                await uploadBytes(fileRef, saveFile);
+                const fileUrl = await getDownloadURL(fileRef);
+
+                await addDoc(collection(db, "posts"), {
+                    title: title,
+                    desc: desc,
+                    imgUrl: imgUrl,
+                    fileUrl: fileUrl,
+                    authorId: currentUser.uid,
+                    authorName: currentUser.displayName || "Без имени",
+                    authorAvatar: currentUser.photoURL || "",
+                    createdAt: serverTimestamp()
+                });
+
+                closeModals();
+                loadFeed();
+            } catch(e) {
+                alert("Ошибка публикации: " + e.message);
+                hideLoading();
+            }
+        }
+
+        // УДАЛЕНИЕ ПОСТА
+        window.deletePost = async (postId) => {
+            if(confirm("Точно удалить пост?")) {
+                showLoading("Удаление...");
+                try {
+                    await deleteDoc(doc(db, "posts", postId));
+                    loadFeed();
+                    // Если открыт профиль, обновляем его
+                    if(document.getElementById('profilePanel').style.display === 'flex') {
+                        closeProfile();
+                    }
+                } catch(e) {
+                    alert("Ошибка: " + e.message);
+                }
+                hideLoading();
+            }
+        }
+
+        // РАБОТА С ПРОФИЛЕМ (ПРАВАЯ ПАНЕЛЬ)
+        window.openProfile = (uid, name, avatar) => {
+            document.getElementById('profileName').innerText = name || "Пользователь";
+            document.getElementById('profileAvatar').src = avatar || "https://via.placeholder.com/120?text=U";
+            
+            const userPosts = allPosts.filter(p => p.authorId === uid);
+            renderPosts(userPosts, 'profilePostsList');
+            
+            document.getElementById('profilePanel').style.display = 'flex';
+        }
+
+        window.openMyProfile = () => {
+            if(!currentUser) return;
+            openProfile(currentUser.uid, currentUser.displayName, currentUser.photoURL);
+        }
+
+        window.closeProfile = () => {
+            document.getElementById('profilePanel').style.display = 'none';
+        }
+
+        // РЕДАКТИРОВАНИЕ ПРОФИЛЯ
+        window.openEditProfileModal = () => {
+            document.getElementById('editProfileName').value = currentUser.displayName || "";
+            document.getElementById('editProfileModal').style.display = 'flex';
+        }
+
+        window.saveProfileChanges = async () => {
+            const newName = document.getElementById('editProfileName').value.trim();
+            const avatarFile = document.getElementById('editProfileAvatarInput').files[0];
+            
+            if(!newName) return alert("Введите имя!");
+            
+            showLoading("Обновление профиля...");
+            try {
+                let photoURL = currentUser.photoURL;
+                
+                if (avatarFile) {
+                    const avatarRef = ref(storage, `avatars/${currentUser.uid}_${Date.now()}`);
+                    await uploadBytes(avatarRef, avatarFile);
+                    photoURL = await getDownloadURL(avatarRef);
+                }
+
+                await updateProfile(currentUser, {
+                    displayName: newName,
+                    photoURL: photoURL
+                });
+
+                closeModals();
+                loadFeed(); // Обновляем ленту чтобы подхватить новое имя/аву
+            } catch(e) {
+                alert("Ошибка: " + e.message);
+            }
+            hideLoading();
+        }
+
+        // UI ФУНКЦИИ
+        window.openUploadModal = () => {
+            document.getElementById('postTitleInput').value = '';
+            document.getElementById('postDescInput').value = '';
+            document.getElementById('postImageInput').value = '';
+            document.getElementById('postFileInput').value = '';
+            document.getElementById('imgFileName').innerText = '';
+            document.getElementById('fileFileName').innerText = '';
             document.getElementById('uploadModal').style.display = 'flex';
         }
 
-        function fakeUpload() {
-            alert('сохранение добавлено в ленту');
-            closeModals();
+        window.closeModals = () => {
+            document.querySelectorAll('.modal').forEach(m => {
+                if(m.id !== 'authModal' || currentUser) m.style.display = 'none';
+            });
         }
 
-        function closeModals() {
-            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        }
-
-        function changeTheme() {
+        window.changeTheme = () => {
             const body = document.body;
             if (body.getAttribute('data-theme') === 'light') {
                 body.removeAttribute('data-theme');
