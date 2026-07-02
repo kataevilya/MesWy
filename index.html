@@ -7,36 +7,39 @@
 <body>
 
     <input type="file" id="fileInput" />
-    <button onclick="uploadToPuter()">Загрузить на сервер</button>
-
-    <script src="https://js.puter.com/v2/"></script>
+    <button onclick="uploadToFileIo()">Загрузить файл</button>
 
     <script>
-        async function uploadToPuter() {
+        async function uploadToFileIo() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
 
             if (!file) {
-                alert('выбери файл');
+                alert('Сначала выбери файл!');
                 return;
             }
 
-            try {
-                // 1. Создаем папку, если её нет
-                await puter.fs.mkdir('uploads').catch(() => {});
+            const formData = new FormData();
+            formData.append('file', file);
 
-                // 2. Загружаем файл
-                const uploadedFile = await puter.fs.write('uploads/' + file.name, file);
-                
-                // 3. Получаем публичную ссылку через метод .url()
-                // Это универсальный способ для актуальной версии Puter.js
-                const url = await uploadedFile.url();
-                
-                console.log('ссылка для скачивания:', url);
-                alert('файл готов! ссылка: ' + url);
+            try {
+                // Отправляем файл на File.io
+                const response = await fetch('https://file.io', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('Ссылка для скачивания:', result.link);
+                    alert('Файл загружен! Ссылка: ' + result.link);
+                } else {
+                    alert('Ошибка при загрузке: ' + (result.message || 'Неизвестная ошибка'));
+                }
             } catch (err) {
                 console.error('Ошибка:', err);
-                alert('ошибка: ' + err.message);
+                alert('Не удалось загрузить файл.');
             }
         }
     </script>
