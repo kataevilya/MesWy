@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MesWy Messenger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        },
+                        dark: {
+                            bg: '#09090b',
+                            surface: '#18181b',
+                            sidebar: '#121214',
+                            border: '#27272a',
+                            muted: '#71717a',
+                            text: '#f4f4f5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121214;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-dark-text h-screen w-screen overflow-hidden font-sans antialiased">
+
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="flex flex-col items-center justify-center h-full w-full bg-dark-bg px-4">
+        <div class="bg-dark-surface border border-dark-border p-8 rounded-2xl w-full max-w-md shadow-2xl text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-600 text-white text-3xl mb-4 shadow-lg shadow-brand-600/20">
+                <i class="fa-solid fa-comments-toggle"></i>
+            </div>
+            <h1 class="text-3xl font-black tracking-tight text-white mb-2">MesWy</h1>
+            <p class="text-dark-muted mb-8 text-sm">Добро пожаловать в современный мессенджер нового поколения</p>
+            <button id="btn-login" class="w-full flex items-center justify-center gap-3 bg-white text-black hover:bg-zinc-200 font-semibold py-3.5 px-4 rounded-xl transition duration-200 shadow-md">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.54 15.01 1 12 1 7.28 1 3.27 3.72 1.3 7.71l3.87 3a7.15 7.15 0 0 1 6.83-5.67z"/>
+                    <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.33H12v4.51h6.46a5.5cbd 5.5cbd 0 0 1-2.41 3.65l3.73 2.89c2.18-2.01 3.71-4.97 3.71-8.72z"/>
+                    <path fill="#FBBC05" d="M5.17 14.71a7.1 7.1 0 0 1 0-4.42l-3.87-3A11.94 11.94 0 0 0 1 12c0 2.22.61 4.3 1.68 6.08l3.49-2.37z"/>
+                    <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.73-2.89a7.13 7.13 0 0 1-4.23 1.21c-3.75 0-6.93-2.53-8.06-5.97L1.07 15.4A11.95 11.95 0 0 0 12 23z"/>
+                </svg>
+                Войти через Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="app-screen" class="hidden h-full w-full flex overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-dark-sidebar border-r border-dark-border flex flex-col flex-shrink-0 z-20">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-dark-border flex items-center justify-between bg-dark-sidebar/50 backdrop-blur-md sticky top-0">
+                <div class="flex items-center gap-3">
+                    <div id="user-avatar-trigger" class="relative group cursor-pointer">
+                        <img id="my-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-xl object-cover ring-2 ring-transparent group-hover:ring-brand-500 transition-all">
+                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-brand-500 border-2 border-dark-sidebar rounded-full"></div>
+                    </div>
+                    <div>
+                        <h2 id="my-name" class="font-bold text-sm text-white truncate max-w-[140px]">Загрузка...</h2>
+                        <p class="text-xs text-brand-500 font-medium">В сети</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button id="btn-open-create-chat" class="w-9 h-9 flex items-center justify-center rounded-xl bg-dark-surface hover:bg-zinc-800 text-zinc-300 transition" title="Создать чат">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                    </button>
+                    <button id="btn-logout" class="w-9 h-9 flex items-center justify-center rounded-xl bg-dark-surface hover:bg-red-950/30 text-dark-muted hover:text-red-400 transition" title="Выйти">
+                        <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="flex gap-1 p-2 bg-dark-bg/40 border-b border-dark-border text-xs font-medium">
+                <button data-tab="all" class="chat-tab flex-1 py-2 text-center rounded-lg bg-dark-surface text-white transition">Все</button>
+                <button data-tab="group" class="chat-tab flex-1 py-2 text-center rounded-lg text-dark-muted hover:text-white transition">Группы</button>
+                <button data-tab="channel" class="chat-tab flex-1 py-2 text-center rounded-lg text-dark-muted hover:text-white transition">Каналы</button>
+                <button data-tab="dm" class="chat-tab flex-1 py-2 text-center rounded-lg text-dark-muted hover:text-white transition">Личные</button>
+            </div>
+
+            <!-- Chats List -->
+            <div id="chats-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+                <!-- Сюда динамически рендерятся чаты -->
+                <div class="text-center text-dark-muted py-8 text-sm">Нет доступных чатов</div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Window -->
+        <main id="chat-window" class="flex-1 bg-dark-bg flex flex-col relative h-full w-full hidden md:flex">
+            
+            <!-- Dynamic Template for Active Chat View -->
+            <div id="active-chat-view" class="hidden flex flex-col h-full w-full">
+                <!-- Chat Header -->
+                <div class="p-4 border-b border-dark-border flex items-center justify-between bg-dark-surface/40 backdrop-blur-md">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <button id="btn-back-to-sidebar" class="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-dark-surface hover:bg-zinc-800 text-zinc-300 mr-1">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <img id="active-chat-avatar" src="" alt="Chat Avatar" class="w-10 h-10 rounded-xl object-cover cursor-pointer hover:opacity-80">
+                        <div class="min-w-0 cursor-pointer" id="active-chat-info-trigger">
+                            <h3 id="active-chat-name" class="font-bold text-sm text-white truncate">Название чат-комнаты</h3>
+                            <p id="active-chat-status" class="text-xs text-dark-muted truncate">Тип комнаты</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-4 bg-[radial-gradient(#1c1c1f_1px,transparent_1px)] [background-size:16px_16px]">
+                    <!-- Сообщения рендерятся тут -->
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-4 border-t border-dark-border bg-dark-surface/20 backdrop-blur-md">
+                    <form id="message-form" class="flex items-end gap-2 max-w-6xl mx-auto relative">
+                        <div class="flex-1 bg-dark-surface border border-dark-border rounded-xl focus-within:border-brand-600 transition duration-150 flex flex-col">
+                            <!-- Preview Box -->
+                            <div id="image-preview-container" class="hidden p-3 border-b border-dark-border relative flex items-center gap-3">
+                                <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-dark-border">
+                                    <img id="image-preview" src="" class="w-full h-full object-cover">
+                                    <div id="upload-overlay" class="absolute inset-0 bg-black/60 flex items-center justify-center hidden">
+                                        <i class="fa-solid fa-spinner fa-spin text-white text-xs"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-white font-medium truncate" id="preview-filename">image.jpg</p>
+                                    <p class="text-[10px] text-brand-500" id="upload-status">Готово к отправке</p>
+                                </div>
+                                <button type="button" id="btn-remove-preview" class="w-6 h-6 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition">
+                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                </button>
+                            </div>
+
+                            <!-- Inputs Row -->
+                            <div class="flex items-center px-3 py-2.5 gap-2">
+                                <label class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-lg hover:bg-zinc-800 text-dark-muted hover:text-white transition flex-shrink-0">
+                                    <i class="fa-solid fa-paperclip text-lg"></i>
+                                    <input type="file" id="file-input" accept="image/*" class="hidden">
+                                </label>
+                                <textarea id="message-input" rows="1" placeholder="Напишите сообщение..." class="flex-1 bg-transparent border-0 outline-none resize-none max-h-32 text-sm text-white placeholder-dark-muted py-1 w-full focus:ring-0 focus:outline-none"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" id="btn-send-message" class="w-11 h-11 flex items-center justify-center rounded-xl bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-600/10 transition active:scale-95 flex-shrink-0">
+                            <i class="fa-solid fa-paper-plane text-sm"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Blank View -->
+            <div id="blank-chat-view" class="flex flex-col items-center justify-center h-full w-full text-center p-6">
+                <div class="w-16 h-16 rounded-2xl bg-dark-surface border border-dark-border flex items-center justify-center text-dark-muted text-2xl mb-4">
+                    <i class="fa-regular fa-comments"></i>
+                </div>
+                <h3 class="text-white font-bold mb-1">Ваши диалоги</h3>
+                <p class="text-dark-muted text-sm max-w-xs">Выберите любой чат из списка слева или создайте новое обсуждение прямо сейчас.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: My Profile & Settings -->
+    <div id="modal-profile" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-dark-surface border border-dark-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative animate-[fadeIn_0.2s_ease-out]">
+            <!-- Profile Background View -->
+            <div id="profile-bg-preview" class="h-32 w-full bg-gradient-to-r from-zinc-800 to-zinc-900 bg-cover bg-center relative">
+                <label class="absolute bottom-2 right-2 px-3 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-sm text-xs text-white font-medium cursor-pointer transition flex items-center gap-1.5 border border-white/10">
+                    <i class="fa-solid fa-camera"></i> Кавер
+                    <input type="file" id="input-upload-bg" accept="image/*" class="hidden">
+                </label>
+            </div>
+            <!-- Profile Info Box -->
+            <div class="px-6 pb-6 relative pt-12">
+                <!-- Avatar Upload Context -->
+                <div class="absolute -top-12 left-6 w-20 h-20 rounded-2xl border-4 border-dark-surface bg-zinc-800 overflow-hidden shadow-md group relative">
+                    <img id="profile-avatar-preview" src="" class="w-full h-full object-cover">
+                    <label class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition">
+                        <i class="fa-solid fa-pen text-white text-xs"></i>
+                        <input type="file" id="input-upload-avatar" accept="image/*" class="hidden">
+                    </label>
+                </div>
+
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-white flex items-center gap-1.5" id="profile-display-name">Имя</h3>
+                        <p class="text-xs text-dark-muted" id="profile-email">email@domain.com</p>
+                    </div>
+                    <button id="btn-close-profile" class="w-8 h-8 rounded-lg bg-dark-bg hover:bg-zinc-800 flex items-center justify-center text-dark-muted hover:text-white transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Fields -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Прямая ссылка на Аватар</label>
+                        <input type="text" id="profile-avatar-url" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-600 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Прямая ссылка на Фон</label>
+                        <input type="text" id="profile-bg-url" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-600 transition">
+                    </div>
+                    <button id="btn-save-profile" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 px-4 rounded-xl transition duration-150 mt-2">
+                        Сохранить профиль
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Create Chat Room -->
+    <div id="modal-create-chat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-dark-surface border border-dark-border rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Создать новое обсуждение</h3>
+                <button id="btn-close-create-chat" class="w-8 h-8 rounded-lg bg-dark-bg hover:bg-zinc-800 flex items-center justify-center text-dark-muted hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Тип комнаты</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="border border-dark-border rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer text-center hover:bg-zinc-800/50 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-600/10 group transition">
+                            <input type="radio" name="chat-type" value="group" checked class="hidden">
+                            <i class="fa-solid fa-users text-dark-muted group-has-[:checked]:text-brand-500"></i>
+                            <span class="text-xs font-medium text-white">Группа</span>
+                        </label>
+                        <label class="border border-dark-border rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer text-center hover:bg-zinc-800/50 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-600/10 group transition">
+                            <input type="radio" name="chat-type" value="channel" class="hidden">
+                            <i class="fa-solid fa-bullhorn text-dark-muted group-has-[:checked]:text-brand-500"></i>
+                            <span class="text-xs font-medium text-white">Канал</span>
+                        </label>
+                        <label class="border border-dark-border rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer text-center hover:bg-zinc-800/50 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-600/10 group transition">
+                            <input type="radio" name="chat-type" value="dm" class="hidden">
+                            <i class="fa-solid fa-user-shield text-dark-muted group-has-[:checked]:text-brand-500"></i>
+                            <span class="text-xs font-medium text-white">Личные (DM)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Dynamic field for Name / Email -->
+                <div id="wrapper-chat-title">
+                    <label id="label-chat-title" class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Название группы / канала</label>
+                    <input type="text" id="input-chat-title" placeholder="Например: Разработка сайтов" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-600 transition">
+                </div>
+
+                <div id="wrapper-chat-avatar">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Ссылка на изображение (Аватар)</label>
+                    <input type="text" id="input-chat-avatar" placeholder="https://..." class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-600 transition">
+                </div>
+
+                <button id="btn-submit-create-chat" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 px-4 rounded-xl transition duration-150 mt-2">
+                    Создать комнату
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: View Foreign User Card / Profile Details -->
+    <div id="modal-view-profile" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-dark-surface border border-dark-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+            <div id="view-profile-bg" class="h-32 w-full bg-cover bg-center"></div>
+            <div class="px-6 pb-6 relative pt-12">
+                <div class="absolute -top-12 left-6 w-20 h-20 rounded-2xl border-4 border-dark-surface bg-zinc-800 overflow-hidden shadow-md">
+                    <img id="view-profile-avatar" src="" class="w-full h-full object-cover">
+                </div>
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-white" id="view-profile-name">Имя пользователя</h3>
+                        <p class="text-xs text-dark-muted" id="view-profile-email">email@domain.com</p>
+                    </div>
+                    <button id="btn-close-view-profile" class="w-8 h-8 rounded-lg bg-dark-bg hover:bg-zinc-800 flex items-center justify-center text-dark-muted hover:text-white transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Controller Logic via Firebase Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Provided Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
+            authDomain: "meswy-web.firebaseapp.com",
+            projectId: "meswy-web",
+            storageBucket: "meswy-web.firebasestorage.app",
+            messagingSenderId: "802423553668",
+            appId: "1:802423553668:web:64be6aae3f34b2d0f88cd1",
+            measurementId: "G-PYS9ELGKDE"
+        };
+
+        // Init App instances
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // Local Application Memory State
+        let currentUserData = null;
+        let activeChatId = null;
+        let selectedTab = 'all';
+        let chatsCache = [];
+        let globalMessagesUnsubscribe = null;
+        let currentUploadedImageUrl = null;
+
+        // ImgBB Upload Function
+        async function uploadImage(file) {
+            const apiKey = "614175d15985961d996a8c076c776f08";
+            const formData = new FormData();
+            formData.append("image", file);
+            
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                method: "POST",
+                body: formData
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                return result.data.url;
+            } else {
+                throw new Error("ImgBB Upload Exception");
+            }
+        }
+
+        // DOM Observers and Triggers
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        const btnLogin = document.getElementById('btn-login');
+        const btnLogout = document.getElementById('btn-logout');
+        
+        const myAvatar = document.getElementById('my-avatar');
+        const myName = document.getElementById('my-name');
+        
+        const chatsList = document.getElementById('chats-list');
+        const chatTabs = document.querySelectorAll('.chat-tab');
+        
+        const activeChatView = document.getElementById('active-chat-view');
+        const blankChatView = document.getElementById('blank-chat-view');
+        const activeChatAvatar = document.getElementById('active-chat-avatar');
+        const activeChatName = document.getElementById('active-chat-name');
+        const activeChatStatus = document.getElementById('active-chat-status');
+        const messagesContainer = document.getElementById('messages-container');
+        
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const fileInput = document.getElementById('file-input');
+        
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const previewFilename = document.getElementById('preview-filename');
+        const uploadStatus = document.getElementById('upload-status');
+        const uploadOverlay = document.getElementById('upload-overlay');
+        const btnRemovePreview = document.getElementById('btn-remove-preview');
+
+        // Modal Elements
+        const modalProfile = document.getElementById('modal-profile');
+        const userAvatarTrigger = document.getElementById('user-avatar-trigger');
+        const btnCloseProfile = document.getElementById('btn-close-profile');
+        const profileAvatarPreview = document.getElementById('profile-avatar-preview');
+        const profileBgPreview = document.getElementById('profile-bg-preview');
+        const profileDisplayName = document.getElementById('profile-display-name');
+        const profileEmail = document.getElementById('profile-email');
+        const profileAvatarUrlInput = document.getElementById('profile-avatar-url');
+        const profileBgUrlInput = document.getElementById('profile-bg-url');
+        const btnSaveProfile = document.getElementById('btn-save-profile');
+        const inputUploadAvatar = document.getElementById('input-upload-avatar');
+        const inputUploadBg = document.getElementById('input-upload-bg');
+
+        const modalCreateChat = document.getElementById('modal-create-chat');
+        const btnOpenCreateChat = document.getElementById('btn-open-create-chat');
+        const btnCloseCreateChat = document.getElementById('btn-close-create-chat');
+        const btnSubmitCreateChat = document.getElementById('btn-submit-create-chat');
+        const inputChatTitle = document.getElementById('input-chat-title');
+        const inputChatAvatar = document.getElementById('input-chat-avatar');
+        const labelChatTitle = document.getElementById('label-chat-title');
+        const wrapperChatAvatar = document.getElementById('wrapper-chat-avatar');
+
+        const modalViewProfile = document.getElementById('modal-view-profile');
+        const btnCloseViewProfile = document.getElementById('btn-close-view-profile');
+        const viewProfileBg = document.getElementById('view-profile-bg');
+        const viewProfileAvatar = document.getElementById('view-profile-avatar');
+        const viewProfileName = document.getElementById('view-profile-name');
+        const viewProfileEmail = document.getElementById('view-profile-email');
+
+        // Layout Responsiveness Fixes
+        function adjustResponsiveViews() {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) {
+                if (activeChatId) {
+                    document.getElementById('sidebar').classList.add('hidden');
+                    document.getElementById('chat-window').classList.remove('hidden');
+                } else {
+                    document.getElementById('sidebar').classList.remove('hidden');
+                    document.getElementById('chat-window').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('sidebar').classList.remove('hidden');
+                document.getElementById('chat-window').classList.remove('hidden');
+            }
+        }
+        window.addEventListener('resize', adjustResponsiveViews);
+        document.getElementById('btn-back-to-sidebar').addEventListener('click', () => {
+            activeChatId = null;
+            if (globalMessagesUnsubscribe) globalMessagesUnsubscribe();
+            adjustResponsiveViews();
+        });
+
+        // Track and change Chat Room Type in creation form
+        document.querySelectorAll('input[name="chat-type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'dm') {
+                    labelChatTitle.innerText = "Email собеседника";
+                    inputChatTitle.placeholder = "user@domain.com";
+                    wrapperChatAvatar.classList.add('hidden');
+                } else {
+                    labelChatTitle.innerText = "Название группы / канала";
+                    inputChatTitle.placeholder = "Например: Разработка сайтов";
+                    wrapperChatAvatar.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Authentication Observer
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                authScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+                
+                const userRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (!userDoc.exists()) {
+                    currentUserData = {
+                        uid: user.uid,
+                        displayName: user.displayName || "Пользователь",
+                        email: user.email,
+                        photoURL: user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150",
+                        bgURL: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
+                        updatedAt: serverTimestamp()
+                    };
+                    await setDoc(userRef, currentUserData);
+                } else {
+                    currentUserData = userDoc.data();
+                }
+                
+                myAvatar.src = currentUserData.photoURL;
+                myName.innerText = currentUserData.displayName;
+                
+                syncChatsList();
+                adjustResponsiveViews();
+            } else {
+                authScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+            }
+        });
+
+        // Login / Logout Handlers
+        btnLogin.addEventListener('click', () => signInWithPopup(auth, provider));
+        btnLogout.addEventListener('click', () => signOut(auth));
+
+        // Sync Chats List from Firestore (Real-time listener)
+        function syncChatsList() {
+            const chatsQuery = query(collection(db, "chats"), orderBy("createdAt", "desc"));
+            onSnapshot(chatsQuery, (snapshot) => {
+                chatsCache = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    data.id = docSnap.id;
+                    
+                    // Filter out DMs not belonging to current user
+                    if (data.type === 'dm') {
+                        if (data.members && data.members.includes(currentUserData.uid)) {
+                            chatsCache.push(data);
+                        }
+                    } else {
+                        chatsCache.push(data);
+                    }
+                });
+                renderChatsList();
+            });
+        }
+
+        // Render Sidebar chats HTML
+        function renderChatsList() {
+            chatsList.innerHTML = '';
+            
+            const filteredChats = chatsCache.filter(chat => {
+                if (selectedTab === 'all') return true;
+                return chat.type === selectedTab;
+            });
+            
+            if (filteredChats.length === 0) {
+                chatsList.innerHTML = `<div class="text-center text-dark-muted py-8 text-sm">Чаты не найдены</div>`;
+                return;
+            }
+            
+            filteredChats.forEach(chat => {
+                let chatName = chat.name;
+                let chatImg = chat.avatar || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150";
+                
+                if (chat.type === 'dm') {
+                    const opponentUid = chat.members.find(uid => uid !== currentUserData.uid);
+                    const opponent = chat.memberDetails?.[opponentUid];
+                    if (opponent) {
+                        chatName = opponent.displayName;
+                        chatImg = opponent.photoURL;
+                    } else {
+                        chatName = "Диалог сохранен";
+                    }
+                }
+                
+                const isActive = chat.id === activeChatId;
+                const activeClasses = isActive ? 'bg-brand-600/15 border-brand-600/40 text-white' : 'border-transparent text-zinc-300 hover:bg-dark-surface/50';
+                
+                const badge = chat.type === 'group' ? '<span class="px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-semibold text-zinc-400">Группа</span>' : 
+                              chat.type === 'channel' ? '<span class="px-1.5 py-0.5 bg-blue-950 text-blue-400 rounded text-[10px] font-semibold">Канал</span>' :
+                              '<span class="px-1.5 py-0.5 bg-emerald-950 text-emerald-400 rounded text-[10px] font-semibold">Личные</span>';
+
+                const chatItem = document.createElement('div');
+                chatItem.className = `flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${activeClasses}`;
+                chatItem.innerHTML = `
+                    <img src="${chatImg}" alt="Avatar" class="w-11 h-11 rounded-xl object-cover flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-bold text-sm text-white truncate">${chatName}</h4>
+                            ${badge}
+                        </div>
+                        <p class="text-xs text-dark-muted truncate">${chat.lastMessage || 'Нет сообщений'}</p>
+                    </div>
+                `;
+                
+                chatItem.addEventListener('click', () => switchActiveChat(chat.id));
+                chatsList.appendChild(chatItem);
+            });
+        }
+
+        // Tab switches filtering
+        chatTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                chatTabs.forEach(t => t.className = 'chat-tab flex-1 py-2 text-center rounded-lg text-dark-muted hover:text-white transition');
+                e.target.className = 'chat-tab flex-1 py-2 text-center rounded-lg bg-dark-surface text-white transition';
+                selectedTab = e.target.getAttribute('data-tab');
+                renderChatsList();
+            });
+        });
+
+        // Switch to chosen active chat view
+        async function switchActiveChat(chatId) {
+            activeChatId = chatId;
+            renderChatsList();
+            
+            blankChatView.classList.add('hidden');
+            activeChatView.classList.remove('hidden');
+            
+            const chatData = chatsCache.find(c => c.id === chatId);
+            if (!chatData) return;
+            
+            let name = chatData.name;
+            let avatar = chatData.avatar || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150";
+            
+            if (chatData.type === 'dm') {
+                const opponentUid = chatData.members.find(uid => uid !== currentUserData.uid);
+                const opponent = chatData.memberDetails?.[opponentUid];
+                if (opponent) {
+                    name = opponent.displayName;
+                    avatar = opponent.photoURL;
+                }
+            }
+            
+            activeChatName.innerText = name;
+            activeChatAvatar.src = avatar;
+            activeChatStatus.innerText = chatData.type === 'group' ? 'Групповой чат' : chatData.type === 'channel' ? 'Информационный канал' : 'Личная переписка';
+            
+            // Channel write restrictions check
+            if (chatData.type === 'channel' && chatData.creatorId !== currentUserData.uid) {
+                messageInput.disabled = true;
+                messageInput.placeholder = "Только администраторы могут писать здесь";
+                messageForm.querySelector('button[type="submit"]').disabled = true;
+                messageForm.querySelector('label').classList.add('hidden');
+            } else {
+                messageInput.disabled = false;
+                messageInput.placeholder = "Напишите сообщение...";
+                messageForm.querySelector('button[type="submit"]').disabled = false;
+                messageForm.querySelector('label').classList.remove('hidden');
+            }
+            
+            adjustResponsiveViews();
+            
+            // Open user metadata modal on clicking opponent name or chat image
+            activeChatAvatar.onclick = activeChatInfoTrigger.onclick = () => showChatMetaProfile(chatData);
+
+            // Subscribe to real-time chat messages
+            if (globalMessagesUnsubscribe) globalMessagesUnsubscribe();
+            
+            const msgQuery = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"));
+            globalMessagesUnsubscribe = onSnapshot(msgQuery, (snapshot) => {
+                messagesContainer.innerHTML = '';
+                if (snapshot.empty) {
+                    messagesContainer.innerHTML = `<div class="text-center text-dark-muted py-12 text-xs">История сообщений пуста</div>`;
+                    return;
+                }
+                
+                snapshot.forEach(docSnap => {
+                    const msg = docSnap.data();
+                    const isMe = msg.senderId === currentUserData.uid;
+                    
+                    const msgRow = document.createElement('div');
+                    msgRow.className = `flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2.5`;
+                    
+                    const innerHTML = `
+                        ${!isMe ? `<img src="${msg.senderPhoto}" class="w-8 h-8 rounded-lg object-cover flex-shrink-0 cursor-pointer user-card-target" data-uid="${msg.senderId}">` : ''}
+                        <div class="flex flex-col max-w-[75%] md:max-w-[60%]">
+                            ${!isMe && chatData.type !== 'dm' ? `<span class="text-[11px] font-bold text-zinc-400 mb-0.5 ml-1">${msg.senderName}</span>` : ''}
+                            <div class="p-3 rounded-2xl ${isMe ? 'bg-brand-600 text-white rounded-br-none' : 'bg-dark-surface border border-dark-border text-dark-text rounded-bl-none'} shadow-md text-sm break-words space-y-2">
+                                ${msg.imageUrl ? `<img src="${msg.imageUrl}" class="w-full rounded-lg max-h-72 object-cover cursor-zoom-in" onclick="window.open('${msg.imageUrl}', '_blank')">` : ''}
+                                ${msg.text ? `<p class="leading-relaxed whitespace-pre-wrap">${escapeHTML(msg.text)}</p>` : ''}
+                                <div class="text-[10px] text-right mt-1 opacity-50 block select-none">
+                                    ${formatMsgTime(msg.createdAt)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    msgRow.innerHTML = innerHTML;
+                    messagesContainer.appendChild(msgRow);
+                });
+                
+                // Event delegation to open foreign profile view
+                messagesContainer.querySelectorAll('.user-card-target').forEach(img => {
+                    img.addEventListener('click', async (e) => {
+                        const uid = e.target.getAttribute('data-uid');
+                        const snapshotUser = await getDoc(doc(db, "users", uid));
+                        if (snapshotUser.exists()) {
+                            openForeignProfileModal(snapshotUser.data());
+                        }
+                    });
+                });
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+
+        // Safe characters escape
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        // Format system timestamp
+        function formatMsgTime(ts) {
+            if (!ts) return '';
+            const date = ts.toDate ? ts.toDate() : new Date(ts);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Send message event handler
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            const imgUrl = currentUploadedImageUrl;
+            
+            if (!text && !imgUrl) return;
+            
+            messageInput.value = '';
+            clearAttachmentPreview();
+            
+            const messagePayload = {
+                senderId: currentUserData.uid,
+                senderName: currentUserData.displayName,
+                senderPhoto: currentUserData.photoURL,
+                text: text,
+                imageUrl: imgUrl,
+                createdAt: serverTimestamp()
+            };
+            
+            const activeChatRef = doc(db, "chats", activeChatId);
+            await addDoc(collection(activeChatRef, "messages"), messagePayload);
+            
+            // Update last preview text in parent room model
+            let displaySnippet = text || "📷 Изображение";
+            if (chatSidesContainSnippet(activeChatId)) {
+                await setDoc(activeChatRef, { 
+                    lastMessage: displaySnippet 
+                }, { merge: true });
+            }
+        });
+
+        function chatSidesContainSnippet(id) {
+            return chatsCache.some(c => c.id === id);
+        }
+
+        // Input attachment handlers
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            imagePreviewContainer.classList.remove('hidden');
+            imagePreview.src = URL.createObjectURL(file);
+            previewFilename.innerText = file.name;
+            uploadStatus.innerText = "Загрузка на сервер...";
+            uploadOverlay.classList.remove('hidden');
+            btnSendMessage.disabled = true;
+            
+            try {
+                const remoteUrl = await uploadImage(file);
+                currentUploadedImageUrl = remoteUrl;
+                uploadStatus.innerText = "Готово к отправке";
+                uploadOverlay.classList.add('hidden');
+            } catch (err) {
+                uploadStatus.innerText = "Ошибка загрузки";
+                uploadOverlay.classList.add('hidden');
+                console.error(err);
+            } finally {
+                btnSendMessage.disabled = false;
+            }
+        });
+
+        function clearAttachmentPreview() {
+            currentUploadedImageUrl = null;
+            imagePreviewContainer.classList.add('hidden');
+            imagePreview.src = '';
+            fileInput.value = '';
+        }
+        btnRemovePreview.addEventListener('click', clearAttachmentPreview);
+
+        // Open/Close Create Chat Form Modals
+        btnOpenCreateChat.addEventListener('click', () => modalCreateChat.classList.remove('hidden'));
+        btnCloseCreateChat.addEventListener('click', () => modalCreateChat.classList.add('hidden'));
+
+        btnSubmitCreateChat.addEventListener('click', async () => {
+            const type = document.querySelector('input[name="chat-type"]:checked').value;
+            const targetVal = inputChatTitle.value.trim();
+            const avatarVal = inputChatAvatar.value.trim();
+            
+            if (!targetVal) return;
+            
+            if (type === 'dm') {
+                // Query target user profile matching given targetVal email
+                const userQuery = query(collection(db, "users"), where("email", "==", targetVal));
+                onSnapshot(userQuery, async (snapshot) => {
+                    if (snapshot.empty) {
+                        alert("Пользователь с таким email не зарегистрирован в системе!");
+                        return;
+                    }
+                    let opponentData = null;
+                    snapshot.forEach(d => opponentData = d.data());
+                    
+                    if (opponentData.uid === currentUserData.uid) {
+                        alert("Нельзя создать личный чат с самим собой.");
+                        return;
+                    }
+                    
+                    // Check duplicate DM
+                    const existingDm = chatsCache.find(c => c.type === 'dm' && c.members.includes(opponentData.uid));
+                    if (existingDm) {
+                        modalCreateChat.classList.add('hidden');
+                        switchActiveChat(existingDm.id);
+                        return;
+                    }
+
+                    const roomPayload = {
+                        type: 'dm',
+                        members: [currentUserData.uid, opponentData.uid],
+                        memberDetails: {
+                            [currentUserData.uid]: { displayName: currentUserData.displayName, photoURL: currentUserData.photoURL },
+                            [opponentData.uid]: { displayName: opponentData.displayName, photoURL: opponentData.photoURL }
+                        },
+                        createdAt: serverTimestamp(),
+                        lastMessage: 'Чат создан'
+                    };
+                    
+                    const createdRef = await addDoc(collection(db, "chats"), roomPayload);
+                    modalCreateChat.classList.add('hidden');
+                    inputChatTitle.value = '';
+                    switchActiveChat(createdRef.id);
+                }, { onlyOnce: true });
+
+            } else {
+                const roomPayload = {
+                    name: targetVal,
+                    type: type,
+                    avatar: avatarVal || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150",
+                    creatorId: currentUserData.uid,
+                    createdAt: serverTimestamp(),
+                    lastMessage: 'Чат создан'
+                };
+                const createdRef = await addDoc(collection(db, "chats"), roomPayload);
+                modalCreateChat.classList.add('hidden');
+                inputChatTitle.value = '';
+                inputChatAvatar.value = '';
+                switchActiveChat(createdRef.id);
+            }
+        });
+
+        // Current Profile Modals Hooks
+        userAvatarTrigger.addEventListener('click', () => {
+            profileAvatarPreview.src = currentUserData.photoURL;
+            profileBgPreview.style.backgroundImage = `url('${currentUserData.bgURL}')`;
+            profileDisplayName.innerText = currentUserData.displayName;
+            profileEmail.innerText = currentUserData.email;
+            profileAvatarUrlInput.value = currentUserData.photoURL;
+            profileBgUrlInput.value = currentUserData.bgURL;
+            modalProfile.classList.remove('hidden');
+        });
+        
+        btnCloseProfile.addEventListener('click', () => modalProfile.classList.add('hidden'));
+
+        // Save customized settings profile values
+        btnSaveProfile.addEventListener('click', async () => {
+            const updated = {
+                displayName: currentUserData.displayName, 
+                photoURL: profileAvatarUrlInput.value.trim() || currentUserData.photoURL,
+                bgURL: profileBgUrlInput.value.trim() || currentUserData.bgURL,
+            };
+            
+            await setDoc(doc(db, "users", currentUserData.uid), updated, { merge: true });
+            currentUserData = { ...currentUserData, ...updated };
+            
+            myAvatar.src = currentUserData.photoURL;
+            modalProfile.classList.add('hidden');
+            renderChatsList();
+        });
+
+        // Fast upload image helpers direct into active forms fields
+        async function handleDirectAssetUpload(file, formFieldInput, previewImgNode) {
+            try {
+                const url = await uploadImage(file);
+                formFieldInput.value = url;
+                if (previewImgNode) {
+                    if(previewImgNode.tagName === 'IMG') previewImgNode.src = url;
+                    else previewImgNode.style.backgroundImage = `url('${url}')`;
+                }
+            } catch(e) {
+                alert("Ошибка обработки загрузки медиа.");
+            }
+        }
+
+        inputUploadAvatar.addEventListener('change', (e) => {
+            if(e.target.files[0]) handleDirectAssetUpload(e.target.files[0], profileAvatarUrlInput, profileAvatarPreview);
+        });
+        inputUploadBg.addEventListener('change', (e) => {
+            if(e.target.files[0]) handleDirectAssetUpload(e.target.files[0], profileBgUrlInput, profileBgPreview);
+        });
+
+        // Foreign Metadata Context Inspection Dialogs
+        async function showChatMetaProfile(chat) {
+            if (chat.type === 'dm') {
+                const opponentUid = chat.members.find(uid => uid !== currentUserData.uid);
+                const snapshotUser = await getDoc(doc(db, "users", opponentUid));
+                if (snapshotUser.exists()) {
+                    openForeignProfileModal(snapshotUser.data());
+                }
+            } else {
+                openForeignProfileModal({
+                    displayName: chat.name,
+                    email: chat.type === 'group' ? 'Групповой публичный чат' : 'Публичный информационный канал',
+                    photoURL: chat.avatar,
+                    bgURL: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800"
+                });
+            }
+        }
+
+        function openForeignProfileModal(userModel) {
+            viewProfileBg.style.backgroundImage = `url('${userModel.bgURL || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'}')`;
+            viewProfileAvatar.src = userModel.photoURL;
+            viewProfileName.innerText = userModel.displayName;
+            viewProfileEmail.innerText = userModel.email;
+            modalViewProfile.classList.remove('hidden');
+        }
+        btnCloseViewProfile.addEventListener('click', () => modalViewProfile.classList.add('hidden'));
+
+        // Elastic Textarea Rows Auto-Expand Hook
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = messageInput.scrollHeight + 'px';
+        });
+    </script>
+</body>
+</html>
