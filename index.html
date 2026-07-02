@@ -8,905 +8,444 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                        },
-                        dark: {
-                            bg: '#09090b',
-                            surface: '#18181b',
-                            sidebar: '#121214',
-                            border: '#27272a',
-                            muted: '#71717a',
-                            text: '#f4f4f5'
-                        }
-                    }
-                }
-            }
+            theme: { extend: { colors: { brand: { 500: '#22c55e', 600: '#16a34a' }, dark: { bg: '#09090b', surface: '#18181b', sidebar: '#121214', border: '#27272a', muted: '#71717a', text: '#f4f4f5' } } } }
         }
     </script>
     <style>
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #121214;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #27272a;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #3f3f46;
-        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-dark-bg text-dark-text h-screen w-screen overflow-hidden font-sans antialiased">
+<body class="bg-dark-bg text-dark-text h-screen w-screen overflow-hidden font-sans antialiased flex">
 
-    <!-- Auth Screen -->
-    <div id="auth-screen" class="flex flex-col items-center justify-center h-full w-full bg-dark-bg px-4">
-        <div class="bg-dark-surface border border-dark-border p-8 rounded-2xl w-full max-w-md shadow-2xl text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-600 text-white text-3xl mb-4 shadow-lg shadow-brand-600/20">
-                <i class="fa-solid fa-comments-toggle"></i>
-            </div>
-            <h1 class="text-3xl font-black tracking-tight text-white mb-2">MesWy</h1>
-            <p class="text-dark-muted mb-8 text-sm">Добро пожаловать в современный мессенджер нового поколения</p>
-            <button id="btn-login" class="w-full flex items-center justify-center gap-3 bg-white text-black hover:bg-zinc-200 font-semibold py-3.5 px-4 rounded-xl transition duration-200 shadow-md">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.54 15.01 1 12 1 7.28 1 3.27 3.72 1.3 7.71l3.87 3a7.15 7.15 0 0 1 6.83-5.67z"/>
-                    <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.33H12v4.51h6.46a5.5cbd 5.5cbd 0 0 1-2.41 3.65l3.73 2.89c2.18-2.01 3.71-4.97 3.71-8.72z"/>
-                    <path fill="#FBBC05" d="M5.17 14.71a7.1 7.1 0 0 1 0-4.42l-3.87-3A11.94 11.94 0 0 0 1 12c0 2.22.61 4.3 1.68 6.08l3.49-2.37z"/>
-                    <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.73-2.89a7.13 7.13 0 0 1-4.23 1.21c-3.75 0-6.93-2.53-8.06-5.97L1.07 15.4A11.95 11.95 0 0 0 12 23z"/>
-                </svg>
-                Войти через Google
-            </button>
+    <!-- Auth -->
+    <div id="auth-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-dark-bg px-4 hidden">
+        <div class="bg-dark-surface border border-dark-border p-8 rounded-2xl w-full max-w-md text-center">
+            <h1 class="text-3xl font-black text-white mb-6">MesWy</h1>
+            <button id="btn-login" class="w-full flex justify-center py-3 bg-white text-black font-bold rounded-xl">Войти через Google</button>
         </div>
     </div>
 
-    <!-- Main App Screen -->
-    <div id="app-screen" class="hidden h-full w-full flex overflow-hidden">
-        
+    <!-- Onboarding -->
+    <div id="onboarding-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-dark-bg px-4 hidden">
+        <div class="bg-dark-surface border border-dark-border p-8 rounded-2xl w-full max-w-md">
+            <h2 class="text-2xl font-bold text-white mb-4">Начальная настройка</h2>
+            <input type="text" id="ob-username" placeholder="@username" class="w-full bg-dark-bg border border-dark-border rounded-xl px-4 py-3 text-white mb-4 outline-none focus:border-brand-500">
+            <button id="btn-finish-ob" class="w-full py-3 bg-brand-600 text-white font-bold rounded-xl">Начать</button>
+        </div>
+    </div>
+
+    <!-- App -->
+    <div id="app-screen" class="flex w-full h-full hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-dark-sidebar border-r border-dark-border flex flex-col flex-shrink-0 z-20">
-            <!-- Sidebar Header -->
-            <div class="p-4 border-b border-dark-border flex items-center justify-between bg-dark-sidebar/50 backdrop-blur-md sticky top-0">
-                <div class="flex items-center gap-3">
-                    <div id="user-avatar-trigger" class="relative group cursor-pointer">
-                        <img id="my-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-xl object-cover ring-2 ring-transparent group-hover:ring-brand-500 transition-all">
-                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-brand-500 border-2 border-dark-sidebar rounded-full"></div>
-                    </div>
-                    <div>
-                        <h2 id="my-name" class="font-bold text-sm text-white truncate max-w-[140px]">Загрузка...</h2>
-                        <p class="text-xs text-brand-500 font-medium">В сети</p>
-                    </div>
+        <aside id="sidebar" class="w-full md:w-80 flex flex-col border-r border-dark-border bg-dark-sidebar z-20">
+            <div class="p-4 border-b border-dark-border flex justify-between items-center bg-dark-surface">
+                <div class="flex items-center gap-3 cursor-pointer" id="btn-my-profile">
+                    <div id="my-avatar-container"></div>
+                    <div class="min-w-0"><h2 id="my-name" class="font-bold text-sm text-white truncate">...</h2></div>
                 </div>
-                <div class="flex items-center gap-1">
-                    <button id="btn-open-create-chat" class="w-9 h-9 flex items-center justify-center rounded-xl bg-dark-surface hover:bg-zinc-800 text-zinc-300 transition" title="Создать чат">
-                        <i class="fa-solid fa-plus text-sm"></i>
-                    </button>
-                    <button id="btn-logout" class="w-9 h-9 flex items-center justify-center rounded-xl bg-dark-surface hover:bg-red-950/30 text-dark-muted hover:text-red-400 transition" title="Выйти">
-                        <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                    </button>
+                <div class="flex gap-2">
+                    <button id="btn-new-chat" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button id="btn-settings" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-gear"></i></button>
                 </div>
             </div>
 
-            <!-- Filter Tabs -->
-            <div class="flex gap-1 p-2 bg-dark-bg/40 border-b border-dark-border text-xs font-medium">
-                <button data-tab="all" class="chat-tab flex-1 py-2 text-center rounded-lg bg-dark-surface text-white transition">Все</button>
-                <button data-tab="group" class="chat-tab flex-1 py-2 text-center rounded-lg text-dark-muted hover:text-white transition">Группы</button>
-                <button data-tab="channel" class="chat-tab flex-1 py-2 text-center rounded-lg text-dark-muted hover:text-white transition">Каналы</button>
-                <button data-tab="dm" class="chat-tab flex-1 py-2 text-center rounded-lg text-dark-muted hover:text-white transition">Личные</button>
+            <!-- Stories -->
+            <div class="p-2 border-b border-dark-border flex gap-3 overflow-x-auto no-scrollbar items-center" id="stories-list">
+                <button id="btn-add-story" class="flex-shrink-0 w-14 h-14 rounded-full border-2 border-dashed border-dark-muted flex flex-col items-center justify-center text-dark-muted hover:text-white hover:border-brand-500">
+                    <i class="fa-solid fa-plus text-lg"></i>
+                </button>
             </div>
 
-            <!-- Chats List -->
-            <div id="chats-list" class="flex-1 overflow-y-auto p-2 space-y-1">
-                <!-- Сюда динамически рендерятся чаты -->
-                <div class="text-center text-dark-muted py-8 text-sm">Нет доступных чатов</div>
+            <!-- Folders -->
+            <div class="flex overflow-x-auto p-2 gap-2 text-xs font-semibold no-scrollbar border-b border-dark-border" id="folders-tabs">
+                <button data-folder="all" class="folder-tab px-3 py-1.5 rounded-lg bg-dark-surface text-white">Все</button>
             </div>
+
+            <div id="chats-list" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
         </aside>
 
-        <!-- Main Chat Window -->
-        <main id="chat-window" class="flex-1 bg-dark-bg flex flex-col relative h-full w-full hidden md:flex">
+        <!-- Chat -->
+        <main id="chat-window" class="flex-1 flex flex-col bg-dark-bg hidden md:flex relative">
+            <div id="blank-chat" class="flex-1 flex items-center justify-center text-dark-muted">Выберите чат</div>
             
-            <!-- Dynamic Template for Active Chat View -->
-            <div id="active-chat-view" class="hidden flex flex-col h-full w-full">
-                <!-- Chat Header -->
-                <div class="p-4 border-b border-dark-border flex items-center justify-between bg-dark-surface/40 backdrop-blur-md">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <button id="btn-back-to-sidebar" class="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-dark-surface hover:bg-zinc-800 text-zinc-300 mr-1">
-                            <i class="fa-solid fa-arrow-left"></i>
-                        </button>
-                        <img id="active-chat-avatar" src="" alt="Chat Avatar" class="w-10 h-10 rounded-xl object-cover cursor-pointer hover:opacity-80">
-                        <div class="min-w-0 cursor-pointer" id="active-chat-info-trigger">
-                            <h3 id="active-chat-name" class="font-bold text-sm text-white truncate">Название чат-комнаты</h3>
-                            <p id="active-chat-status" class="text-xs text-dark-muted truncate">Тип комнаты</p>
+            <div id="active-chat" class="hidden flex-1 flex flex-col">
+                <div class="p-4 border-b border-dark-border flex items-center justify-between bg-dark-surface">
+                    <div class="flex items-center gap-3">
+                        <button id="btn-back" class="md:hidden text-zinc-400"><i class="fa-solid fa-arrow-left"></i></button>
+                        <div id="chat-avatar-container"></div>
+                        <div>
+                            <h3 id="chat-name" class="font-bold text-white text-sm">...</h3>
+                            <p id="chat-username" class="text-xs text-brand-500">...</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Messages Container -->
-                <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-4 bg-[radial-gradient(#1c1c1f_1px,transparent_1px)] [background-size:16px_16px]">
-                    <!-- Сообщения рендерятся тут -->
-                </div>
+                <div id="messages-list" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
 
-                <!-- Input Area -->
-                <div class="p-4 border-t border-dark-border bg-dark-surface/20 backdrop-blur-md">
-                    <form id="message-form" class="flex items-end gap-2 max-w-6xl mx-auto relative">
-                        <div class="flex-1 bg-dark-surface border border-dark-border rounded-xl focus-within:border-brand-600 transition duration-150 flex flex-col">
-                            <!-- Preview Box -->
-                            <div id="image-preview-container" class="hidden p-3 border-b border-dark-border relative flex items-center gap-3">
-                                <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-dark-border">
-                                    <img id="image-preview" src="" class="w-full h-full object-cover">
-                                    <div id="upload-overlay" class="absolute inset-0 bg-black/60 flex items-center justify-center hidden">
-                                        <i class="fa-solid fa-spinner fa-spin text-white text-xs"></i>
-                                    </div>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs text-white font-medium truncate" id="preview-filename">image.jpg</p>
-                                    <p class="text-[10px] text-brand-500" id="upload-status">Готово к отправке</p>
-                                </div>
-                                <button type="button" id="btn-remove-preview" class="w-6 h-6 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition">
-                                    <i class="fa-solid fa-xmark text-xs"></i>
-                                </button>
-                            </div>
+                <div class="p-3 border-t border-dark-border bg-dark-surface relative">
+                    <!-- Emoji Picker -->
+                    <div id="emoji-picker" class="hidden absolute bottom-16 left-2 bg-dark-sidebar border border-dark-border rounded-xl p-2 grid grid-cols-5 gap-2 text-xl z-50">
+                        <span class="cursor-pointer hover:scale-110">😀</span><span class="cursor-pointer hover:scale-110">😂</span>
+                        <span class="cursor-pointer hover:scale-110">🥰</span><span class="cursor-pointer hover:scale-110">😎</span>
+                        <span class="cursor-pointer hover:scale-110">🤔</span><span class="cursor-pointer hover:scale-110">😭</span>
+                        <span class="cursor-pointer hover:scale-110">😡</span><span class="cursor-pointer hover:scale-110">👍</span>
+                        <span class="cursor-pointer hover:scale-110">🔥</span><span class="cursor-pointer hover:scale-110">✨</span>
+                    </div>
 
-                            <!-- Inputs Row -->
-                            <div class="flex items-center px-3 py-2.5 gap-2">
-                                <label class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-lg hover:bg-zinc-800 text-dark-muted hover:text-white transition flex-shrink-0">
-                                    <i class="fa-solid fa-paperclip text-lg"></i>
-                                    <input type="file" id="file-input" accept="image/*" class="hidden">
-                                </label>
-                                <textarea id="message-input" rows="1" placeholder="Напишите сообщение..." class="flex-1 bg-transparent border-0 outline-none resize-none max-h-32 text-sm text-white placeholder-dark-muted py-1 w-full focus:ring-0 focus:outline-none"></textarea>
+                    <form id="msg-form" class="flex items-end gap-2">
+                        <button type="button" id="btn-emoji" class="p-2 text-dark-muted hover:text-white"><i class="fa-regular fa-face-smile"></i></button>
+                        <label class="p-2 text-dark-muted hover:text-white cursor-pointer">
+                            <i class="fa-solid fa-paperclip"></i>
+                            <input type="file" id="msg-file" class="hidden" accept="image/*">
+                        </label>
+                        <div class="flex-1 bg-dark-bg border border-dark-border rounded-xl flex flex-col">
+                            <div id="preview-box" class="hidden p-2 border-b border-dark-border flex items-center gap-2">
+                                <img id="preview-img" class="w-10 h-10 rounded object-cover">
+                                <span class="text-xs text-white" id="preview-txt">Загрузка...</span>
+                                <button type="button" id="btn-clear-file" class="ml-auto text-red-500 text-xs"><i class="fa-solid fa-xmark"></i></button>
                             </div>
+                            <textarea id="msg-input" rows="1" class="w-full bg-transparent p-3 text-sm text-white outline-none resize-none" placeholder="Сообщение..."></textarea>
                         </div>
-                        <button type="submit" id="btn-send-message" class="w-11 h-11 flex items-center justify-center rounded-xl bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-600/10 transition active:scale-95 flex-shrink-0">
-                            <i class="fa-solid fa-paper-plane text-sm"></i>
-                        </button>
+                        <button type="submit" class="p-3 bg-brand-600 text-white rounded-xl"><i class="fa-solid fa-paper-plane"></i></button>
                     </form>
                 </div>
-            </div>
-
-            <!-- Blank View -->
-            <div id="blank-chat-view" class="flex flex-col items-center justify-center h-full w-full text-center p-6">
-                <div class="w-16 h-16 rounded-2xl bg-dark-surface border border-dark-border flex items-center justify-center text-dark-muted text-2xl mb-4">
-                    <i class="fa-regular fa-comments"></i>
-                </div>
-                <h3 class="text-white font-bold mb-1">Ваши диалоги</h3>
-                <p class="text-dark-muted text-sm max-w-xs">Выберите любой чат из списка слева или создайте новое обсуждение прямо сейчас.</p>
             </div>
         </main>
     </div>
 
-    <!-- Modal: My Profile & Settings -->
-    <div id="modal-profile" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-dark-surface border border-dark-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative animate-[fadeIn_0.2s_ease-out]">
-            <!-- Profile Background View -->
-            <div id="profile-bg-preview" class="h-32 w-full bg-gradient-to-r from-zinc-800 to-zinc-900 bg-cover bg-center relative">
-                <label class="absolute bottom-2 right-2 px-3 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-sm text-xs text-white font-medium cursor-pointer transition flex items-center gap-1.5 border border-white/10">
-                    <i class="fa-solid fa-camera"></i> Кавер
-                    <input type="file" id="input-upload-bg" accept="image/*" class="hidden">
-                </label>
-            </div>
-            <!-- Profile Info Box -->
-            <div class="px-6 pb-6 relative pt-12">
-                <!-- Avatar Upload Context -->
-                <div class="absolute -top-12 left-6 w-20 h-20 rounded-2xl border-4 border-dark-surface bg-zinc-800 overflow-hidden shadow-md group relative">
-                    <img id="profile-avatar-preview" src="" class="w-full h-full object-cover">
-                    <label class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition">
-                        <i class="fa-solid fa-pen text-white text-xs"></i>
-                        <input type="file" id="input-upload-avatar" accept="image/*" class="hidden">
-                    </label>
-                </div>
-
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <h3 class="text-xl font-bold text-white flex items-center gap-1.5" id="profile-display-name">Имя</h3>
-                        <p class="text-xs text-dark-muted" id="profile-email">email@domain.com</p>
-                    </div>
-                    <button id="btn-close-profile" class="w-8 h-8 rounded-lg bg-dark-bg hover:bg-zinc-800 flex items-center justify-center text-dark-muted hover:text-white transition">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-
-                <!-- Fields -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Прямая ссылка на Аватар</label>
-                        <input type="text" id="profile-avatar-url" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-600 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Прямая ссылка на Фон</label>
-                        <input type="text" id="profile-bg-url" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-600 transition">
-                    </div>
-                    <button id="btn-save-profile" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 px-4 rounded-xl transition duration-150 mt-2">
-                        Сохранить профиль
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Create Chat Room -->
-    <div id="modal-create-chat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-dark-surface border border-dark-border rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-white">Создать новое обсуждение</h3>
-                <button id="btn-close-create-chat" class="w-8 h-8 rounded-lg bg-dark-bg hover:bg-zinc-800 flex items-center justify-center text-dark-muted hover:text-white transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
+    <!-- Modals (Settings, Create Chat, Story) -->
+    <div id="modal-settings" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden">
+        <div class="bg-dark-surface w-full max-w-md p-6 rounded-2xl">
+            <h3 class="text-xl font-bold text-white mb-4">Настройки</h3>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Тип комнаты</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <label class="border border-dark-border rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer text-center hover:bg-zinc-800/50 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-600/10 group transition">
-                            <input type="radio" name="chat-type" value="group" checked class="hidden">
-                            <i class="fa-solid fa-users text-dark-muted group-has-[:checked]:text-brand-500"></i>
-                            <span class="text-xs font-medium text-white">Группа</span>
-                        </label>
-                        <label class="border border-dark-border rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer text-center hover:bg-zinc-800/50 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-600/10 group transition">
-                            <input type="radio" name="chat-type" value="channel" class="hidden">
-                            <i class="fa-solid fa-bullhorn text-dark-muted group-has-[:checked]:text-brand-500"></i>
-                            <span class="text-xs font-medium text-white">Канал</span>
-                        </label>
-                        <label class="border border-dark-border rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer text-center hover:bg-zinc-800/50 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-600/10 group transition">
-                            <input type="radio" name="chat-type" value="dm" class="hidden">
-                            <i class="fa-solid fa-user-shield text-dark-muted group-has-[:checked]:text-brand-500"></i>
-                            <span class="text-xs font-medium text-white">Личные (DM)</span>
-                        </label>
-                    </div>
-                </div>
+                <input type="text" id="set-name" class="w-full bg-dark-bg p-3 rounded-xl border border-dark-border text-white" placeholder="Имя">
+                <input type="text" id="set-username" class="w-full bg-dark-bg p-3 rounded-xl border border-dark-border text-white" placeholder="@username">
+                <label class="block text-xs text-dark-muted">Папки (через запятую)</label>
+                <input type="text" id="set-folders" class="w-full bg-dark-bg p-3 rounded-xl border border-dark-border text-white" placeholder="Работа, Семья">
+                <button id="btn-save-settings" class="w-full py-3 bg-brand-600 text-white rounded-xl font-bold">Сохранить</button>
+                <button id="btn-del-account" class="w-full py-3 bg-red-600/20 text-red-500 rounded-xl font-bold mt-4 border border-red-900/50">Удалить аккаунт</button>
+            </div>
+            <button id="btn-close-settings" class="absolute top-4 right-4 text-white p-2">Закрыть</button>
+        </div>
+    </div>
 
-                <!-- Dynamic field for Name / Email -->
-                <div id="wrapper-chat-title">
-                    <label id="label-chat-title" class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Название группы / канала</label>
-                    <input type="text" id="input-chat-title" placeholder="Например: Разработка сайтов" class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-600 transition">
-                </div>
+    <div id="modal-create" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden">
+        <div class="bg-dark-surface w-full max-w-md p-6 rounded-2xl">
+            <h3 class="text-xl font-bold text-white mb-4">Новый чат</h3>
+            <select id="create-type" class="w-full bg-dark-bg p-3 rounded-xl border border-dark-border text-white mb-4 outline-none">
+                <option value="dm">Личный (по @username)</option>
+                <option value="group">Группа</option>
+                <option value="channel">Канал</option>
+            </select>
+            <input type="text" id="create-title" class="w-full bg-dark-bg p-3 rounded-xl border border-dark-border text-white mb-4" placeholder="Имя / @username">
+            <input type="text" id="create-username" class="w-full bg-dark-bg p-3 rounded-xl border border-dark-border text-white mb-4 hidden" placeholder="@уникальный_id">
+            <button id="btn-submit-create" class="w-full py-3 bg-brand-600 text-white rounded-xl font-bold">Создать</button>
+            <button id="btn-close-create" class="mt-2 w-full py-3 text-dark-muted rounded-xl">Отмена</button>
+        </div>
+    </div>
 
-                <div id="wrapper-chat-avatar">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1.5">Ссылка на изображение (Аватар)</label>
-                    <input type="text" id="input-chat-avatar" placeholder="https://..." class="w-full bg-dark-bg border border-dark-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-600 transition">
-                </div>
-
-                <button id="btn-submit-create-chat" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 px-4 rounded-xl transition duration-150 mt-2">
-                    Создать комнату
-                </button>
+    <div id="modal-story" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center hidden">
+        <div class="bg-dark-surface w-full max-w-md p-6 rounded-2xl flex flex-col items-center">
+            <h3 class="text-white font-bold mb-4">Редактор Истории</h3>
+            <input type="file" id="story-file" accept="image/*" class="mb-4 text-white text-sm">
+            <textarea id="story-text" class="w-full bg-dark-bg p-3 text-white border border-dark-border rounded-xl mb-2" placeholder="Добавить текст/эмодзи..."></textarea>
+            <div class="flex gap-2 w-full">
+                <button id="btn-pub-story" class="flex-1 py-2 bg-brand-600 text-white rounded-xl">Опубликовать</button>
+                <button id="btn-close-story" class="flex-1 py-2 bg-zinc-800 text-white rounded-xl">Закрыть</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: View Foreign User Card / Profile Details -->
-    <div id="modal-view-profile" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-dark-surface border border-dark-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
-            <div id="view-profile-bg" class="h-32 w-full bg-cover bg-center"></div>
-            <div class="px-6 pb-6 relative pt-12">
-                <div class="absolute -top-12 left-6 w-20 h-20 rounded-2xl border-4 border-dark-surface bg-zinc-800 overflow-hidden shadow-md">
-                    <img id="view-profile-avatar" src="" class="w-full h-full object-cover">
-                </div>
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-white" id="view-profile-name">Имя пользователя</h3>
-                        <p class="text-xs text-dark-muted" id="view-profile-email">email@domain.com</p>
-                    </div>
-                    <button id="btn-close-view-profile" class="w-8 h-8 rounded-lg bg-dark-bg hover:bg-zinc-800 flex items-center justify-center text-dark-muted hover:text-white transition">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
+    <div id="modal-view-story" class="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center hidden">
+        <div class="relative w-full max-w-md h-[80vh] bg-dark-surface rounded-2xl overflow-hidden flex flex-col">
+            <div id="story-progress" class="h-1 bg-brand-500 w-full"></div>
+            <img id="view-story-img" class="w-full h-full object-cover absolute inset-0 mix-blend-overlay opacity-50">
+            <div class="relative z-10 flex-1 flex items-center justify-center p-6 text-center text-white text-2xl font-bold" id="view-story-text"></div>
+            <button id="btn-close-view-story" class="absolute top-4 right-4 z-20 text-white w-10 h-10 bg-black/50 rounded-full"><i class="fa-solid fa-xmark"></i></button>
         </div>
     </div>
 
-    <!-- Main Controller Logic via Firebase Modules -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Provided Configuration
-        const firebaseConfig = {
+        const app = initializeApp({
             apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
             authDomain: "meswy-web.firebaseapp.com",
             projectId: "meswy-web",
             storageBucket: "meswy-web.firebasestorage.app",
             messagingSenderId: "802423553668",
-            appId: "1:802423553668:web:64be6aae3f34b2d0f88cd1",
-            measurementId: "G-PYS9ELGKDE"
-        };
+            appId: "1:802423553668:web:64be6aae3f34b2d0f88cd1"
+        });
 
-        // Init App instances
-        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-
-        // Local Application Memory State
-        let currentUserData = null;
+        
+        let me = null;
         let activeChatId = null;
-        let selectedTab = 'all';
-        let chatsCache = [];
-        let globalMessagesUnsubscribe = null;
-        let currentUploadedImageUrl = null;
+        let chats = [];
+        let currentFolder = 'all';
+        let msgUnsub = null;
+        let pendingImgUrl = null;
 
-        // ImgBB Upload Function
-        async function uploadImage(file) {
-            const apiKey = "614175d15985961d996a8c076c776f08";
-            const formData = new FormData();
-            formData.append("image", file);
-            
-            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-                method: "POST",
-                body: formData
-            });
-            
-            const result = await response.json();
-            if (result.success) {
-                return result.data.url;
-            } else {
-                throw new Error("ImgBB Upload Exception");
-            }
+        const getEl = id => document.getElementById(id);
+        
+        // Utils: First Letter Avatar
+        function getAvatarHtml(name, url, size="w-10 h-10", text="text-lg") {
+            if(url) return `<img src="${url}" class="${size} rounded-full object-cover">`;
+            const letter = (name || "?").charAt(0).toUpperCase();
+            return `<div class="${size} rounded-full bg-gradient-to-br from-brand-600 to-emerald-900 text-white flex items-center justify-center font-bold ${text} shadow-inner">${letter}</div>`;
         }
 
-        // DOM Observers and Triggers
-        const authScreen = document.getElementById('auth-screen');
-        const appScreen = document.getElementById('app-screen');
-        const btnLogin = document.getElementById('btn-login');
-        const btnLogout = document.getElementById('btn-logout');
-        
-        const myAvatar = document.getElementById('my-avatar');
-        const myName = document.getElementById('my-name');
-        
-        const chatsList = document.getElementById('chats-list');
-        const chatTabs = document.querySelectorAll('.chat-tab');
-        
-        const activeChatView = document.getElementById('active-chat-view');
-        const blankChatView = document.getElementById('blank-chat-view');
-        const activeChatAvatar = document.getElementById('active-chat-avatar');
-        const activeChatName = document.getElementById('active-chat-name');
-        const activeChatStatus = document.getElementById('active-chat-status');
-        const messagesContainer = document.getElementById('messages-container');
-        
-        const messageForm = document.getElementById('message-form');
-        const messageInput = document.getElementById('message-input');
-        const fileInput = document.getElementById('file-input');
-        
-        const imagePreviewContainer = document.getElementById('image-preview-container');
-        const imagePreview = document.getElementById('image-preview');
-        const previewFilename = document.getElementById('preview-filename');
-        const uploadStatus = document.getElementById('upload-status');
-        const uploadOverlay = document.getElementById('upload-overlay');
-        const btnRemovePreview = document.getElementById('btn-remove-preview');
-
-        // Modal Elements
-        const modalProfile = document.getElementById('modal-profile');
-        const userAvatarTrigger = document.getElementById('user-avatar-trigger');
-        const btnCloseProfile = document.getElementById('btn-close-profile');
-        const profileAvatarPreview = document.getElementById('profile-avatar-preview');
-        const profileBgPreview = document.getElementById('profile-bg-preview');
-        const profileDisplayName = document.getElementById('profile-display-name');
-        const profileEmail = document.getElementById('profile-email');
-        const profileAvatarUrlInput = document.getElementById('profile-avatar-url');
-        const profileBgUrlInput = document.getElementById('profile-bg-url');
-        const btnSaveProfile = document.getElementById('btn-save-profile');
-        const inputUploadAvatar = document.getElementById('input-upload-avatar');
-        const inputUploadBg = document.getElementById('input-upload-bg');
-
-        const modalCreateChat = document.getElementById('modal-create-chat');
-        const btnOpenCreateChat = document.getElementById('btn-open-create-chat');
-        const btnCloseCreateChat = document.getElementById('btn-close-create-chat');
-        const btnSubmitCreateChat = document.getElementById('btn-submit-create-chat');
-        const inputChatTitle = document.getElementById('input-chat-title');
-        const inputChatAvatar = document.getElementById('input-chat-avatar');
-        const labelChatTitle = document.getElementById('label-chat-title');
-        const wrapperChatAvatar = document.getElementById('wrapper-chat-avatar');
-
-        const modalViewProfile = document.getElementById('modal-view-profile');
-        const btnCloseViewProfile = document.getElementById('btn-close-view-profile');
-        const viewProfileBg = document.getElementById('view-profile-bg');
-        const viewProfileAvatar = document.getElementById('view-profile-avatar');
-        const viewProfileName = document.getElementById('view-profile-name');
-        const viewProfileEmail = document.getElementById('view-profile-email');
-
-        // Layout Responsiveness Fixes
-        function adjustResponsiveViews() {
-            const isMobile = window.innerWidth < 768;
-            if (isMobile) {
-                if (activeChatId) {
-                    document.getElementById('sidebar').classList.add('hidden');
-                    document.getElementById('chat-window').classList.remove('hidden');
-                } else {
-                    document.getElementById('sidebar').classList.remove('hidden');
-                    document.getElementById('chat-window').classList.add('hidden');
-                }
-            } else {
-                document.getElementById('sidebar').classList.remove('hidden');
-                document.getElementById('chat-window').classList.remove('hidden');
-            }
+        // Utils: ImgBB
+        async function uploadImg(file) {
+            const fd = new FormData(); fd.append("image", file);
+            const r = await fetch("https://api.imgbb.com/1/upload?key=614175d15985961d996a8c076c776f08", { method: "POST", body: fd });
+            const j = await r.json(); return j.data.url;
         }
-        window.addEventListener('resize', adjustResponsiveViews);
-        document.getElementById('btn-back-to-sidebar').addEventListener('click', () => {
-            activeChatId = null;
-            if (globalMessagesUnsubscribe) globalMessagesUnsubscribe();
-            adjustResponsiveViews();
-        });
 
-        // Track and change Chat Room Type in creation form
-        document.querySelectorAll('input[name="chat-type"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                if (e.target.value === 'dm') {
-                    labelChatTitle.innerText = "Email собеседника";
-                    inputChatTitle.placeholder = "user@domain.com";
-                    wrapperChatAvatar.classList.add('hidden');
-                } else {
-                    labelChatTitle.innerText = "Название группы / канала";
-                    inputChatTitle.placeholder = "Например: Разработка сайтов";
-                    wrapperChatAvatar.classList.remove('hidden');
-                }
-            });
-        });
-
-        // Authentication Observer
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                authScreen.classList.add('hidden');
-                appScreen.classList.remove('hidden');
-                
-                const userRef = doc(db, "users", user.uid);
-                const userDoc = await getDoc(userRef);
-                
-                if (!userDoc.exists()) {
-                    currentUserData = {
-                        uid: user.uid,
-                        displayName: user.displayName || "Пользователь",
-                        email: user.email,
-                        photoURL: user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150",
-                        bgURL: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
-                        updatedAt: serverTimestamp()
-                    };
-                    await setDoc(userRef, currentUserData);
-                } else {
-                    currentUserData = userDoc.data();
-                }
-                
-                myAvatar.src = currentUserData.photoURL;
-                myName.innerText = currentUserData.displayName;
-                
-                syncChatsList();
-                adjustResponsiveViews();
-            } else {
-                authScreen.classList.remove('hidden');
-                appScreen.classList.add('hidden');
-            }
-        });
-
-        // Login / Logout Handlers
-        btnLogin.addEventListener('click', () => signInWithPopup(auth, provider));
-        btnLogout.addEventListener('click', () => signOut(auth));
-
-        // Sync Chats List from Firestore (Real-time listener)
-        function syncChatsList() {
-            const chatsQuery = query(collection(db, "chats"), orderBy("createdAt", "desc"));
-            onSnapshot(chatsQuery, (snapshot) => {
-                chatsCache = [];
-                snapshot.forEach(docSnap => {
-                    const data = docSnap.data();
-                    data.id = docSnap.id;
-                    
-                    // Filter out DMs not belonging to current user
-                    if (data.type === 'dm') {
-                        if (data.members && data.members.includes(currentUserData.uid)) {
-                            chatsCache.push(data);
-                        }
-                    } else {
-                        chatsCache.push(data);
-                    }
-                });
-                renderChatsList();
+        // Utils: Safe Link Format (no js)
+        function formatSafeLinks(text) {
+            const safeText = text.replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+            return safeText.replace(/(https?:\/\/[^\s]+)/g, url => {
+                return `<a href="${url}" target="_blank" rel="noopener" class="block mt-2 p-3 rounded-lg bg-zinc-900 border border-zinc-800 text-brand-500 hover:bg-zinc-800 transition truncate text-sm">
+                            <i class="fa-solid fa-link text-zinc-500 mr-2"></i>${url}
+                        </a>`;
             });
         }
 
-        // Render Sidebar chats HTML
-        function renderChatsList() {
-            chatsList.innerHTML = '';
-            
-            const filteredChats = chatsCache.filter(chat => {
-                if (selectedTab === 'all') return true;
-                return chat.type === selectedTab;
-            });
-            
-            if (filteredChats.length === 0) {
-                chatsList.innerHTML = `<div class="text-center text-dark-muted py-8 text-sm">Чаты не найдены</div>`;
+        onAuthStateChanged(auth, async u => {
+            if(!u) {
+                getEl('auth-screen').classList.remove('hidden');
+                getEl('app-screen').classList.add('hidden');
                 return;
             }
-            
-            filteredChats.forEach(chat => {
-                let chatName = chat.name;
-                let chatImg = chat.avatar || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150";
-                
-                if (chat.type === 'dm') {
-                    const opponentUid = chat.members.find(uid => uid !== currentUserData.uid);
-                    const opponent = chat.memberDetails?.[opponentUid];
-                    if (opponent) {
-                        chatName = opponent.displayName;
-                        chatImg = opponent.photoURL;
-                    } else {
-                        chatName = "Диалог сохранен";
-                    }
-                }
-                
-                const isActive = chat.id === activeChatId;
-                const activeClasses = isActive ? 'bg-brand-600/15 border-brand-600/40 text-white' : 'border-transparent text-zinc-300 hover:bg-dark-surface/50';
-                
-                const badge = chat.type === 'group' ? '<span class="px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-semibold text-zinc-400">Группа</span>' : 
-                              chat.type === 'channel' ? '<span class="px-1.5 py-0.5 bg-blue-950 text-blue-400 rounded text-[10px] font-semibold">Канал</span>' :
-                              '<span class="px-1.5 py-0.5 bg-emerald-950 text-emerald-400 rounded text-[10px] font-semibold">Личные</span>';
-
-                const chatItem = document.createElement('div');
-                chatItem.className = `flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${activeClasses}`;
-                chatItem.innerHTML = `
-                    <img src="${chatImg}" alt="Avatar" class="w-11 h-11 rounded-xl object-cover flex-shrink-0">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-1">
-                            <h4 class="font-bold text-sm text-white truncate">${chatName}</h4>
-                            ${badge}
-                        </div>
-                        <p class="text-xs text-dark-muted truncate">${chat.lastMessage || 'Нет сообщений'}</p>
-                    </div>
-                `;
-                
-                chatItem.addEventListener('click', () => switchActiveChat(chat.id));
-                chatsList.appendChild(chatItem);
-            });
-        }
-
-        // Tab switches filtering
-        chatTabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                chatTabs.forEach(t => t.className = 'chat-tab flex-1 py-2 text-center rounded-lg text-dark-muted hover:text-white transition');
-                e.target.className = 'chat-tab flex-1 py-2 text-center rounded-lg bg-dark-surface text-white transition';
-                selectedTab = e.target.getAttribute('data-tab');
-                renderChatsList();
-            });
-        });
-
-        // Switch to chosen active chat view
-        async function switchActiveChat(chatId) {
-            activeChatId = chatId;
-            renderChatsList();
-            
-            blankChatView.classList.add('hidden');
-            activeChatView.classList.remove('hidden');
-            
-            const chatData = chatsCache.find(c => c.id === chatId);
-            if (!chatData) return;
-            
-            let name = chatData.name;
-            let avatar = chatData.avatar || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150";
-            
-            if (chatData.type === 'dm') {
-                const opponentUid = chatData.members.find(uid => uid !== currentUserData.uid);
-                const opponent = chatData.memberDetails?.[opponentUid];
-                if (opponent) {
-                    name = opponent.displayName;
-                    avatar = opponent.photoURL;
-                }
-            }
-            
-            activeChatName.innerText = name;
-            activeChatAvatar.src = avatar;
-            activeChatStatus.innerText = chatData.type === 'group' ? 'Групповой чат' : chatData.type === 'channel' ? 'Информационный канал' : 'Личная переписка';
-            
-            // Channel write restrictions check
-            if (chatData.type === 'channel' && chatData.creatorId !== currentUserData.uid) {
-                messageInput.disabled = true;
-                messageInput.placeholder = "Только администраторы могут писать здесь";
-                messageForm.querySelector('button[type="submit"]').disabled = true;
-                messageForm.querySelector('label').classList.add('hidden');
+            getEl('auth-screen').classList.add('hidden');
+            const ref = doc(db, "users", u.uid);
+            const d = await getDoc(ref);
+            if(d.exists() && d.data().username) {
+                me = { uid: u.uid, ...d.data() };
+                initApp();
             } else {
-                messageInput.disabled = false;
-                messageInput.placeholder = "Напишите сообщение...";
-                messageForm.querySelector('button[type="submit"]').disabled = false;
-                messageForm.querySelector('label').classList.remove('hidden');
-            }
-            
-            adjustResponsiveViews();
-            
-            // Open user metadata modal on clicking opponent name or chat image
-            activeChatAvatar.onclick = activeChatInfoTrigger.onclick = () => showChatMetaProfile(chatData);
-
-            // Subscribe to real-time chat messages
-            if (globalMessagesUnsubscribe) globalMessagesUnsubscribe();
-            
-            const msgQuery = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"));
-            globalMessagesUnsubscribe = onSnapshot(msgQuery, (snapshot) => {
-                messagesContainer.innerHTML = '';
-                if (snapshot.empty) {
-                    messagesContainer.innerHTML = `<div class="text-center text-dark-muted py-12 text-xs">История сообщений пуста</div>`;
-                    return;
-                }
-                
-                snapshot.forEach(docSnap => {
-                    const msg = docSnap.data();
-                    const isMe = msg.senderId === currentUserData.uid;
-                    
-                    const msgRow = document.createElement('div');
-                    msgRow.className = `flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2.5`;
-                    
-                    const innerHTML = `
-                        ${!isMe ? `<img src="${msg.senderPhoto}" class="w-8 h-8 rounded-lg object-cover flex-shrink-0 cursor-pointer user-card-target" data-uid="${msg.senderId}">` : ''}
-                        <div class="flex flex-col max-w-[75%] md:max-w-[60%]">
-                            ${!isMe && chatData.type !== 'dm' ? `<span class="text-[11px] font-bold text-zinc-400 mb-0.5 ml-1">${msg.senderName}</span>` : ''}
-                            <div class="p-3 rounded-2xl ${isMe ? 'bg-brand-600 text-white rounded-br-none' : 'bg-dark-surface border border-dark-border text-dark-text rounded-bl-none'} shadow-md text-sm break-words space-y-2">
-                                ${msg.imageUrl ? `<img src="${msg.imageUrl}" class="w-full rounded-lg max-h-72 object-cover cursor-zoom-in" onclick="window.open('${msg.imageUrl}', '_blank')">` : ''}
-                                ${msg.text ? `<p class="leading-relaxed whitespace-pre-wrap">${escapeHTML(msg.text)}</p>` : ''}
-                                <div class="text-[10px] text-right mt-1 opacity-50 block select-none">
-                                    ${formatMsgTime(msg.createdAt)}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    msgRow.innerHTML = innerHTML;
-                    messagesContainer.appendChild(msgRow);
-                });
-                
-                // Event delegation to open foreign profile view
-                messagesContainer.querySelectorAll('.user-card-target').forEach(img => {
-                    img.addEventListener('click', async (e) => {
-                        const uid = e.target.getAttribute('data-uid');
-                        const snapshotUser = await getDoc(doc(db, "users", uid));
-                        if (snapshotUser.exists()) {
-                            openForeignProfileModal(snapshotUser.data());
-                        }
-                    });
-                });
-                
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            });
-        }
-
-        // Safe characters escape
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
-        }
-
-        // Format system timestamp
-        function formatMsgTime(ts) {
-            if (!ts) return '';
-            const date = ts.toDate ? ts.toDate() : new Date(ts);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        // Send message event handler
-        messageForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const text = messageInput.value.trim();
-            const imgUrl = currentUploadedImageUrl;
-            
-            if (!text && !imgUrl) return;
-            
-            messageInput.value = '';
-            clearAttachmentPreview();
-            
-            const messagePayload = {
-                senderId: currentUserData.uid,
-                senderName: currentUserData.displayName,
-                senderPhoto: currentUserData.photoURL,
-                text: text,
-                imageUrl: imgUrl,
-                createdAt: serverTimestamp()
-            };
-            
-            const activeChatRef = doc(db, "chats", activeChatId);
-            await addDoc(collection(activeChatRef, "messages"), messagePayload);
-            
-            // Update last preview text in parent room model
-            let displaySnippet = text || "📷 Изображение";
-            if (chatSidesContainSnippet(activeChatId)) {
-                await setDoc(activeChatRef, { 
-                    lastMessage: displaySnippet 
-                }, { merge: true });
-            }
-        });
-
-        function chatSidesContainSnippet(id) {
-            return chatsCache.some(c => c.id === id);
-        }
-
-        // Input attachment handlers
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            imagePreviewContainer.classList.remove('hidden');
-            imagePreview.src = URL.createObjectURL(file);
-            previewFilename.innerText = file.name;
-            uploadStatus.innerText = "Загрузка на сервер...";
-            uploadOverlay.classList.remove('hidden');
-            btnSendMessage.disabled = true;
-            
-            try {
-                const remoteUrl = await uploadImage(file);
-                currentUploadedImageUrl = remoteUrl;
-                uploadStatus.innerText = "Готово к отправке";
-                uploadOverlay.classList.add('hidden');
-            } catch (err) {
-                uploadStatus.innerText = "Ошибка загрузки";
-                uploadOverlay.classList.add('hidden');
-                console.error(err);
-            } finally {
-                btnSendMessage.disabled = false;
-            }
-        });
-
-        function clearAttachmentPreview() {
-            currentUploadedImageUrl = null;
-            imagePreviewContainer.classList.add('hidden');
-            imagePreview.src = '';
-            fileInput.value = '';
-        }
-        btnRemovePreview.addEventListener('click', clearAttachmentPreview);
-
-        // Open/Close Create Chat Form Modals
-        btnOpenCreateChat.addEventListener('click', () => modalCreateChat.classList.remove('hidden'));
-        btnCloseCreateChat.addEventListener('click', () => modalCreateChat.classList.add('hidden'));
-
-        btnSubmitCreateChat.addEventListener('click', async () => {
-            const type = document.querySelector('input[name="chat-type"]:checked').value;
-            const targetVal = inputChatTitle.value.trim();
-            const avatarVal = inputChatAvatar.value.trim();
-            
-            if (!targetVal) return;
-            
-            if (type === 'dm') {
-                // Query target user profile matching given targetVal email
-                const userQuery = query(collection(db, "users"), where("email", "==", targetVal));
-                onSnapshot(userQuery, async (snapshot) => {
-                    if (snapshot.empty) {
-                        alert("Пользователь с таким email не зарегистрирован в системе!");
-                        return;
-                    }
-                    let opponentData = null;
-                    snapshot.forEach(d => opponentData = d.data());
-                    
-                    if (opponentData.uid === currentUserData.uid) {
-                        alert("Нельзя создать личный чат с самим собой.");
-                        return;
-                    }
-                    
-                    // Check duplicate DM
-                    const existingDm = chatsCache.find(c => c.type === 'dm' && c.members.includes(opponentData.uid));
-                    if (existingDm) {
-                        modalCreateChat.classList.add('hidden');
-                        switchActiveChat(existingDm.id);
-                        return;
-                    }
-
-                    const roomPayload = {
-                        type: 'dm',
-                        members: [currentUserData.uid, opponentData.uid],
-                        memberDetails: {
-                            [currentUserData.uid]: { displayName: currentUserData.displayName, photoURL: currentUserData.photoURL },
-                            [opponentData.uid]: { displayName: opponentData.displayName, photoURL: opponentData.photoURL }
-                        },
-                        createdAt: serverTimestamp(),
-                        lastMessage: 'Чат создан'
-                    };
-                    
-                    const createdRef = await addDoc(collection(db, "chats"), roomPayload);
-                    modalCreateChat.classList.add('hidden');
-                    inputChatTitle.value = '';
-                    switchActiveChat(createdRef.id);
-                }, { onlyOnce: true });
-
-            } else {
-                const roomPayload = {
-                    name: targetVal,
-                    type: type,
-                    avatar: avatarVal || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150",
-                    creatorId: currentUserData.uid,
-                    createdAt: serverTimestamp(),
-                    lastMessage: 'Чат создан'
+                getEl('onboarding-screen').classList.remove('hidden');
+                getEl('btn-finish-ob').onclick = async () => {
+                    const un = getEl('ob-username').value.trim().toLowerCase();
+                    if(!un) return;
+                    me = { uid: u.uid, name: u.displayName||"User", email: u.email, username: un, folders: ['Работа', 'Семья'] };
+                    await setDoc(ref, me);
+                    getEl('onboarding-screen').classList.add('hidden');
+                    initApp();
                 };
-                const createdRef = await addDoc(collection(db, "chats"), roomPayload);
-                modalCreateChat.classList.add('hidden');
-                inputChatTitle.value = '';
-                inputChatAvatar.value = '';
-                switchActiveChat(createdRef.id);
             }
         });
 
-        // Current Profile Modals Hooks
-        userAvatarTrigger.addEventListener('click', () => {
-            profileAvatarPreview.src = currentUserData.photoURL;
-            profileBgPreview.style.backgroundImage = `url('${currentUserData.bgURL}')`;
-            profileDisplayName.innerText = currentUserData.displayName;
-            profileEmail.innerText = currentUserData.email;
-            profileAvatarUrlInput.value = currentUserData.photoURL;
-            profileBgUrlInput.value = currentUserData.bgURL;
-            modalProfile.classList.remove('hidden');
+        getEl('btn-login').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
+
+        function initApp() {
+            getEl('app-screen').classList.remove('hidden');
+            getEl('my-avatar-container').innerHTML = getAvatarHtml(me.name, me.photo);
+            getEl('my-name').innerText = me.name;
+            renderFolders();
+            syncChats();
+            syncStories();
+        }
+
+        // Folders
+        function renderFolders() {
+            const c = getEl('folders-tabs');
+            c.innerHTML = `<button data-folder="all" class="folder-tab px-3 py-1.5 rounded-lg ${currentFolder==='all'?'bg-dark-surface text-white':'text-dark-muted'}">Все</button>`;
+            (me.folders||[]).forEach(f => {
+                c.innerHTML += `<button data-folder="${f}" class="folder-tab px-3 py-1.5 rounded-lg ${currentFolder===f?'bg-dark-surface text-white':'text-dark-muted'}">${f}</button>`;
+            });
+            document.querySelectorAll('.folder-tab').forEach(b => b.onclick = (e) => {
+                currentFolder = e.target.dataset.folder;
+                renderFolders();
+                renderChats();
+            });
+        }
+
+        // Sync & Render Chats
+        function syncChats() {
+            onSnapshot(query(collection(db, "chats"), orderBy("updated", "desc")), snap => {
+                chats = [];
+                snap.forEach(d => {
+                    let c = d.data(); c.id = d.id;
+                    if(c.type === 'dm' && !c.members.includes(me.username)) return;
+                    chats.push(c);
+                });
+                renderChats();
+            });
+        }
+
+        function renderChats() {
+            const list = getEl('chats-list'); list.innerHTML = '';
+            chats.forEach(c => {
+                // simple folder logic: if folder selected, chat must contain folder tag
+                if(currentFolder !== 'all' && !(c.tags||[]).includes(currentFolder)) return;
+                
+                let name = c.name, img = c.photo;
+                if(c.type === 'dm') name = c.members.find(x => x !== me.username) || "Избранное";
+                
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-xl cursor-pointer flex gap-3 items-center hover:bg-dark-surface ${activeChatId===c.id?'bg-brand-900/20':''}`;
+                div.innerHTML = `${getAvatarHtml(name, img, "w-11 h-11", "text-xl")}
+                                 <div class="flex-1 min-w-0"><div class="text-sm font-bold text-white truncate">${name}</div>
+                                 <div class="text-xs text-dark-muted truncate">${c.last||'Нет сообщений'}</div></div>`;
+                div.onclick = () => openChat(c.id, name, img, c.username || (c.type==='dm'?name:''));
+                list.appendChild(div);
+            });
+        }
+
+        // Chat Logic
+        function openChat(id, name, img, un) {
+            activeChatId = id;
+            getEl('sidebar').classList.add('hidden'); getEl('sidebar').classList.add('md:flex');
+            getEl('chat-window').classList.remove('hidden');
+            getEl('blank-chat').classList.add('hidden'); getEl('active-chat').classList.remove('hidden'); getEl('active-chat').classList.add('flex');
+            
+            getEl('chat-avatar-container').innerHTML = getAvatarHtml(name, img);
+            getEl('chat-name').innerText = name;
+            getEl('chat-username').innerText = un ? `@${un}` : '';
+
+            if(msgUnsub) msgUnsub();
+            msgUnsub = onSnapshot(query(collection(db, `chats/${id}/msgs`), orderBy("time", "asc")), snap => {
+                const ml = getEl('messages-list'); ml.innerHTML = '';
+                snap.forEach(d => {
+                    const m = d.data(); const isMe = m.user === me.username;
+                    ml.innerHTML += `<div class="flex flex-col ${isMe?'items-end':'items-start'}">
+                        ${!isMe ? `<span class="text-[10px] text-zinc-500 ml-1 mb-1">@${m.user}</span>` : ''}
+                        <div class="max-w-[75%] p-3 rounded-2xl ${isMe?'bg-brand-600 text-white rounded-br-none':'bg-dark-surface border border-dark-border rounded-bl-none'}">
+                            ${m.img ? `<img src="${m.img}" class="rounded-lg mb-2 max-w-full">` : ''}
+                            ${m.text ? `<div class="text-sm break-words">${formatSafeLinks(m.text)}</div>` : ''}
+                        </div>
+                    </div>`;
+                });
+                ml.scrollTop = ml.scrollHeight;
+            });
+        }
+
+        getEl('btn-back').onclick = () => {
+            getEl('sidebar').classList.remove('hidden'); getEl('chat-window').classList.add('hidden');
+        };
+
+        // Send Msg
+        getEl('msg-form').onsubmit = async e => {
+            e.preventDefault();
+            const txt = getEl('msg-input').value.trim();
+            if(!txt && !pendingImgUrl) return;
+            getEl('msg-input').value = '';
+            
+            let img = pendingImgUrl; pendingImgUrl = null; 
+            getEl('preview-box').classList.add('hidden'); getEl('msg-file').value = '';
+
+            await addDoc(collection(db, `chats/${activeChatId}/msgs`), { user: me.username, text: txt, img: img, time: serverTimestamp() });
+            await setDoc(doc(db, "chats", activeChatId), { last: txt||'Фото', updated: serverTimestamp() }, {merge:true});
+        };
+
+        // Emoji & File
+        getEl('btn-emoji').onclick = () => getEl('emoji-picker').classList.toggle('hidden');
+        document.querySelectorAll('#emoji-picker span').forEach(sp => {
+            sp.onclick = () => { getEl('msg-input').value += sp.innerText; getEl('emoji-picker').classList.add('hidden'); }
         });
         
-        btnCloseProfile.addEventListener('click', () => modalProfile.classList.add('hidden'));
-
-        // Save customized settings profile values
-        btnSaveProfile.addEventListener('click', async () => {
-            const updated = {
-                displayName: currentUserData.displayName, 
-                photoURL: profileAvatarUrlInput.value.trim() || currentUserData.photoURL,
-                bgURL: profileBgUrlInput.value.trim() || currentUserData.bgURL,
-            };
-            
-            await setDoc(doc(db, "users", currentUserData.uid), updated, { merge: true });
-            currentUserData = { ...currentUserData, ...updated };
-            
-            myAvatar.src = currentUserData.photoURL;
-            modalProfile.classList.add('hidden');
-            renderChatsList();
-        });
-
-        // Fast upload image helpers direct into active forms fields
-        async function handleDirectAssetUpload(file, formFieldInput, previewImgNode) {
+        getEl('msg-file').onchange = async e => {
+            if(!e.target.files[0]) return;
+            getEl('preview-box').classList.remove('hidden'); getEl('preview-txt').innerText = "Загрузка...";
             try {
-                const url = await uploadImage(file);
-                formFieldInput.value = url;
-                if (previewImgNode) {
-                    if(previewImgNode.tagName === 'IMG') previewImgNode.src = url;
-                    else previewImgNode.style.backgroundImage = `url('${url}')`;
-                }
-            } catch(e) {
-                alert("Ошибка обработки загрузки медиа.");
-            }
-        }
+                pendingImgUrl = await uploadImg(e.target.files[0]);
+                getEl('preview-img').src = pendingImgUrl; getEl('preview-txt').innerText = "Готово";
+            } catch(er) { getEl('preview-txt').innerText = "Ошибка"; }
+        };
+        getEl('btn-clear-file').onclick = () => { pendingImgUrl=null; getEl('preview-box').classList.add('hidden'); getEl('msg-file').value=''; };
 
-        inputUploadAvatar.addEventListener('change', (e) => {
-            if(e.target.files[0]) handleDirectAssetUpload(e.target.files[0], profileAvatarUrlInput, profileAvatarPreview);
-        });
-        inputUploadBg.addEventListener('change', (e) => {
-            if(e.target.files[0]) handleDirectAssetUpload(e.target.files[0], profileBgUrlInput, profileBgPreview);
-        });
-
-        // Foreign Metadata Context Inspection Dialogs
-        async function showChatMetaProfile(chat) {
-            if (chat.type === 'dm') {
-                const opponentUid = chat.members.find(uid => uid !== currentUserData.uid);
-                const snapshotUser = await getDoc(doc(db, "users", opponentUid));
-                if (snapshotUser.exists()) {
-                    openForeignProfileModal(snapshotUser.data());
-                }
+        // Create Chat
+        getEl('btn-new-chat').onclick = () => getEl('modal-create').classList.remove('hidden');
+        getEl('btn-close-create').onclick = () => getEl('modal-create').classList.add('hidden');
+        getEl('create-type').onchange = e => {
+            const isGrp = e.target.value !== 'dm';
+            getEl('create-username').classList.toggle('hidden', !isGrp);
+            getEl('create-title').placeholder = isGrp ? "Название" : "@username собеседника";
+        };
+        getEl('btn-submit-create').onclick = async () => {
+            const t = getEl('create-type').value;
+            const title = getEl('create-title').value.trim();
+            const un = getEl('create-username').value.trim();
+            if(!title) return;
+            
+            let payload = { type: t, updated: serverTimestamp(), tags: ['all'] };
+            if(t === 'dm') {
+                payload.members = [me.username, title.replace('@','')];
+                payload.name = "Личные";
             } else {
-                openForeignProfileModal({
-                    displayName: chat.name,
-                    email: chat.type === 'group' ? 'Групповой публичный чат' : 'Публичный информационный канал',
-                    photoURL: chat.avatar,
-                    bgURL: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800"
-                });
+                payload.name = title; payload.username = un.replace('@',''); payload.members = [me.username];
             }
-        }
+            await addDoc(collection(db, "chats"), payload);
+            getEl('modal-create').classList.add('hidden');
+        };
 
-        function openForeignProfileModal(userModel) {
-            viewProfileBg.style.backgroundImage = `url('${userModel.bgURL || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'}')`;
-            viewProfileAvatar.src = userModel.photoURL;
-            viewProfileName.innerText = userModel.displayName;
-            viewProfileEmail.innerText = userModel.email;
-            modalViewProfile.classList.remove('hidden');
-        }
-        btnCloseViewProfile.addEventListener('click', () => modalViewProfile.classList.add('hidden'));
+        // Settings & Delete Acc
+        getEl('btn-settings').onclick = () => {
+            getEl('set-name').value = me.name; getEl('set-username').value = me.username;
+            getEl('set-folders').value = (me.folders||[]).join(', ');
+            getEl('modal-settings').classList.remove('hidden');
+        };
+        getEl('btn-close-settings').onclick = () => getEl('modal-settings').classList.add('hidden');
+        getEl('btn-save-settings').onclick = async () => {
+            me.name = getEl('set-name').value.trim(); me.username = getEl('set-username').value.replace('@','').trim();
+            me.folders = getEl('set-folders').value.split(',').map(s=>s.trim()).filter(s=>s);
+            await setDoc(doc(db, "users", me.uid), me, {merge:true});
+            getEl('modal-settings').classList.add('hidden'); initApp();
+        };
+        getEl('btn-del-account').onclick = async () => {
+            if(confirm("Удалить аккаунт навсегда?")) {
+                await deleteDoc(doc(db, "users", me.uid));
+                await deleteUser(auth.currentUser);
+                location.reload();
+            }
+        };
 
-        // Elastic Textarea Rows Auto-Expand Hook
-        messageInput.addEventListener('input', () => {
-            messageInput.style.height = 'auto';
-            messageInput.style.height = messageInput.scrollHeight + 'px';
-        });
+        // Stories
+        getEl('btn-add-story').onclick = () => getEl('modal-story').classList.remove('hidden');
+        getEl('btn-close-story').onclick = () => getEl('modal-story').classList.add('hidden');
+        let storyImg = null;
+        getEl('story-file').onchange = async e => { if(e.target.files[0]) storyImg = await uploadImg(e.target.files[0]); };
+        getEl('btn-pub-story').onclick = async () => {
+            const text = getEl('story-text').value.trim();
+            if(!text && !storyImg) return;
+            await addDoc(collection(db, "stories"), { user: me.username, avatar: me.photo, img: storyImg, text: text, time: serverTimestamp() });
+            getEl('modal-story').classList.add('hidden'); getEl('story-text').value=''; storyImg=null;
+        };
+
+        function syncStories() {
+            const d = new Date(); d.setHours(d.getHours() - 24);
+            onSnapshot(query(collection(db, "stories"), where("time", ">", d), orderBy("time", "desc")), snap => {
+                const lst = getEl('stories-list'); 
+                lst.innerHTML = `<button id="btn-add-story-2" class="flex-shrink-0 w-14 h-14 rounded-full border-2 border-dashed border-dark-muted flex flex-col items-center justify-center text-dark-muted"><i class="fa-solid fa-plus text-lg"></i></button>`;
+                getEl('btn-add-story-2').onclick = () => getEl('modal-story').classList.remove('hidden');
+                
+                snap.forEach(docSnap => {
+                    const s = docSnap.data();
+                    const btn = document.createElement('div');
+                    btn.className = "flex-shrink-0 cursor-pointer rounded-full p-0.5 bg-gradient-to-tr from-brand-500 to-emerald-400";
+                    btn.innerHTML = getAvatarHtml(s.user, s.avatar, "w-13 h-13", "text-xl border-2 border-dark-bg");
+                    btn.onclick = () => openStory(s);
+                    lst.appendChild(btn);
+                });
+            });
+        }
+        
+        function openStory(s) {
+            getEl('modal-view-story').classList.remove('hidden');
+            getEl('view-story-img').src = s.img || '';
+            getEl('view-story-text').innerText = s.text || '';
+            setTimeout(() => getEl('modal-view-story').classList.add('hidden'), 5000);
+        }
+        getEl('btn-close-view-story').onclick = () => getEl('modal-view-story').classList.add('hidden');
+
     </script>
 </body>
 </html>
