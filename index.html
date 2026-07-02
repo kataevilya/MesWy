@@ -22,7 +22,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; outline: none; }
         body { background: var(--bg-color); color: var(--text-color); display: flex; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* Боковая панель (Левая) */
         .sidebar-left {
             width: 70px;
             background: var(--panel-bg);
@@ -49,7 +48,6 @@
         .nav-item span { margin-left: 15px; opacity: 0; transition: opacity 0.3s; font-size: 16px; font-weight: bold; }
         .sidebar-left:hover .nav-item span { opacity: 1; }
         
-        /* Центральная лента */
         .feed {
             flex-grow: 1;
             padding: 30px;
@@ -72,10 +70,8 @@
         .post-author { font-size: 18px; font-weight: bold; }
         .post-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: var(--accent); }
         .post-desc { font-size: 16px; margin-bottom: 15px; line-height: 1.5; }
-        .post-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; }
-        .post-actions { display: flex; gap: 10px; }
+        .post-actions { display: flex; gap: 10px; flex-wrap: wrap; }
         
-        /* Кнопки */
         .btn {
             padding: 12px 25px;
             border-radius: 30px;
@@ -92,15 +88,15 @@
         }
         .btn:hover { opacity: 0.8; transform: scale(0.98); }
         .btn-danger { background: #ff4444; }
+        .btn-secondary { background: var(--hover-bg); color: var(--text-color); }
         .btn-google { background: #fff; color: #000; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
-        /* Профиль (Правая панель) */
         .sidebar-right {
             width: 400px;
             background: var(--panel-bg);
             padding: 30px;
             border-left: 1px solid var(--hover-bg);
-            display: none; /* Скрыто по умолчанию */
+            display: none;
             flex-direction: column;
             align-items: center;
             position: absolute;
@@ -134,7 +130,6 @@
         .profile-posts-container { width: 100%; }
         .profile-posts-container h3 { font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid var(--hover-bg); padding-bottom: 10px; }
         
-        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
@@ -167,7 +162,6 @@
         }
         .modal-content input[type="text"]:focus, .modal-content textarea:focus { border-color: var(--accent); }
         
-        /* Кастомные инпуты для файлов с закруглениями */
         .file-upload-wrapper { position: relative; width: 100%; text-align: center; }
         .file-upload-wrapper input[type="file"] { display: none; }
         .file-upload-label {
@@ -185,7 +179,6 @@
         .file-upload-label i { font-size: 28px; margin-bottom: 10px; display: block; color: var(--accent); }
         .file-name-display { margin-top: 10px; font-size: 14px; color: var(--accent); }
 
-        /* Лоадер */
         #loadingOverlay {
             display: none;
             position: fixed;
@@ -213,103 +206,83 @@
 </head>
 <body>
 
-    <!-- Лоадер -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <span id="loadingText">Загрузка...</span>
+        <span id="loadingText">загрузка...</span>
     </div>
 
-    <!-- Левое меню -->
     <nav class="sidebar-left">
         <div class="nav-item" onclick="openUploadModal()">
             <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>Загрузить сохранение</span>
+            <span>загрузить сохранение</span>
         </div>
         <div class="nav-item" onclick="openMyProfile()">
             <i class="fa-solid fa-user-circle"></i>
-            <span>Мой профиль</span>
+            <span>мой профиль</span>
         </div>
         <div class="nav-item" onclick="openEditProfileModal()">
             <i class="fa-solid fa-user-pen"></i>
-            <span>Настроить профиль</span>
+            <span>настроить профиль</span>
         </div>
         <div class="nav-item" onclick="changeTheme()">
             <i class="fa-solid fa-palette"></i>
-            <span>Смена темы</span>
+            <span>смена темы</span>
         </div>
         <a class="nav-item" href="https://t.me/ryzik348" target="_blank">
             <i class="fa-brands fa-telegram"></i>
-            <span>Поддержка</span>
+            <span>поддержка</span>
         </a>
         <div class="nav-item" onclick="logout()" style="margin-top: auto; color: #ff4444;">
             <i class="fa-solid fa-right-from-bracket"></i>
-            <span>Выйти</span>
+            <span>выйти</span>
         </div>
     </nav>
 
-    <!-- Лента -->
     <main class="feed">
-        <h2>Лента сохранений</h2>
-        <div id="feedContainer">
-            <!-- Посты будут тут -->
-        </div>
+        <h2>лента сохранений</h2>
+        <div id="feedContainer"></div>
     </main>
 
-    <!-- Правая панель (Профиль) -->
     <aside class="sidebar-right" id="profilePanel">
         <i class="fa-solid fa-xmark close-profile" onclick="closeProfile()"></i>
-        <img src="" id="profileAvatar" class="profile-avatar-large" alt="Аватар" onerror="this.src='https://via.placeholder.com/120?text=Аватар'">
-        <div class="profile-name" id="profileName">Имя пользователя</div>
-        
+        <img src="" id="profileAvatar" class="profile-avatar-large" alt="Аватар" onerror="this.src='https://via.placeholder.com/120?text=U'">
+        <div class="profile-name" id="profileName">имя пользователя</div>
         <div class="profile-posts-container">
-            <h3>Посты пользователя</h3>
+            <h3>посты пользователя</h3>
             <div id="profilePostsList"></div>
         </div>
     </aside>
 
-    <!-- Модалка Авторизации -->
     <div id="authModal" class="modal" style="display: flex;">
         <div class="modal-content">
-            <h3>Добро пожаловать в MesWy</h3>
-            <p style="text-align: center; color: #ccc;">Войдите, чтобы сохранять и делиться файлами</p>
+            <h3>добро пожаловать в meswy</h3>
+            <p style="text-align: center; color: #ccc;">войдите чтобы сохранять файлы</p>
             <button class="btn btn-google" onclick="loginGoogle()">
-                <i class="fa-brands fa-google" style="font-size: 20px;"></i> Войти через Google
+                <i class="fa-brands fa-google" style="font-size: 20px;"></i> войти через google
             </button>
         </div>
     </div>
 
-    <!-- Модалка Редактирования Профиля -->
     <div id="editProfileModal" class="modal">
         <div class="modal-content">
-            <h3>Настройки профиля</h3>
-            <input type="text" id="editProfileName" placeholder="Ваше имя">
-            
-            <div class="file-upload-wrapper">
-                <label for="editProfileAvatarInput" class="file-upload-label">
-                    <i class="fa-solid fa-image-portrait"></i>
-                    Выберите новую аватарку
-                </label>
-                <input type="file" id="editProfileAvatarInput" accept="image/*" onchange="updateFileName('editProfileAvatarInput', 'avatarFileName')">
-                <div id="avatarFileName" class="file-name-display"></div>
-            </div>
-
-            <button class="btn" onclick="saveProfileChanges()">Сохранить профиль</button>
-            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">Отмена</button>
+            <h3>настройки профиля</h3>
+            <input type="text" id="editProfileName" placeholder="ваше имя">
+            <input type="text" id="editProfileAvatarInput" placeholder="вставьте прямую ссылку на картинку аватарки">
+            <button class="btn" onclick="saveProfileChanges()">сохранить профиль</button>
+            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">отмена</button>
         </div>
     </div>
 
-    <!-- Модалка Загрузки Сохранения -->
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h3>Новое сохранение</h3>
-            
-            <input type="text" id="postTitleInput" placeholder="Название игры / сохранения">
-            <textarea id="postDescInput" placeholder="Описание вашего сохранения" rows="3"></textarea>
+            <h3>новое сохранение</h3>
+            <input type="text" id="postTitleInput" placeholder="название игры / сохранения">
+            <textarea id="postDescInput" placeholder="описание вашего сохранения" rows="3"></textarea>
             
             <div class="file-upload-wrapper">
                 <label for="postImageInput" class="file-upload-label">
                     <i class="fa-solid fa-image"></i>
-                    Скриншот игры
+                    скриншот игры (необязательно)
                 </label>
                 <input type="file" id="postImageInput" accept="image/*" onchange="updateFileName('postImageInput', 'imgFileName')">
                 <div id="imgFileName" class="file-name-display"></div>
@@ -318,68 +291,59 @@
             <div class="file-upload-wrapper">
                 <label for="postFileInput" class="file-upload-label">
                     <i class="fa-solid fa-file-zipper"></i>
-                    Файл сохранения (.pc, .zip, .rar)
+                    файл сохранения (.pc, .zip)
                 </label>
                 <input type="file" id="postFileInput" onchange="updateFileName('postFileInput', 'fileFileName')">
                 <div id="fileFileName" class="file-name-display"></div>
             </div>
 
-            <button class="btn" onclick="uploadPost()">Опубликовать</button>
-            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">Отмена</button>
+            <button class="btn" onclick="uploadPost()">опубликовать</button>
+            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">отмена</button>
         </div>
     </div>
 
-    <!-- FIREBASE СКРИПТЫ (Модульная версия 10) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        // КОНФИГ ИЗ ТВОЕГО ЗАПРОСА
+        // конфиг фаербейз без стораджа
         const firebaseConfig = {
             apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
             authDomain: "meswy-web.firebaseapp.com",
             projectId: "meswy-web",
-            storageBucket: "meswy-web.firebasestorage.app",
-            messagingSenderId: "802423553668",
-            appId: "1:802423553668:web:64be6aae3f34b2d0f88cd1",
-            measurementId: "G-PYS9ELGKDE"
+            appId: "1:802423553668:web:64be6aae3f34b2d0f88cd1"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         let currentUser = null;
         let allPosts = [];
 
-        // Показ имени файла при выборе
         window.updateFileName = (inputId, displayId) => {
             const input = document.getElementById(inputId);
             const display = document.getElementById(displayId);
             if(input.files.length > 0) {
-                display.innerText = "Выбран файл: " + input.files[0].name;
+                display.innerText = "выбран файл: " + input.files[0].name;
             } else {
                 display.innerText = "";
             }
         }
 
-        // Управление лоадером
         const showLoading = (text) => {
             document.getElementById('loadingText').innerText = text;
             document.getElementById('loadingOverlay').style.display = 'flex';
         }
         const hideLoading = () => { document.getElementById('loadingOverlay').style.display = 'none'; }
 
-        // АВТОРИЗАЦИЯ
         window.loginGoogle = async () => {
             try {
                 const provider = new GoogleAuthProvider();
                 await signInWithPopup(auth, provider);
             } catch (error) {
-                alert("Ошибка входа: " + error.message);
+                alert("ошибка входа: " + error.message);
             }
         }
 
@@ -398,9 +362,34 @@
             }
         });
 
-        // ЗАГРУЗКА ЛЕНТЫ
+        // функция загрузки файлов на бесплатный gofile
+        async function uploadToGofile(file) {
+            try {
+                const serverReq = await fetch('https://api.gofile.io/servers');
+                const serverData = await serverReq.json();
+                const server = serverData.data.servers[0].name;
+
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const uploadReq = await fetch(`https://${server}.gofile.io/uploadFile`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const uploadData = await uploadReq.json();
+                if (uploadData.status === 'ok') {
+                    return uploadData.data.downloadPage;
+                } else {
+                    throw new Error('ошибка сервера gofile');
+                }
+            } catch (e) {
+                throw new Error('не удалось загрузить файл на сервер');
+            }
+        }
+
         async function loadFeed() {
-            showLoading('Загрузка ленты...');
+            showLoading('загрузка ленты...');
             try {
                 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
@@ -410,7 +399,7 @@
                 });
                 renderPosts(allPosts, 'feedContainer');
             } catch (e) {
-                console.error("Ошибка загрузки постов:", e);
+                console.error("ошибка загрузки:", e);
             }
             hideLoading();
         }
@@ -420,7 +409,7 @@
             container.innerHTML = '';
             
             if(postsArray.length === 0) {
-                container.innerHTML = '<p style="color:#aaa;">Здесь пока пусто.</p>';
+                container.innerHTML = '<p style="color:#aaa;">здесь пока пусто</p>';
                 return;
             }
 
@@ -430,22 +419,21 @@
                 postEl.className = 'post';
                 postEl.innerHTML = `
                     <div class="post-header" onclick="openProfile('${post.authorId}', '${post.authorName}', '${post.authorAvatar}')">
-                        <img src="${post.authorAvatar || 'https://via.placeholder.com/50?text=U'}" class="post-avatar">
+                        <img src="${post.authorAvatar || 'https://via.placeholder.com/50?text=U'}" class="post-avatar" onerror="this.src='https://via.placeholder.com/50?text=U'">
                         <div class="post-author">${post.authorName}</div>
                     </div>
                     <div class="post-title">${post.title}</div>
                     <div class="post-desc">${post.desc}</div>
-                    ${post.imgUrl ? `<img src="${post.imgUrl}" class="post-img">` : ''}
-                    <div class="post-actions">
-                        <a href="${post.fileUrl}" target="_blank" class="btn"><i class="fa-solid fa-download"></i> Скачать файл</a>
-                        ${isAuthor ? `<button class="btn btn-danger" onclick="deletePost('${post.id}')"><i class="fa-solid fa-trash"></i> Удалить</button>` : ''}
+                    <div class="post-actions" style="margin-top: 15px;">
+                        <a href="${post.fileUrl}" target="_blank" class="btn"><i class="fa-solid fa-download"></i> скачать файл</a>
+                        ${post.imgUrl ? `<a href="${post.imgUrl}" target="_blank" class="btn btn-secondary"><i class="fa-solid fa-image"></i> скриншот</a>` : ''}
+                        ${isAuthor ? `<button class="btn btn-danger" onclick="deletePost('${post.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
                     </div>
                 `;
                 container.appendChild(postEl);
             });
         }
 
-        // СОЗДАНИЕ ПОСТА
         window.uploadPost = async () => {
             const title = document.getElementById('postTitleInput').value.trim();
             const desc = document.getElementById('postDescInput').value.trim();
@@ -453,22 +441,18 @@
             const saveFile = document.getElementById('postFileInput').files[0];
 
             if(!title || !saveFile) {
-                alert("Укажите название и выберите файл сохранения!");
+                alert("укажите название и выберите файл сохранения");
                 return;
             }
 
-            showLoading('Публикация...');
+            showLoading('отправка файлов на сервер...');
             try {
                 let imgUrl = "";
                 if (imageFile) {
-                    const imgRef = ref(storage, `images/${Date.now()}_${imageFile.name}`);
-                    await uploadBytes(imgRef, imageFile);
-                    imgUrl = await getDownloadURL(imgRef);
+                    imgUrl = await uploadToGofile(imageFile);
                 }
 
-                const fileRef = ref(storage, `files/${Date.now()}_${saveFile.name}`);
-                await uploadBytes(fileRef, saveFile);
-                const fileUrl = await getDownloadURL(fileRef);
+                const fileUrl = await uploadToGofile(saveFile);
 
                 await addDoc(collection(db, "posts"), {
                     title: title,
@@ -476,7 +460,7 @@
                     imgUrl: imgUrl,
                     fileUrl: fileUrl,
                     authorId: currentUser.uid,
-                    authorName: currentUser.displayName || "Без имени",
+                    authorName: currentUser.displayName || "без имени",
                     authorAvatar: currentUser.photoURL || "",
                     createdAt: serverTimestamp()
                 });
@@ -484,32 +468,29 @@
                 closeModals();
                 loadFeed();
             } catch(e) {
-                alert("Ошибка публикации: " + e.message);
+                alert("ошибка публикации: " + e.message);
                 hideLoading();
             }
         }
 
-        // УДАЛЕНИЕ ПОСТА
         window.deletePost = async (postId) => {
-            if(confirm("Точно удалить пост?")) {
-                showLoading("Удаление...");
+            if(confirm("удалить пост?")) {
+                showLoading("удаление...");
                 try {
                     await deleteDoc(doc(db, "posts", postId));
                     loadFeed();
-                    // Если открыт профиль, обновляем его
                     if(document.getElementById('profilePanel').style.display === 'flex') {
                         closeProfile();
                     }
                 } catch(e) {
-                    alert("Ошибка: " + e.message);
+                    alert("ошибка: " + e.message);
                 }
                 hideLoading();
             }
         }
 
-        // РАБОТА С ПРОФИЛЕМ (ПРАВАЯ ПАНЕЛЬ)
         window.openProfile = (uid, name, avatar) => {
-            document.getElementById('profileName').innerText = name || "Пользователь";
+            document.getElementById('profileName').innerText = name || "пользователь";
             document.getElementById('profileAvatar').src = avatar || "https://via.placeholder.com/120?text=U";
             
             const userPosts = allPosts.filter(p => p.authorId === uid);
@@ -527,42 +508,33 @@
             document.getElementById('profilePanel').style.display = 'none';
         }
 
-        // РЕДАКТИРОВАНИЕ ПРОФИЛЯ
         window.openEditProfileModal = () => {
             document.getElementById('editProfileName').value = currentUser.displayName || "";
+            document.getElementById('editProfileAvatarInput').value = currentUser.photoURL || "";
             document.getElementById('editProfileModal').style.display = 'flex';
         }
 
         window.saveProfileChanges = async () => {
             const newName = document.getElementById('editProfileName').value.trim();
-            const avatarFile = document.getElementById('editProfileAvatarInput').files[0];
+            const photoURL = document.getElementById('editProfileAvatarInput').value.trim();
             
-            if(!newName) return alert("Введите имя!");
+            if(!newName) return alert("введите имя");
             
-            showLoading("Обновление профиля...");
+            showLoading("сохранение...");
             try {
-                let photoURL = currentUser.photoURL;
-                
-                if (avatarFile) {
-                    const avatarRef = ref(storage, `avatars/${currentUser.uid}_${Date.now()}`);
-                    await uploadBytes(avatarRef, avatarFile);
-                    photoURL = await getDownloadURL(avatarRef);
-                }
-
                 await updateProfile(currentUser, {
                     displayName: newName,
                     photoURL: photoURL
                 });
 
                 closeModals();
-                loadFeed(); // Обновляем ленту чтобы подхватить новое имя/аву
+                loadFeed(); 
             } catch(e) {
-                alert("Ошибка: " + e.message);
+                alert("ошибка: " + e.message);
             }
             hideLoading();
         }
 
-        // UI ФУНКЦИИ
         window.openUploadModal = () => {
             document.getElementById('postTitleInput').value = '';
             document.getElementById('postDescInput').value = '';
