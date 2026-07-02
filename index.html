@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>MesWy - Лучшее хранение ваших сохранений</title>
+    <title>MesWy — Лучшее хранение ваших сохранений</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -208,81 +208,81 @@
 
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <span id="loadingText">загрузка...</span>
+        <span id="loadingText">Загрузка...</span>
     </div>
 
     <nav class="sidebar-left">
         <div class="nav-item" onclick="openUploadModal()">
             <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>загрузить сохранение</span>
+            <span>Загрузить сохранение</span>
         </div>
         <div class="nav-item" onclick="openMyProfile()">
             <i class="fa-solid fa-user-circle"></i>
-            <span>мой профиль</span>
+            <span>Мой профиль</span>
         </div>
         <div class="nav-item" onclick="openEditProfileModal()">
             <i class="fa-solid fa-user-pen"></i>
-            <span>настроить профиль</span>
+            <span>Настроить профиль</span>
         </div>
         <div class="nav-item" onclick="changeTheme()">
             <i class="fa-solid fa-palette"></i>
-            <span>смена темы</span>
+            <span>Смена темы</span>
         </div>
         <a class="nav-item" href="https://t.me/ryzik348" target="_blank">
             <i class="fa-brands fa-telegram"></i>
-            <span>поддержка</span>
+            <span>Поддержка</span>
         </a>
         <div class="nav-item" onclick="logout()" style="margin-top: auto; color: #ff4444;">
             <i class="fa-solid fa-right-from-bracket"></i>
-            <span>выйти</span>
+            <span>Выйти</span>
         </div>
     </nav>
 
     <main class="feed">
-        <h2>лента сохранений</h2>
+        <h2>Лента сохранений</h2>
         <div id="feedContainer"></div>
     </main>
 
     <aside class="sidebar-right" id="profilePanel">
         <i class="fa-solid fa-xmark close-profile" onclick="closeProfile()"></i>
         <img src="" id="profileAvatar" class="profile-avatar-large" alt="Аватар" onerror="this.src='https://via.placeholder.com/120?text=U'">
-        <div class="profile-name" id="profileName">имя пользователя</div>
+        <div class="profile-name" id="profileName">Имя пользователя</div>
         <div class="profile-posts-container">
-            <h3>посты пользователя</h3>
+            <h3>Посты пользователя</h3>
             <div id="profilePostsList"></div>
         </div>
     </aside>
 
     <div id="authModal" class="modal" style="display: flex;">
         <div class="modal-content">
-            <h3>добро пожаловать в meswy</h3>
-            <p style="text-align: center; color: #ccc;">войдите чтобы сохранять файлы</p>
+            <h3>Добро пожаловать в MesWy</h3>
+            <p style="text-align: center; color: #ccc;">Войдите, чтобы сохранять файлы</p>
             <button class="btn btn-google" onclick="loginGoogle()">
-                <i class="fa-brands fa-google" style="font-size: 20px;"></i> войти через google
+                <i class="fa-brands fa-google" style="font-size: 20px;"></i> Войти через Google
             </button>
         </div>
     </div>
 
     <div id="editProfileModal" class="modal">
         <div class="modal-content">
-            <h3>настройки профиля</h3>
-            <input type="text" id="editProfileName" placeholder="ваше имя">
-            <input type="text" id="editProfileAvatarInput" placeholder="вставьте прямую ссылку на картинку аватарки">
-            <button class="btn" onclick="saveProfileChanges()">сохранить профиль</button>
-            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">отмена</button>
+            <h3>Настройки профиля</h3>
+            <input type="text" id="editProfileName" placeholder="Ваше имя">
+            <input type="text" id="editProfileAvatarInput" placeholder="Вставьте прямую ссылку на картинку аватарки">
+            <button class="btn" onclick="saveProfileChanges()">Сохранить профиль</button>
+            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">Отмена</button>
         </div>
     </div>
 
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h3>новое сохранение</h3>
-            <input type="text" id="postTitleInput" placeholder="название игры / сохранения">
-            <textarea id="postDescInput" placeholder="описание вашего сохранения" rows="3"></textarea>
+            <h3>Новое сохранение</h3>
+            <input type="text" id="postTitleInput" placeholder="Название игры / сохранения">
+            <textarea id="postDescInput" placeholder="Описание вашего сохранения" rows="3"></textarea>
             
             <div class="file-upload-wrapper">
                 <label for="postImageInput" class="file-upload-label">
                     <i class="fa-solid fa-image"></i>
-                    скриншот игры (необязательно)
+                    Скриншот игры (необязательно)
                 </label>
                 <input type="file" id="postImageInput" accept="image/*" onchange="updateFileName('postImageInput', 'imgFileName')">
                 <div id="imgFileName" class="file-name-display"></div>
@@ -291,14 +291,14 @@
             <div class="file-upload-wrapper">
                 <label for="postFileInput" class="file-upload-label">
                     <i class="fa-solid fa-file-zipper"></i>
-                    файл сохранения (.pc, .zip)
+                    Файл сохранения (.pc, .zip)
                 </label>
                 <input type="file" id="postFileInput" onchange="updateFileName('postFileInput', 'fileFileName')">
                 <div id="fileFileName" class="file-name-display"></div>
             </div>
 
-            <button class="btn" onclick="uploadPost()">опубликовать</button>
-            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">отмена</button>
+            <button class="btn" onclick="uploadPost()">Опубликовать</button>
+            <button class="btn" onclick="closeModals()" style="background: var(--hover-bg);">Отмена</button>
         </div>
     </div>
 
@@ -307,7 +307,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // конфиг фаербейз без стораджа
+        // Конфигурация Firebase без Storage
         const firebaseConfig = {
             apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
             authDomain: "meswy-web.firebaseapp.com",
@@ -326,7 +326,7 @@
             const input = document.getElementById(inputId);
             const display = document.getElementById(displayId);
             if(input.files.length > 0) {
-                display.innerText = "выбран файл: " + input.files[0].name;
+                display.innerText = "Выбран файл: " + input.files[0].name;
             } else {
                 display.innerText = "";
             }
@@ -343,7 +343,7 @@
                 const provider = new GoogleAuthProvider();
                 await signInWithPopup(auth, provider);
             } catch (error) {
-                alert("ошибка входа: " + error.message);
+                alert("Ошибка входа: " + error.message);
             }
         }
 
@@ -362,7 +362,7 @@
             }
         });
 
-        // функция загрузки файлов на бесплатный gofile
+        // Функция загрузки файлов на бесплатный GoFile
         async function uploadToGofile(file) {
             try {
                 const serverReq = await fetch('https://api.gofile.io/servers');
@@ -381,15 +381,15 @@
                 if (uploadData.status === 'ok') {
                     return uploadData.data.downloadPage;
                 } else {
-                    throw new Error('ошибка сервера gofile');
+                    throw new Error('Ошибка сервера GoFile');
                 }
             } catch (e) {
-                throw new Error('не удалось загрузить файл на сервер');
+                throw new Error('Не удалось загрузить файл на сервер.');
             }
         }
 
         async function loadFeed() {
-            showLoading('загрузка ленты...');
+            showLoading('Загрузка ленты...');
             try {
                 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
@@ -399,7 +399,7 @@
                 });
                 renderPosts(allPosts, 'feedContainer');
             } catch (e) {
-                console.error("ошибка загрузки:", e);
+                console.error("Ошибка загрузки:", e);
             }
             hideLoading();
         }
@@ -409,7 +409,7 @@
             container.innerHTML = '';
             
             if(postsArray.length === 0) {
-                container.innerHTML = '<p style="color:#aaa;">здесь пока пусто</p>';
+                container.innerHTML = '<p style="color:#aaa;">Здесь пока пусто.</p>';
                 return;
             }
 
@@ -425,8 +425,8 @@
                     <div class="post-title">${post.title}</div>
                     <div class="post-desc">${post.desc}</div>
                     <div class="post-actions" style="margin-top: 15px;">
-                        <a href="${post.fileUrl}" target="_blank" class="btn"><i class="fa-solid fa-download"></i> скачать файл</a>
-                        ${post.imgUrl ? `<a href="${post.imgUrl}" target="_blank" class="btn btn-secondary"><i class="fa-solid fa-image"></i> скриншот</a>` : ''}
+                        <a href="${post.fileUrl}" target="_blank" class="btn"><i class="fa-solid fa-download"></i> Скачать файл</a>
+                        ${post.imgUrl ? `<a href="${post.imgUrl}" target="_blank" class="btn btn-secondary"><i class="fa-solid fa-image"></i> Скриншот</a>` : ''}
                         ${isAuthor ? `<button class="btn btn-danger" onclick="deletePost('${post.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
                     </div>
                 `;
@@ -441,11 +441,11 @@
             const saveFile = document.getElementById('postFileInput').files[0];
 
             if(!title || !saveFile) {
-                alert("укажите название и выберите файл сохранения");
+                alert("Укажите название и выберите файл сохранения!");
                 return;
             }
 
-            showLoading('отправка файлов на сервер...');
+            showLoading('Отправка файлов на сервер...');
             try {
                 let imgUrl = "";
                 if (imageFile) {
@@ -460,7 +460,7 @@
                     imgUrl: imgUrl,
                     fileUrl: fileUrl,
                     authorId: currentUser.uid,
-                    authorName: currentUser.displayName || "без имени",
+                    authorName: currentUser.displayName || "Без имени",
                     authorAvatar: currentUser.photoURL || "",
                     createdAt: serverTimestamp()
                 });
@@ -468,14 +468,14 @@
                 closeModals();
                 loadFeed();
             } catch(e) {
-                alert("ошибка публикации: " + e.message);
+                alert("Ошибка публикации: " + e.message);
                 hideLoading();
             }
         }
 
         window.deletePost = async (postId) => {
-            if(confirm("удалить пост?")) {
-                showLoading("удаление...");
+            if(confirm("Удалить этот пост?")) {
+                showLoading("Удаление...");
                 try {
                     await deleteDoc(doc(db, "posts", postId));
                     loadFeed();
@@ -483,14 +483,14 @@
                         closeProfile();
                     }
                 } catch(e) {
-                    alert("ошибка: " + e.message);
+                    alert("Ошибка при удалении: " + e.message);
                 }
                 hideLoading();
             }
         }
 
         window.openProfile = (uid, name, avatar) => {
-            document.getElementById('profileName').innerText = name || "пользователь";
+            document.getElementById('profileName').innerText = name || "Пользователь";
             document.getElementById('profileAvatar').src = avatar || "https://via.placeholder.com/120?text=U";
             
             const userPosts = allPosts.filter(p => p.authorId === uid);
@@ -518,9 +518,9 @@
             const newName = document.getElementById('editProfileName').value.trim();
             const photoURL = document.getElementById('editProfileAvatarInput').value.trim();
             
-            if(!newName) return alert("введите имя");
+            if(!newName) return alert("Введите ваше имя!");
             
-            showLoading("сохранение...");
+            showLoading("Сохранение изменений...");
             try {
                 await updateProfile(currentUser, {
                     displayName: newName,
@@ -530,7 +530,7 @@
                 closeModals();
                 loadFeed(); 
             } catch(e) {
-                alert("ошибка: " + e.message);
+                alert("Ошибка при обновлении профиля: " + e.message);
             }
             hideLoading();
         }
