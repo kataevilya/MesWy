@@ -2,7 +2,7 @@
 <html lang="ru" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MesWy — Социальная сеть</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -24,20 +24,90 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
         :root { --accent-color: #2563eb; }
-        body { background-color: #121212; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; }
+        * { box-sizing: border-box; }
+        body { background-color: #121212; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 20px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+
+        /* Навигация */
         .nav-btn {
             transition: all 0.2s;
-            padding-top: 12px;
-            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 0;
+            padding: 8px 0;
+            position: relative;
+            color: #9ca3af;
         }
+        .nav-btn i { font-size: 26px; transition: color 0.2s; }
+        .nav-btn .nav-label { display: none; }
         .nav-btn.active i { color: #2563eb !important; }
         .nav-btn.active .nav-label { color: #2563eb !important; }
+        /* Для ПК отображаем лейблы при наведении */
+        @media (min-width: 640px) {
+            .nav-btn { padding: 12px 16px; justify-content: flex-start; flex: none; width: 100%; }
+            .nav-btn i { font-size: 28px; min-width: 3rem; text-align: center; }
+            .nav-btn .nav-label { display: inline; margin-left: 12px; font-weight: 500; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+            .group:hover .nav-btn .nav-label { opacity: 1; }
+        }
+        /* Мобильное меню: без отступов, кнопки по центру */
+        .mobile-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 100%;
+            padding: 0 4px;
+        }
+        .mobile-nav .nav-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 4px 0;
+        }
+        .mobile-nav .nav-btn i { font-size: 24px; }
+        @media (max-width: 639px) {
+            .nav-btn .nav-label { display: none; }
+        }
+
+        /* Панели (выезжающие) */
+        .slide-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 100%;
+            max-width: 480px;
+            background: #1f1f22;
+            z-index: 50;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            border-left: 1px solid #2a2a2e;
+            display: flex;
+            flex-direction: column;
+        }
+        .slide-panel.open { transform: translateX(0); }
+        .slide-panel .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #2a2a2e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1f1f22;
+            flex-shrink: 0;
+        }
+        .slide-panel .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+        .slide-panel .panel-body::-webkit-scrollbar { width: 4px; }
+        .slide-panel .panel-body::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+
+        /* Кнопка подписки на посте */
         .follow-btn-post {
             position: absolute;
             top: 12px;
@@ -60,37 +130,72 @@
         }
         .follow-btn-post:hover { transform: scale(1.1); background: #1d4ed8; }
         .follow-btn-post.following { background: #1f1f22; color: #888; box-shadow: none; }
-        .color-preset {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: 0.2s;
+
+        /* Комментарии */
+        .comment-item { border-bottom: 1px solid #2a2a2e; padding: 12px 0; }
+        .comment-item:last-child { border-bottom: none; }
+
+        /* Адаптив для ПК: боковая панель меню */
+        .sidebar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: #1f1f22;
+            border-top: 1px solid #2a2a2e;
+            z-index: 40;
+            display: flex;
+            align-items: center;
         }
-        .color-preset:hover { transform: scale(1.1); }
-        .color-preset.active { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,0.3); }
-        .comments-modal .comment-item {
-            border-bottom: 1px solid #2a2a2e;
-            padding: 12px 0;
-        }
-        .comments-modal .comment-item:last-child { border-bottom: none; }
-        @media (max-width: 640px) {
-            .nav-label { display: none; }
-            .nav-btn { justify-content: center; padding: 8px 0; }
-        }
-        .menu-container { gap: 4px; }
-        .menu-container .nav-btn { padding-left: 12px; padding-right: 12px; }
         @media (min-width: 640px) {
-            .menu-container .nav-btn { padding-left: 16px; padding-right: 16px; }
+            .sidebar {
+                width: 72px;
+                height: 100%;
+                border-top: none;
+                border-right: 1px solid #2a2a2e;
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 12px;
+                overflow-y: auto;
+            }
+            .sidebar .mobile-nav {
+                flex-direction: column;
+                height: auto;
+                width: 100%;
+                gap: 4px;
+            }
+            .sidebar .mobile-nav .nav-btn {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 10px 16px;
+            }
         }
-        /* профиль – убран акцент */
-        #profileEmail { color: #9ca3af !important; }
+
+        /* Остальное */
+        .post-card { background: #1f1f22; border-radius: 16px; border: 1px solid #2a2a2e; padding: 16px; position: relative; transition: border-color 0.2s; }
+        .post-card:hover { border-color: #3f3f46; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #2a2a2e; }
+        .avatar-sm { width: 32px; height: 32px; }
+        #profileEmail { color: #9ca3af !important; } /* убран акцент */
+
+        /* Тень для панелей при открытии */
+        .panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 45;
+            display: none;
+        }
+        .panel-overlay.active { display: block; }
+        @media (min-width: 640px) {
+            .panel-overlay { display: none !important; }
+        }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden font-sans text-gray-200 selection:bg-primary selection:text-white">
+<body>
 
-    <!-- Toasts -->
+    <!-- Тосты -->
     <div id="toastContainer" class="fixed bottom-20 sm:bottom-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
     <!-- Экран бана -->
@@ -118,123 +223,99 @@
         </div>
     </div>
 
-    <!-- Боковое меню -->
-    <aside class="group fixed bottom-0 w-full h-14 sm:h-full sm:w-20 sm:hover:w-60 bg-darkPanel border-t sm:border-t-0 sm:border-r border-gray-800 transition-all duration-300 flex flex-row sm:flex-col justify-around sm:justify-between z-40 shadow-xl overflow-y-auto hide-scroll">
-        <div class="flex flex-row sm:flex-col w-full sm:mt-2 items-center sm:items-stretch h-full sm:h-auto gap-1 sm:gap-1 menu-container">
-            <div class="hidden sm:flex items-center w-full p-3 mb-2">
-                <i class='bx bx-infinite text-3xl text-primary min-w-[3rem] text-center'></i>
-                <span class="ml-2 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">MesWy</span>
-            </div>
-            
+    <!-- Боковое меню (Sidebar) -->
+    <aside class="sidebar group" id="sidebar">
+        <div class="mobile-nav">
             <!-- 1. Лента -->
-            <button onclick="loadPosts(true); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom active">
-                <i class='bx bx-home-alt-2 text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Лента</span>
+            <button onclick="loadPosts(true); setActiveNav(this)" class="nav-btn active" id="navFeed">
+                <i class='bx bx-home-alt-2'></i>
+                <span class="nav-label">Лента</span>
             </button>
-
-            <!-- 2. Поиск (модалка) -->
-            <button onclick="openSearch(); setActiveNav(null)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-search text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Поиск</span>
+            <!-- 2. Поиск (панель) -->
+            <button onclick="toggleSearchPanel(); setActiveNav(null)" class="nav-btn" id="navSearch">
+                <i class='bx bx-search'></i>
+                <span class="nav-label">Поиск</span>
             </button>
-
             <!-- 3. Рекомендации -->
-            <button onclick="loadRecs(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-trending-up text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Рекомендации</span>
+            <button onclick="loadRecs(); setActiveNav(this)" class="nav-btn" id="navRecs">
+                <i class='bx bx-trending-up'></i>
+                <span class="nav-label">Рекомендации</span>
             </button>
-
-            <!-- 4. Создать (панель) -->
-            <button onclick="toggleCreatePanel(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-plus-circle text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-primary transition-colors'></i>
-                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity text-primary whitespace-nowrap">Создать</span>
+            <!-- 4. Создать (панель) — без подсветки -->
+            <button onclick="toggleCreatePanel(); setActiveNav(null)" class="nav-btn" id="navCreate">
+                <i class='bx bx-plus-circle' style="color:#2563eb;"></i>
+                <span class="nav-label" style="color:#2563eb;">Создать</span>
             </button>
-
             <!-- 5. Уведомления (панель) -->
-            <button onclick="toggleNotifications(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom relative">
-                <i class='bx bx-bell text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Уведомления</span>
-                <span id="notifBadge" class="hidden absolute top-2 sm:top-3 left-6 sm:left-10 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel"></span>
+            <button onclick="toggleNotifications(); setActiveNav(this)" class="nav-btn" id="navNotif">
+                <i class='bx bx-bell'></i>
+                <span class="nav-label">Уведомления</span>
+                <span id="notifBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel" style="top:4px; right:4px;"></span>
             </button>
-
             <!-- 6. Профиль (панель) -->
-            <button onclick="if(currentUser) openProfile(currentUser.uid); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-user text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Профиль</span>
+            <button onclick="if(currentUser) openProfile(currentUser.uid); setActiveNav(this)" class="nav-btn" id="navProfile">
+                <i class='bx bx-user'></i>
+                <span class="nav-label">Профиль</span>
             </button>
-
-            <!-- 7. (пусто) -->
-
-            <!-- 8. (пусто) -->
-
-            <!-- 9. Выход -->
-            <button id="navLogout" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-log-out text-2xl sm:text-3xl sm:min-w-[3rem] text-center'></i>
-                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Выйти</span>
+            <!-- 7. Выход -->
+            <button id="navLogout" class="nav-btn text-red-500 hover:text-red-400" style="color:#ef4444;">
+                <i class='bx bx-log-out'></i>
+                <span class="nav-label">Выйти</span>
             </button>
         </div>
     </aside>
 
     <!-- Основная лента -->
-    <main class="w-full sm:ml-20 flex-1 h-full overflow-y-auto p-3 sm:p-6 flex justify-center bg-[#121212] pb-20 sm:pb-6">
-        <div class="max-w-xl w-full flex flex-col gap-4" id="postsFeed">
-            <!-- посты рендерятся тут -->
-        </div>
+    <main id="mainContent" class="w-full h-full overflow-y-auto p-3 sm:p-6 flex justify-center pb-20 sm:pb-6" style="margin-left:0; transition: margin-left 0.3s;">
+        <div class="max-w-xl w-full flex flex-col gap-4" id="postsFeed"></div>
     </main>
 
+    <!-- Оверлей для мобильных панелей -->
+    <div id="panelOverlay" class="panel-overlay" onclick="closeAllPanels()"></div>
+
     <!-- Панель профиля -->
-    <div id="profilePanel" class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
-        <div class="flex-1 overflow-y-auto hide-scroll pb-20 sm:pb-4">
-            <div id="profileCover" class="h-40 sm:h-48 bg-gray-800 bg-cover bg-center relative">
-                <button onclick="closeProfilePanel()" class="absolute top-3 right-3 bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80 flex items-center justify-center transition backdrop-blur-sm z-50">
-                    <i class='bx bx-x text-2xl'></i>
-                </button>
+    <div id="profilePanel" class="slide-panel">
+        <div class="panel-header">
+            <h2 class="text-xl font-bold">Профиль</h2>
+            <button onclick="closeProfilePanel()" class="text-gray-400 hover:text-white text-2xl"><i class='bx bx-x'></i></button>
+        </div>
+        <div class="panel-body">
+            <div id="profileCover" class="h-32 sm:h-40 bg-gray-800 rounded-custom mb-4 bg-cover bg-center"></div>
+            <div class="flex items-center gap-4 -mt-10 relative z-10">
+                <img id="profileAvatar" src="" class="w-20 h-20 rounded-full border-4 border-darkPanel object-cover bg-darkPanel shadow-lg">
+                <div class="flex-1">
+                    <h2 id="profileName" class="text-xl font-bold"></h2>
+                    <p id="profileEmail" class="text-sm text-gray-400"></p>
+                    <p id="profileBio" class="text-gray-400 text-sm mt-1 whitespace-pre-wrap"></p>
+                </div>
             </div>
-            <div class="px-5 relative flex flex-col">
-                <div class="flex justify-between items-end -mt-12 sm:-mt-14 relative z-20 mb-3">
-                    <img id="profileAvatar" src="" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-darkPanel object-cover bg-darkPanel shadow-lg">
-                    <div class="flex gap-2 mb-1">
-                        <button id="adminPanelBtn" onclick="document.getElementById('adminModal').classList.remove('hidden')" class="hidden bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-custom font-bold transition shadow-lg shadow-red-600/20 text-sm">
-                            <i class='bx bx-shield-quarter'></i> Админ
-                        </button>
-                        <button id="editProfileBtn" onclick="openEditProfile()" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-5 py-2 rounded-custom font-bold transition border border-gray-700 text-sm">
-                            Редактировать
-                        </button>
-                    </div>
-                </div>
-                <div class="mt-1">
-                    <h2 id="profileName" class="text-2xl font-bold"></h2>
-                    <p id="profileEmail" class="text-sm font-medium mt-1"></p> <!-- убран акцент -->
-                    <p id="profileBio" class="text-gray-400 mt-2 text-sm leading-relaxed whitespace-pre-wrap"></p>
-                </div>
-                <div class="mt-6 border-t border-gray-800 pt-5">
-                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class='bx bx-grid-alt text-primary'></i> Публикации</h3>
-                    <div id="profilePostsFeed" class="flex flex-col gap-4"></div>
-                </div>
+            <div class="mt-4 flex gap-2">
+                <button id="adminPanelBtn" onclick="document.getElementById('adminModal').classList.remove('hidden')" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-custom font-bold text-sm">Админ</button>
+                <button id="editProfileBtn" onclick="openEditProfile()" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-4 py-2 rounded-custom font-bold border border-gray-700 text-sm">Редактировать</button>
+            </div>
+            <div class="mt-6 border-t border-gray-800 pt-4">
+                <h3 class="font-bold mb-3 flex items-center gap-2"><i class='bx bx-grid-alt text-primary'></i> Публикации</h3>
+                <div id="profilePostsFeed" class="flex flex-col gap-4"></div>
             </div>
         </div>
     </div>
 
     <!-- Панель уведомлений -->
-    <div id="notificationsPanel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-darkPanel shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
-        <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-darkPanel sticky top-0 z-10 backdrop-blur-sm bg-opacity-90">
+    <div id="notificationsPanel" class="slide-panel">
+        <div class="panel-header">
             <h2 class="text-xl font-bold flex items-center gap-2"><i class='bx bx-bell text-primary'></i> Уведомления</h2>
-            <button onclick="closeNotificationsPanel()" class="text-gray-400 hover:text-white transition bg-[#121212] w-8 h-8 rounded-full flex items-center justify-center border border-gray-800">
-                <i class='bx bx-x text-xl'></i>
-            </button>
+            <button onclick="closeNotificationsPanel()" class="text-gray-400 hover:text-white text-2xl"><i class='bx bx-x'></i></button>
         </div>
-        <div id="notificationsList" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 hide-scroll pb-20 sm:pb-4"></div>
+        <div id="notificationsList" class="panel-body"></div>
     </div>
 
     <!-- Панель создания поста -->
-    <div id="createPanel" class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-darkPanel shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
-        <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-darkPanel sticky top-0 z-10 backdrop-blur-sm bg-opacity-90">
+    <div id="createPanel" class="slide-panel">
+        <div class="panel-header">
             <h2 class="text-xl font-bold flex items-center gap-2"><i class='bx bx-plus-circle text-primary'></i> Новый пост</h2>
-            <button onclick="closeCreatePanel()" class="text-gray-400 hover:text-white transition bg-[#121212] w-8 h-8 rounded-full flex items-center justify-center border border-gray-800">
-                <i class='bx bx-x text-xl'></i>
-            </button>
+            <button onclick="closeCreatePanel()" class="text-gray-400 hover:text-white text-2xl"><i class='bx bx-x'></i></button>
         </div>
-        <div class="flex-1 overflow-y-auto hide-scroll p-5">
+        <div class="panel-body">
             <form id="createPostForm" class="space-y-4">
                 <input type="text" id="postTitle" placeholder="Заголовок поста..." required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
                 <textarea id="postDesc" placeholder="Расскажите, что происходит?" rows="4" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-base"></textarea>
@@ -251,16 +332,16 @@
         </div>
     </div>
 
-    <!-- Поиск (модалка) -->
-    <div id="searchModal" class="hidden fixed inset-0 z-[60] bg-[#121212] flex flex-col p-4 overflow-y-auto hide-scroll pb-20">
-        <button onclick="closeSearch()" class="fixed top-4 right-4 text-gray-400 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-darkPanel border border-gray-800 z-50 transition">
-            <i class='bx bx-x text-2xl'></i>
-        </button>
-        <div class="max-w-2xl w-full mx-auto mt-8 sm:mt-6">
-            <h2 class="text-2xl font-bold mb-4 text-center">Поиск по MesWy</h2>
-            <div class="relative mb-6">
+    <!-- Панель поиска -->
+    <div id="searchPanel" class="slide-panel">
+        <div class="panel-header">
+            <h2 class="text-xl font-bold flex items-center gap-2"><i class='bx bx-search text-primary'></i> Поиск</h2>
+            <button onclick="closeSearchPanel()" class="text-gray-400 hover:text-white text-2xl"><i class='bx bx-x'></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="relative mb-4">
                 <i class='bx bx-search absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-500'></i>
-                <input type="text" id="searchInput" placeholder="Введите текст для поиска постов..." class="w-full pl-12 p-4 rounded-custom bg-darkPanel border border-gray-800 focus:border-primary outline-none transition text-base shadow-xl">
+                <input type="text" id="searchInput" placeholder="Введите текст для поиска постов..." class="w-full pl-12 p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
             </div>
             <div id="searchResults" class="flex flex-col gap-4">
                 <div class="text-center text-gray-500 mt-8"><i class='bx bx-search text-5xl opacity-20 mb-3'></i><br>Начните вводить запрос</div>
@@ -312,7 +393,7 @@
         </div>
     </div>
 
-    <!-- Модалка редактирования профиля (без настроек) -->
+    <!-- Модалка редактирования профиля -->
     <div id="editProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-md relative border border-gray-800 overflow-y-auto max-h-[90vh] hide-scroll">
             <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
@@ -392,56 +473,179 @@
             if(btn) btn.classList.add('active');
         };
 
-        // --- Закрытие панелей ---
-        window.closeProfilePanel = () => {
-            document.getElementById('profilePanel').classList.add('translate-x-full');
-            // снимаем подсветку с профиля
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                if(b.querySelector('.bx-user')) b.classList.remove('active');
-            });
+        // --- Панели: управление оверлеем и открытием/закрытием ---
+        function openPanel(panelId) {
+            const panel = document.getElementById(panelId);
+            if(panel.classList.contains('open')) return;
+            // Закрываем все остальные панели
+            document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('open'));
+            panel.classList.add('open');
+            // Оверлей для мобильных
+            const overlay = document.getElementById('panelOverlay');
+            if(window.innerWidth < 640) overlay.classList.add('active');
+            // Сдвиг контента вправо (для ПК) — не требуется, т.к. панель поверх
+        }
+
+        function closePanel(panelId) {
+            document.getElementById(panelId).classList.remove('open');
+            document.getElementById('panelOverlay').classList.remove('active');
+        }
+
+        window.closeAllPanels = () => {
+            document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('open'));
+            document.getElementById('panelOverlay').classList.remove('active');
+            // снимаем подсветку с кнопок, кроме ленты
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            // подсветим ленту, если она активна
+            const feedBtn = document.getElementById('navFeed');
+            if(feedBtn) feedBtn.classList.add('active');
         };
 
-        window.closeNotificationsPanel = () => {
-            document.getElementById('notificationsPanel').classList.add('translate-x-full');
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                if(b.querySelector('.bx-bell')) b.classList.remove('active');
-            });
-        };
+        // --- Отдельные функции для панелей ---
+        window.closeProfilePanel = () => closePanel('profilePanel');
+        window.closeNotificationsPanel = () => closePanel('notificationsPanel');
+        window.closeCreatePanel = () => closePanel('createPanel');
+        window.closeSearchPanel = () => closePanel('searchPanel');
 
-        window.closeCreatePanel = () => {
-            document.getElementById('createPanel').classList.add('translate-x-full');
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                if(b.querySelector('.bx-plus-circle')) b.classList.remove('active');
-            });
-        };
-
-        window.closeSearch = () => {
-            document.getElementById('searchModal').classList.add('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                if(b.querySelector('.bx-search')) b.classList.remove('active');
-            });
-        };
-
-        window.closeCommentsModal = () => {
-            document.getElementById('commentsModal').classList.add('hidden');
-        };
-
-        // --- Открытие панели создания ---
-        window.toggleCreatePanel = () => {
-            const panel = document.getElementById('createPanel');
-            if(!panel.classList.contains('translate-x-full')) {
-                closeCreatePanel();
+        window.toggleNotifications = () => {
+            const panel = document.getElementById('notificationsPanel');
+            if(panel.classList.contains('open')) {
+                closePanel('notificationsPanel');
+                // убираем подсветку
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('navFeed').classList.add('active');
                 return;
             }
-            // закрываем другие панели
-            closeProfilePanel();
-            closeNotificationsPanel();
-            closeSearch();
-            closeCommentsModal();
-            panel.classList.remove('translate-x-full');
-            // подсветка на кнопке "Создать"
+            openPanel('notificationsPanel');
+            // подсветка на кнопке уведомлений
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.nav-btn .bx-plus-circle')?.closest('.nav-btn')?.classList.add('active');
+            document.getElementById('navNotif').classList.add('active');
+            // загружаем уведомления
+            loadNotifications();
+        };
+
+        window.toggleCreatePanel = () => {
+            const panel = document.getElementById('createPanel');
+            if(panel.classList.contains('open')) {
+                closePanel('createPanel');
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('navFeed').classList.add('active');
+                return;
+            }
+            openPanel('createPanel');
+            // НЕ подсвечиваем кнопку "Создать"
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navFeed').classList.add('active');
+        };
+
+        window.toggleSearchPanel = () => {
+            const panel = document.getElementById('searchPanel');
+            if(panel.classList.contains('open')) {
+                closePanel('searchPanel');
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('navFeed').classList.add('active');
+                return;
+            }
+            openPanel('searchPanel');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navFeed').classList.add('active');
+            document.getElementById('searchInput').focus();
+        };
+
+        // --- Открытие профиля (панель) ---
+        window.openProfile = async (uid) => {
+            const panel = document.getElementById('profilePanel');
+            if(panel.classList.contains('open')) {
+                closePanel('profilePanel');
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('navFeed').classList.add('active');
+                return;
+            }
+            openPanel('profilePanel');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navProfile').classList.add('active');
+
+            const d = await getUserData(uid);
+            document.getElementById('profileName').innerText = d.displayName;
+            document.getElementById('profileEmail').innerText = d.email || '';
+            document.getElementById('profileBio').innerText = d.bio || '';
+            document.getElementById('profileAvatar').src = d.photoURL;
+            if(uid === currentUser.uid) document.getElementById('editProfileBtn').classList.remove('hidden');
+            else document.getElementById('editProfileBtn').classList.add('hidden');
+            // загружаем посты пользователя
+            const pFeed = document.getElementById('profilePostsFeed');
+            pFeed.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
+            try {
+                const s = await getDocs(query(collection(db, "posts"), where("authorId", "==", uid), orderBy("createdAt", "desc")));
+                pFeed.innerHTML = '';
+                if(s.empty) pFeed.innerHTML = '<div class="text-center text-gray-500 py-6 bg-[#121212] rounded-custom text-sm">Нет публикаций</div>';
+                for(const d of s.docs) await renderPost(d, pFeed, true);
+            } catch(e) { pFeed.innerHTML = '<div class="text-center text-red-500 text-sm py-4">Ошибка загрузки</div>'; }
+        };
+
+        // --- Загрузка уведомлений ---
+        async function loadNotifications() {
+            const list = document.getElementById('notificationsList');
+            const data = await getUserData(currentUser.uid);
+            list.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
+            if(!data.notifications || data.notifications.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center mt-5 bg-[#121212] p-4 rounded-custom text-sm border border-gray-800">У вас пока нет уведомлений</p>';
+                return;
+            }
+            list.innerHTML = '';
+            const notifs = data.notifications.slice().reverse();
+            for(const n of notifs) {
+                const u = await getUserData(n.from);
+                const txt = n.type === 'like' ? 'оценил(а) ваш пост' : 'прокомментировал(а) ваш пост';
+                const icon = n.type === 'like' ? 'bxs-heart text-red-500' : 'bx-message-rounded text-primary';
+                const el = document.createElement('div');
+                el.className = "bg-[#121212] p-4 rounded-custom flex gap-3 items-center border border-gray-800 hover:border-gray-600 transition duration-300 cursor-pointer shadow-lg";
+                // Если есть postId, сделаем клик на пост
+                const postLink = n.postId ? `onclick="openPostById('${n.postId}')"` : '';
+                el.innerHTML = `
+                    <img src="${n.fromAvatar || u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
+                    <div class="flex-1 text-sm">
+                        <span class="font-bold hover:text-primary transition" onclick="openProfile('${n.from}')">${n.fromName || u.displayName}</span>
+                        <div class="text-gray-400 mt-0.5 flex items-center gap-1"><i class='bx ${icon}'></i> ${txt}</div>
+                        ${n.postId ? `<button class="text-xs text-primary hover:underline mt-1" onclick="openPostById('${n.postId}')">Перейти к посту</button>` : ''}
+                    </div>
+                `;
+                list.appendChild(el);
+            }
+        }
+
+        // --- Открытие поста по ID (прокрутка к нему) ---
+        window.openPostById = async (postId) => {
+            // Закрываем все панели
+            closeAllPanels();
+            // Ищем пост в ленте, если его нет — загружаем
+            const feed = document.getElementById('postsFeed');
+            // Проверим, есть ли уже пост с таким ID
+            const existing = feed.querySelector(`[data-postid="${postId}"]`);
+            if(existing) {
+                existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                existing.style.borderColor = '#2563eb';
+                setTimeout(() => existing.style.borderColor = '', 3000);
+                return;
+            }
+            // Если нет — загружаем один пост
+            try {
+                const docSnap = await getDoc(doc(db, "posts", postId));
+                if(docSnap.exists()) {
+                    // Вставляем в начало ленты
+                    const container = document.createElement('div');
+                    container.dataset.postid = postId;
+                    await renderPost(docSnap, container, false);
+                    feed.prepend(container);
+                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    container.style.borderColor = '#2563eb';
+                    setTimeout(() => container.style.borderColor = '', 3000);
+                } else {
+                    showToast("Пост не найден", "error");
+                }
+            } catch(e) {
+                showToast("Ошибка загрузки поста", "error");
+            }
         };
 
         // --- Авторизация ---
@@ -514,16 +718,12 @@
                 window.currentUser = null;
                 window.userDataCache = null;
                 document.getElementById('authModal').classList.remove('hidden');
-                closeProfilePanel();
-                closeNotificationsPanel();
-                closeCreatePanel();
-                closeSearch();
-                closeCommentsModal();
+                closeAllPanels();
                 setActiveNav(null);
             }
         });
 
-        // --- Админка ---
+        // --- Админка (бан/разбан) ---
         window.banUser = async () => {
             const email = document.getElementById('banEmail').value.trim();
             const reason = document.getElementById('banReasonInput').value;
@@ -538,7 +738,7 @@
                 await updateDoc(doc(db, "users", targetUid), { banned: { reason, until: until.toISOString() } });
                 showToast("Пользователь забанен");
                 document.getElementById('adminModal').classList.add('hidden');
-            } catch(e) { showToast("Ошибка бана", "error"); }
+            } catch(e) { showToast("Ошибка бана: " + e.message, "error"); }
         };
 
         window.unbanUser = async () => {
@@ -552,10 +752,10 @@
                 await updateDoc(doc(db, "users", targetUid), { banned: deleteField() });
                 showToast("Пользователь разбанен");
                 document.getElementById('adminModal').classList.add('hidden');
-            } catch(e) { showToast("Ошибка разбана", "error"); }
+            } catch(e) { showToast("Ошибка разбана: " + e.message, "error"); }
         };
 
-        // --- Уведомления ---
+        // --- Уведомления (отправка) ---
         window.sendNotification = async (targetUid, type, postId) => {
             if(targetUid === currentUser.uid) return;
             try {
@@ -571,88 +771,20 @@
                 await updateDoc(doc(db, "users", targetUid), {
                     notifications: arrayUnion(notif)
                 });
+                // обновим бейдж
+                checkNotifications();
             } catch(e) {}
         };
 
-        window.toggleNotifications = async () => {
-            const panel = document.getElementById('notificationsPanel');
-            if(!panel.classList.contains('translate-x-full')) {
-                closeNotificationsPanel();
-                return;
-            }
-            closeProfilePanel();
-            closeCreatePanel();
-            closeSearch();
-            closeCommentsModal();
-            panel.classList.remove('translate-x-full');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.nav-btn .bx-bell')?.closest('.nav-btn')?.classList.add('active');
-            
-            document.getElementById('notifBadge').classList.add('hidden');
-            const list = document.getElementById('notificationsList');
-            const data = await getUserData(currentUser.uid);
-            list.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
-            if(!data.notifications || data.notifications.length === 0) {
-                list.innerHTML = '<p class="text-gray-500 text-center mt-5 bg-[#121212] p-4 rounded-custom text-sm border border-gray-800">У вас пока нет уведомлений</p>';
-            } else {
-                list.innerHTML = '';
-                const notifs = data.notifications.slice().reverse();
-                for(const n of notifs) {
-                    const u = await getUserData(n.from);
-                    const txt = n.type === 'like' ? 'оценил(а) ваш пост' : 'прокомментировал(а) ваш пост';
-                    const icon = n.type === 'like' ? 'bxs-heart text-red-500' : 'bx-message-rounded text-primary';
-                    const el = document.createElement('div');
-                    el.className = "bg-[#121212] p-4 rounded-custom flex gap-3 items-center border border-gray-800 hover:border-gray-600 transition duration-300 cursor-pointer shadow-lg";
-                    el.innerHTML = `
-                        <img src="${n.fromAvatar || u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
-                        <div class="flex-1 text-sm">
-                            <span class="font-bold hover:text-primary transition" onclick="openProfile('${n.from}')">${n.fromName || u.displayName}</span>
-                            <div class="text-gray-400 mt-0.5 flex items-center gap-1"><i class='bx ${icon}'></i> ${txt}</div>
-                        </div>
-                    `;
-                    list.prepend(el);
-                }
-            }
-        };
-
         async function checkNotifications() {
+            if(!currentUser) return;
             const data = await getUserData(currentUser.uid);
             if(data.notifications && data.notifications.length > 0) {
                 document.getElementById('notifBadge').classList.remove('hidden');
+            } else {
+                document.getElementById('notifBadge').classList.add('hidden');
             }
         }
-
-        // --- Открытие профиля ---
-        window.openProfile = async (uid) => {
-            const panel = document.getElementById('profilePanel');
-            if(!panel.classList.contains('translate-x-full')) {
-                closeProfilePanel();
-                return;
-            }
-            closeNotificationsPanel();
-            closeCreatePanel();
-            closeSearch();
-            closeCommentsModal();
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.nav-btn .bx-user')?.closest('.nav-btn')?.classList.add('active');
-            
-            const d = await getUserData(uid);
-            document.getElementById('profileName').innerText = d.displayName;
-            document.getElementById('profileEmail').innerText = d.email || '';
-            document.getElementById('profileBio').innerText = d.bio || '';
-            document.getElementById('profileAvatar').src = d.photoURL;
-            if(uid === currentUser.uid) document.getElementById('editProfileBtn').classList.remove('hidden');
-            else document.getElementById('editProfileBtn').classList.add('hidden');
-            panel.classList.remove('translate-x-full');
-            const pFeed = document.getElementById('profilePostsFeed');
-            pFeed.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
-            try {
-                const s = await getDocs(query(collection(db, "posts"), where("authorId", "==", uid), orderBy("createdAt", "desc")));
-                pFeed.innerHTML = '';
-                if(s.empty) pFeed.innerHTML = '<div class="text-center text-gray-500 py-6 bg-[#121212] rounded-custom text-sm">Нет публикаций</div>';
-                for(const d of s.docs) await renderPost(d, pFeed, true);
-            } catch(e) { pFeed.innerHTML = '<div class="text-center text-red-500 text-sm py-4">Ошибка загрузки</div>'; }
-        };
 
         // --- Лайк ---
         window.toggleLike = async (postId, authorId, btn) => {
@@ -680,10 +812,6 @@
             const avatar = document.getElementById('commentsModalAvatar');
             avatar.src = userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png';
             modal.classList.remove('hidden');
-            closeProfilePanel();
-            closeNotificationsPanel();
-            closeCreatePanel();
-            closeSearch();
             list.innerHTML = '<div class="text-center py-4"><i class="bx bx-loader-alt bx-spin text-2xl text-primary"></i></div>';
             try {
                 const snap = await getDoc(doc(db, "posts", postId));
@@ -734,6 +862,10 @@
             finally { input.disabled = false; }
         };
 
+        window.closeCommentsModal = () => {
+            document.getElementById('commentsModal').classList.add('hidden');
+        };
+
         // --- Подписка (исправлена) ---
         window.toggleFollow = async (targetUid, btn) => {
             if(targetUid === currentUser.uid) return;
@@ -752,7 +884,7 @@
                     btn.classList.add('following');
                     sendNotification(targetUid, 'follow', null);
                 }
-            } catch(e) { showToast("Ошибка подписки", "error"); }
+            } catch(e) { showToast("Ошибка подписки: " + e.message, "error"); }
         };
 
         // --- Рендер поста ---
@@ -775,10 +907,11 @@
             const commentCount = p.comments?.length || 0;
 
             const el = document.createElement('article');
-            el.className = "bg-darkPanel rounded-custom border border-gray-800 p-4 sm:p-5 shadow-xl hover:border-gray-700 transition relative";
+            el.className = "post-card";
+            el.dataset.postid = docSnap.id;
             el.innerHTML = `
                 <div class="flex items-center space-x-3 mb-4 cursor-pointer" onclick="openProfile('${p.authorId}')">
-                    <img src="${u.photoURL}" class="w-10 h-10 rounded-full object-cover border-2 border-transparent hover:border-primary transition shadow-md">
+                    <img src="${u.photoURL}" class="avatar border-2 border-transparent hover:border-primary transition">
                     <div>
                         <h3 class="text-base font-bold hover:text-primary transition">${u.displayName}</h3>
                         <span class="text-xs text-gray-500">${new Date(p.createdAt).toLocaleDateString()}</span>
@@ -804,7 +937,7 @@
                 const followBtn = document.createElement('button');
                 followBtn.className = 'follow-btn-post';
                 followBtn.textContent = '+';
-                // Проверяем подписку и устанавливаем начальное состояние
+                // Проверяем подписку
                 (async () => {
                     const userData = await getUserData(currentUser.uid);
                     const following = userData?.following || [];
@@ -865,17 +998,7 @@
             } catch(e) { showToast("Ошибка", "error"); }
         };
 
-        // --- Поиск ---
-        window.openSearch = () => {
-            document.getElementById('searchModal').classList.remove('hidden');
-            closeProfilePanel();
-            closeNotificationsPanel();
-            closeCreatePanel();
-            closeCommentsModal();
-            document.getElementById('searchInput').focus();
-            setActiveNav(null);
-        };
-
+        // --- Поиск в панели ---
         document.getElementById('searchInput').addEventListener('input', async (e) => {
             const val = e.target.value.toLowerCase();
             const results = document.getElementById('searchResults');
@@ -965,7 +1088,7 @@
                 userCache[currentUser.uid] = { ...userCache[currentUser.uid], ...updates }; 
                 userDataCache = { ...userDataCache, ...updates };
                 document.getElementById('editProfileModal').classList.add('hidden');
-                if(!document.getElementById('profilePanel').classList.contains('translate-x-full')) {
+                if(document.getElementById('profilePanel').classList.contains('open')) {
                     openProfile(currentUser.uid);
                 }
                 loadPosts(true); 
@@ -990,6 +1113,11 @@
             zoomScale += e.deltaY * -0.002;
             zoomScale = Math.min(Math.max(0.5, zoomScale), 5);
             vImg.style.transform = `scale(${zoomScale})`;
+        });
+
+        // --- Инициализация активной вкладки ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('navFeed').classList.add('active');
         });
     </script>
 </body>
