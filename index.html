@@ -12,12 +12,13 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#121212', // Глубокий черный фон
-                        darkPanel: '#1f1f22', // Темно-серый для карточек
-                        darkHover: '#2a2a2e'
+                        darkBg: '#121212',
+                        darkPanel: '#1f1f22',
+                        darkHover: '#2a2a2e',
+                        primary: 'var(--accent-color)'
                     },
                     borderRadius: {
-                        'custom': '20px' // Заданное закругление 20px
+                        'custom': '20px'
                     }
                 }
             }
@@ -26,182 +27,257 @@
     <!-- Boxicons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
+        :root {
+            --accent-color: #2563eb; /* По умолчанию синий */
+        }
         body { background-color: #121212; color: #e5e7eb; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 20px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         
-        /* Анимация уведомлений */
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        
+        /* Фикс для мобильного меню */
+        @media (max-width: 640px) {
+            .mobile-nav-text { display: none; }
+        }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden font-sans text-gray-200">
+<body class="flex h-screen overflow-hidden font-sans text-gray-200 selection:bg-primary selection:text-white">
 
-    <!-- Custom Notifications Container -->
-    <div id="toastContainer" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3"></div>
+    <!-- Уведомления (Toasts) -->
+    <div id="toastContainer" class="fixed bottom-20 sm:bottom-6 right-6 z-[9999] flex flex-col gap-3"></div>
 
-    <!-- Auth Modal -->
-    <div id="authModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
-        <div class="bg-darkPanel p-8 rounded-custom shadow-2xl w-[400px]">
-            <div class="flex justify-center mb-6"><i class='bx bx-infinite text-5xl text-blue-500'></i></div>
-            <h2 id="authTitle" class="text-2xl font-bold mb-6 text-center">Вход в MesWy</h2>
+    <!-- Модалка Авторизации -->
+    <div id="authModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-darkPanel p-8 rounded-custom shadow-2xl w-full max-w-md border border-gray-800">
+            <div class="flex justify-center mb-6"><i class='bx bx-infinite text-6xl text-primary'></i></div>
+            <h2 id="authTitle" class="text-3xl font-bold mb-6 text-center">Вход в MesWy</h2>
             <form id="authForm" class="space-y-4">
-                <input type="email" id="authEmail" placeholder="Email" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-blue-500 outline-none transition">
-                <input type="password" id="authPassword" placeholder="Пароль" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-blue-500 outline-none transition">
-                <button type="submit" id="authSubmitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-custom transition-colors">Войти</button>
+                <input type="email" id="authEmail" placeholder="Email" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-lg">
+                <input type="password" id="authPassword" placeholder="Пароль" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-lg">
+                <button type="submit" id="authSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-4 rounded-custom transition-all text-lg">Войти</button>
             </form>
-            <div class="mt-6 flex items-center justify-between">
-                <hr class="w-full border-gray-700"><span class="px-3 text-sm text-gray-500">ИЛИ</span><hr class="w-full border-gray-700">
-            </div>
-            <button id="googleLoginBtn" class="mt-6 w-full bg-white text-black hover:bg-gray-200 font-bold py-4 rounded-custom transition-colors flex justify-center items-center gap-2">
-                <i class='bx bxl-google text-xl'></i> Вход через Google
+            <button id="googleLoginBtn" class="mt-4 w-full bg-white text-black hover:bg-gray-200 font-bold py-4 rounded-custom transition-all flex justify-center items-center gap-2 text-lg">
+                <i class='bx bxl-google text-2xl'></i> Google
             </button>
-            <p class="mt-6 text-center text-sm text-gray-400 cursor-pointer hover:text-white transition" id="authToggleBtn">Нет аккаунта? Зарегистрироваться</p>
+            <p class="mt-6 text-center text-gray-400 cursor-pointer hover:text-white transition" id="authToggleBtn">Нет аккаунта? Создать</p>
         </div>
     </div>
 
-    <!-- Sidebar -->
-    <aside class="group w-20 hover:w-64 bg-darkPanel border-r border-gray-800 transition-all duration-300 flex flex-col justify-between fixed h-full z-40 overflow-hidden whitespace-nowrap shadow-xl">
-        <div class="flex flex-col w-full mt-4 space-y-2">
-            <div class="flex items-center w-full p-4 mb-6">
-                <i class='bx bx-infinite text-3xl text-blue-500 min-w-[3rem] text-center'></i>
-                <span class="ml-2 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity">MesWy</span>
+    <!-- Боковое меню (ПК) / Нижнее меню (Мобайл) -->
+    <aside class="group fixed bottom-0 w-full h-16 sm:h-full sm:w-24 sm:hover:w-72 bg-darkPanel border-t sm:border-t-0 sm:border-r border-gray-800 transition-all duration-300 flex flex-row sm:flex-col justify-around sm:justify-between z-40 shadow-xl overflow-y-auto hide-scroll">
+        <div class="flex flex-row sm:flex-col w-full sm:mt-4 items-center sm:items-stretch h-full sm:h-auto">
+            <div class="hidden sm:flex items-center w-full p-4 mb-4">
+                <i class='bx bx-infinite text-4xl text-primary min-w-[3.5rem] text-center'></i>
+                <span class="ml-2 text-2xl font-bold opacity-0 group-hover:opacity-100 transition-opacity">MesWy</span>
             </div>
-            <button id="navSearch" class="flex items-center w-full p-4 hover:bg-darkHover transition-colors cursor-pointer text-left rounded-r-custom">
-                <i class='bx bx-search text-2xl min-w-[3rem] text-center'></i>
-                <span class="ml-2 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Поиск</span>
+            
+            <button onclick="document.getElementById('postsFeed').scrollIntoView()" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-home-alt-2 text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Лента</span>
             </button>
-            <button id="navCreatePost" class="flex items-center w-full p-4 hover:bg-darkHover transition-colors cursor-pointer text-left rounded-r-custom">
-                <i class='bx bx-plus-circle text-2xl min-w-[3rem] text-center'></i>
-                <span class="ml-2 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Создать пост</span>
+
+            <button id="navSearch" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-search text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Поиск</span>
             </button>
-            <button id="navProfile" class="flex items-center w-full p-4 hover:bg-darkHover transition-colors cursor-pointer text-left rounded-r-custom">
-                <i class='bx bx-user text-2xl min-w-[3rem] text-center'></i>
-                <span class="ml-2 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Мой Профиль</span>
+
+            <button id="navPopular" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-trending-up text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Популярное</span>
+            </button>
+
+            <button id="navCreatePost" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-plus-circle text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text text-primary">Создать</span>
+            </button>
+
+            <button id="navNotifications" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom relative">
+                <i class='bx bx-bell text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Уведомления</span>
+                <span class="absolute top-3 sm:top-5 left-8 sm:left-12 w-3 h-3 bg-red-500 rounded-full border-2 border-darkPanel"></span>
+            </button>
+
+            <button id="navProfile" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-user text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Профиль</span>
             </button>
         </div>
-        <div class="flex flex-col w-full mb-6">
-            <button id="navLogout" class="flex items-center w-full p-4 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer text-left rounded-r-custom">
-                <i class='bx bx-log-out text-2xl min-w-[3rem] text-center'></i>
-                <span class="ml-2 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Выйти</span>
+
+        <div class="hidden sm:flex flex-col w-full mb-6">
+            <button id="navSettings" class="flex items-center w-full p-5 hover:bg-darkHover transition-colors cursor-pointer text-left rounded-r-custom">
+                <i class='bx bx-cog text-4xl min-w-[3.5rem] text-center text-gray-400 hover:text-white'></i>
+                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity">Настройки</span>
+            </button>
+            <button id="navLogout" class="flex items-center w-full p-5 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer text-left rounded-r-custom">
+                <i class='bx bx-log-out text-4xl min-w-[3.5rem] text-center'></i>
+                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity">Выйти</span>
             </button>
         </div>
     </aside>
 
-    <!-- Main Feed -->
-    <main class="ml-20 flex-1 h-full overflow-y-auto p-4 sm:p-8 flex justify-center bg-[#121212]">
-        <div class="max-w-2xl w-full flex flex-col gap-6 pb-20" id="postsFeed">
+    <!-- Основная Лента -->
+    <main class="w-full sm:ml-24 flex-1 h-full overflow-y-auto p-4 sm:p-8 flex justify-center bg-[#121212] pb-24 sm:pb-8">
+        <div class="max-w-2xl w-full flex flex-col gap-6" id="postsFeed">
             <!-- Посты рендерятся тут -->
         </div>
     </main>
 
-    <!-- Profile Panel -->
-    <div id="profilePanel" class="fixed top-0 right-0 h-full w-full sm:w-[450px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800 rounded-l-custom">
-        <div id="profileCover" class="h-48 bg-gray-800 bg-cover bg-center relative rounded-tl-custom">
-            <button id="closeProfileBtn" class="absolute top-4 right-4 bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80 flex items-center justify-center transition">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
-        </div>
-        <div class="px-6 pb-6 relative flex-1 overflow-y-auto hide-scroll flex flex-col">
-            <!-- Исправленная аватарка: z-index, relative родитель, правильные отступы -->
-            <div class="relative h-16 w-full mb-2">
-                <img id="profileAvatar" src="" class="w-28 h-28 rounded-full border-4 border-darkPanel absolute bottom-0 left-0 z-10 object-cover bg-darkPanel">
-                <button id="editProfileBtn" class="hidden absolute top-4 right-0 bg-darkHover hover:bg-gray-700 text-white px-5 py-2 rounded-custom font-medium transition border border-gray-700">
-                    Редактировать
+    <!-- Панель Профиля -->
+    <div id="profilePanel" class="fixed top-0 right-0 h-full w-full sm:w-[600px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
+        <div class="flex-1 overflow-y-auto hide-scroll pb-24 sm:pb-6">
+            <!-- Обложка -->
+            <div id="profileCover" class="h-48 sm:h-64 bg-gray-800 bg-cover bg-center relative">
+                <button id="closeProfileBtn" class="absolute top-4 right-4 bg-black/60 text-white w-12 h-12 rounded-full hover:bg-black/80 flex items-center justify-center transition backdrop-blur-sm z-50">
+                    <i class='bx bx-x text-3xl'></i>
                 </button>
             </div>
             
-            <div class="mt-2">
-                <h2 id="profileName" class="text-2xl font-bold">Имя пользователя</h2>
-                <p id="profileBio" class="text-gray-400 mt-2 text-sm leading-relaxed">Описание...</p>
-            </div>
-            
-            <div class="flex gap-8 mt-6 bg-[#121212] p-4 rounded-custom border border-gray-800">
-                <div class="text-center flex-1"><span class="block font-bold text-xl text-white" id="profileFollowing">0</span> <span class="text-gray-500 text-sm">Подписок</span></div>
-                <div class="text-center flex-1 border-l border-gray-800"><span class="block font-bold text-xl text-white" id="profileLikes">0</span> <span class="text-gray-500 text-sm">Лайков</span></div>
+            <div class="px-6 relative flex flex-col">
+                <!-- Аватарка вынесена наверх, перекрытие исправлено -->
+                <div class="flex justify-between items-end -mt-14 sm:-mt-16 relative z-20 mb-4">
+                    <img id="profileAvatar" src="" class="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-darkPanel object-cover bg-darkPanel shadow-lg">
+                    <button id="editProfileBtn" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-6 py-2.5 rounded-custom font-bold transition border border-gray-700 text-sm sm:text-base mb-2">
+                        Редактировать
+                    </button>
+                </div>
+                
+                <div class="mt-2">
+                    <h2 id="profileName" class="text-3xl font-bold">Имя</h2>
+                    <p id="profileBio" class="text-gray-400 mt-3 text-base leading-relaxed whitespace-pre-wrap">Описание...</p>
+                </div>
+                
+                <div class="flex gap-4 mt-6 bg-[#121212] p-4 rounded-custom border border-gray-800">
+                    <div class="text-center flex-1"><span class="block font-bold text-2xl text-white" id="profileFollowing">0</span> <span class="text-gray-500 text-sm">Подписок</span></div>
+                    <div class="text-center flex-1 border-l border-gray-800"><span class="block font-bold text-2xl text-white" id="profileLikes">0</span> <span class="text-gray-500 text-sm">Лайков</span></div>
+                </div>
+
+                <!-- Посты пользователя -->
+                <div class="mt-8 border-t border-gray-800 pt-6">
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2"><i class='bx bx-grid-alt text-primary'></i> Публикации</h3>
+                    <div id="profilePostsFeed" class="flex flex-col gap-6">
+                        <!-- Посты пользователя рендерятся тут -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Create Post Modal -->
-    <div id="createPostModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212]">
-                <i class='bx bx-x text-xl'></i>
+    <!-- Полноэкранный Поиск -->
+    <div id="searchModal" class="hidden fixed inset-0 z-[60] bg-[#121212] flex flex-col p-4 sm:p-8 overflow-y-auto hide-scroll pb-24">
+        <button class="close-modal-btn fixed top-6 right-6 text-gray-400 hover:text-white w-12 h-12 flex items-center justify-center rounded-full bg-darkPanel border border-gray-800 z-50 transition">
+            <i class='bx bx-x text-3xl'></i>
+        </button>
+        <div class="max-w-3xl w-full mx-auto mt-12 sm:mt-8">
+            <h2 class="text-3xl font-bold mb-6 text-center">Поиск по MesWy</h2>
+            <div class="relative mb-8">
+                <i class='bx bx-search absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-gray-500'></i>
+                <input type="text" id="searchInput" placeholder="Введите текст для поиска постов..." class="w-full pl-14 p-5 rounded-custom bg-darkPanel border border-gray-800 focus:border-primary outline-none transition text-lg shadow-xl">
+            </div>
+            <div id="searchResults" class="flex flex-col gap-6">
+                <!-- Найденные полноценные посты -->
+                <div class="text-center text-gray-500 mt-10"><i class='bx bx-search text-6xl opacity-20 mb-4'></i><br>Начните вводить запрос</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка Создания Поста -->
+    <div id="createPostModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-darkPanel p-6 sm:p-8 rounded-custom shadow-2xl w-full max-w-xl relative border border-gray-800">
+            <button class="close-modal-btn absolute top-6 right-6 text-gray-500 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-[#121212] transition">
+                <i class='bx bx-x text-2xl'></i>
             </button>
-            <h2 class="text-2xl font-bold mb-6">Новый пост</h2>
-            <form id="createPostForm" class="space-y-4">
-                <input type="text" id="postTitle" placeholder="Заголовок..." required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-blue-500 outline-none transition">
-                <textarea id="postDesc" placeholder="Что у вас нового?" rows="4" class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-blue-500 outline-none transition resize-none"></textarea>
-                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800 cursor-pointer hover:border-gray-600 transition">
+            <h2 class="text-3xl font-bold mb-6">Новый пост</h2>
+            <form id="createPostForm" class="space-y-5">
+                <input type="text" id="postTitle" placeholder="Заголовок поста..." required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-lg">
+                <textarea id="postDesc" placeholder="Расскажите, что происходит?" rows="5" class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-lg"></textarea>
+                <div class="bg-[#121212] p-6 rounded-custom border border-gray-800 cursor-pointer hover:border-gray-600 transition group">
                     <label class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                        <i class='bx bx-image-add text-3xl text-gray-500 mb-2'></i>
-                        <span class="text-sm text-gray-400">Прикрепить фото (до 10 шт)</span>
+                        <i class='bx bx-images text-5xl text-gray-500 group-hover:text-primary transition-colors mb-3'></i>
+                        <span class="text-base text-gray-400 font-medium">Прикрепить фото (до 10 шт)</span>
                         <input type="file" id="postImages" multiple accept="image/*" class="hidden">
                     </label>
-                    <div id="imagePreview" class="mt-3 flex gap-2 overflow-x-auto hide-scroll"></div>
+                    <div id="imagePreview" class="mt-4 flex gap-3 overflow-x-auto hide-scroll"></div>
                 </div>
-                <button type="submit" id="postSubmitBtn" class="w-full bg-white text-black hover:bg-gray-200 font-bold py-4 rounded-custom transition-colors flex justify-center items-center gap-2">
+                <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-4 rounded-custom transition-all text-lg">
                     Опубликовать
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Search Modal -->
-    <div id="searchModal" class="hidden fixed inset-0 z-50 flex justify-center pt-20 bg-black/80 backdrop-blur-sm p-4">
-        <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-2xl relative border border-gray-800 h-fit max-h-[70vh] flex flex-col">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212]">
-                <i class='bx bx-x text-xl'></i>
+    <!-- Настройки / Кастомизация -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-darkPanel p-8 rounded-custom shadow-2xl w-full max-w-md relative border border-gray-800">
+            <button class="close-modal-btn absolute top-6 right-6 text-gray-500 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-[#121212]">
+                <i class='bx bx-x text-2xl'></i>
             </button>
-            <h2 class="text-xl font-bold mb-4">Поиск постов</h2>
-            <input type="text" id="searchInput" placeholder="Введите заголовок или текст..." class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-blue-500 outline-none transition mb-4">
-            <div id="searchResults" class="overflow-y-auto flex-1 hide-scroll flex flex-col gap-4"></div>
+            <h2 class="text-3xl font-bold mb-8">Настройки</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold mb-4 text-gray-300">Цвет интерфейса (Accent Color)</h3>
+                    <div class="flex gap-4 flex-wrap">
+                        <button onclick="changeThemeColor('#2563eb')" class="w-12 h-12 rounded-full bg-[#2563eb] border-2 border-transparent hover:scale-110 transition"></button>
+                        <button onclick="changeThemeColor('#dc2626')" class="w-12 h-12 rounded-full bg-[#dc2626] border-2 border-transparent hover:scale-110 transition"></button>
+                        <button onclick="changeThemeColor('#16a34a')" class="w-12 h-12 rounded-full bg-[#16a34a] border-2 border-transparent hover:scale-110 transition"></button>
+                        <button onclick="changeThemeColor('#9333ea')" class="w-12 h-12 rounded-full bg-[#9333ea] border-2 border-transparent hover:scale-110 transition"></button>
+                        <button onclick="changeThemeColor('#ea580c')" class="w-12 h-12 rounded-full bg-[#ea580c] border-2 border-transparent hover:scale-110 transition"></button>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-800 pt-6">
+                    <button class="w-full flex items-center justify-between p-4 bg-[#121212] rounded-custom hover:bg-gray-800 transition">
+                        <span class="font-bold">Управление аккаунтом</span>
+                        <i class='bx bx-chevron-right text-2xl text-gray-500'></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Edit Profile Modal -->
-    <div id="editProfileModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212]">
-                <i class='bx bx-x text-xl'></i>
+    <!-- Редактирование Профиля -->
+    <div id="editProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-darkPanel p-6 sm:p-8 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800 overflow-y-auto max-h-[90vh] hide-scroll">
+            <button class="close-modal-btn absolute top-6 right-6 text-gray-500 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-[#121212]">
+                <i class='bx bx-x text-2xl'></i>
             </button>
-            <h2 class="text-2xl font-bold mb-6">Редактирование</h2>
-            <form id="editProfileForm" class="space-y-4">
-                <input type="text" id="editName" placeholder="Имя пользователя" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 outline-none">
-                <textarea id="editBio" placeholder="О себе" rows="3" class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 outline-none resize-none"></textarea>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
-                        <label class="block text-sm text-gray-400 mb-2">Аватарка</label>
-                        <input type="file" id="editAvatar" accept="image/*" class="w-full text-sm file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1">
+            <h2 class="text-3xl font-bold mb-6">Редактирование</h2>
+            <form id="editProfileForm" class="space-y-5">
+                <input type="text" id="editName" placeholder="Имя пользователя" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 outline-none text-lg">
+                <textarea id="editBio" placeholder="О себе" rows="4" class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 outline-none resize-none text-lg"></textarea>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-[#121212] p-5 rounded-custom border border-gray-800">
+                        <label class="block text-base font-medium text-gray-400 mb-3">Сменить аватарку</label>
+                        <input type="file" id="editAvatar" accept="image/*" class="w-full text-sm file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-4 file:py-2 file:cursor-pointer">
                     </div>
-                    <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
-                        <label class="block text-sm text-gray-400 mb-2">Обложка</label>
-                        <input type="file" id="editCover" accept="image/*" class="w-full text-sm file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1">
+                    <div class="bg-[#121212] p-5 rounded-custom border border-gray-800">
+                        <label class="block text-base font-medium text-gray-400 mb-3">Сменить обложку</label>
+                        <input type="file" id="editCover" accept="image/*" class="w-full text-sm file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-4 file:py-2 file:cursor-pointer">
                     </div>
                 </div>
-                <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black font-bold py-4 rounded-custom transition-colors">Сохранить</button>
+                <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black hover:bg-gray-200 font-bold py-4 rounded-custom transition-all text-lg mt-4">Сохранить изменения</button>
             </form>
         </div>
     </div>
 
-    <!-- Image Viewer Modal -->
-    <div id="imageViewerModal" class="hidden fixed inset-0 z-[999] bg-black/95 flex items-center justify-center">
-        <button id="closeImageViewer" class="absolute top-6 right-6 text-white w-12 h-12 bg-gray-900/50 hover:bg-gray-800 rounded-full flex items-center justify-center transition">
-            <i class='bx bx-x text-3xl'></i>
+    <!-- Просмотр Изображений -->
+    <div id="imageViewerModal" class="hidden fixed inset-0 z-[999] bg-black/95 flex items-center justify-center p-4">
+        <button id="closeImageViewer" class="absolute top-6 right-6 text-white w-14 h-14 bg-gray-900/50 hover:bg-gray-800 rounded-full flex items-center justify-center transition backdrop-blur-md">
+            <i class='bx bx-x text-4xl'></i>
         </button>
-        <img id="viewerImage" src="" class="max-w-[90vw] max-h-[90vh] object-contain rounded-custom shadow-2xl">
+        <img id="viewerImage" src="" class="max-w-full max-h-full object-contain rounded-custom shadow-2xl">
     </div>
 
     <!-- Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, limit, startAfter, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, limit, startAfter, arrayUnion, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // === 1. ИНИЦИАЛИЗАЦИЯ ===
         const firebaseConfig = {
             apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
             authDomain: "meswy-web.firebaseapp.com",
@@ -216,18 +292,26 @@
         const IMGBB_API_KEY = "cfedaeb5c6bb179902b44ba10cb396cb";
 
         let currentUser = null;
-        let userDataCache = null; // Для кэширования данных текущего юзера
-        let lastVisiblePost = null; // Для пагинации
+        let userDataCache = null; 
+        let lastVisiblePost = null; 
 
-        // === 2. КАСТОМНЫЕ УВЕДОМЛЕНИЯ ===
+        // Кастомизация цвета
+        window.changeThemeColor = (color) => {
+            document.documentElement.style.setProperty('--accent-color', color);
+            localStorage.setItem('themeColor', color);
+        };
+        const savedColor = localStorage.getItem('themeColor');
+        if(savedColor) changeThemeColor(savedColor);
+
+        // Уведомления
         window.showToast = (message, type = 'info') => {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            const colors = { info: 'bg-darkPanel border-gray-700', success: 'bg-green-900/80 border-green-700', error: 'bg-red-900/80 border-red-700' };
-            const icons = { info: 'bx-info-circle', success: 'bx-check-circle', error: 'bx-error-circle' };
+            const bg = type === 'error' ? 'bg-red-900/90 border-red-700' : 'bg-darkPanel border-gray-700';
+            const icon = type === 'error' ? 'bx-error-circle text-red-500' : 'bx-check-circle text-primary';
             
-            toast.className = `toast-enter flex items-center gap-3 p-4 rounded-custom border ${colors[type]} text-white shadow-lg min-w-[250px]`;
-            toast.innerHTML = `<i class='bx ${icons[type]} text-2xl'></i> <span class="font-medium">${message}</span>`;
+            toast.className = `toast-enter flex items-center gap-4 p-5 rounded-custom border ${bg} text-white shadow-2xl min-w-[300px] mb-3`;
+            toast.innerHTML = `<i class='bx ${icon} text-3xl'></i> <span class="font-bold text-lg">${message}</span>`;
             
             container.appendChild(toast);
             setTimeout(() => {
@@ -235,10 +319,10 @@
                 toast.style.transform = 'translateX(100%)';
                 toast.style.transition = 'all 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 4000);
         };
 
-        // === 3. IMGBB ЗАГРУЗКА ===
+        // Загрузка в ImgBB
         async function uploadToImgBB(file) {
             const formData = new FormData();
             formData.append('image', file);
@@ -246,29 +330,27 @@
                 const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
                 const data = await res.json();
                 return data.data.url;
-            } catch (e) {
-                showToast("Ошибка загрузки картинки", "error");
-                return null;
-            }
+            } catch (e) { showToast("Ошибка картинки", "error"); return null; }
         }
 
-        // Управление модалками
+        // Модалки
         document.querySelectorAll('.close-modal-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.target.closest('div.fixed').classList.add('hidden');
-            });
+            btn.addEventListener('click', (e) => e.target.closest('div.fixed').classList.add('hidden'));
         });
 
-        // === 4. АВТОРИЗАЦИЯ ===
+        document.getElementById('navSettings')?.addEventListener('click', () => document.getElementById('settingsModal').classList.remove('hidden'));
+        document.getElementById('navNotifications').addEventListener('click', () => showToast("У вас нет новых уведомлений"));
+        document.getElementById('navPopular').addEventListener('click', () => { showToast("Загружаем популярное..."); loadPosts(true); });
+
+        // Авторизация
         let isLoginMode = true;
         const authModal = document.getElementById('authModal');
-        const authForm = document.getElementById('authForm');
         
         document.getElementById('authToggleBtn').addEventListener('click', (e) => {
             isLoginMode = !isLoginMode;
             document.getElementById('authTitle').textContent = isLoginMode ? "Вход в MesWy" : "Регистрация";
             document.getElementById('authSubmitBtn').textContent = isLoginMode ? "Войти" : "Создать аккаунт";
-            e.target.textContent = isLoginMode ? "Нет аккаунта? Зарегистрироваться" : "Уже есть аккаунт? Войти";
+            e.target.textContent = isLoginMode ? "Нет аккаунта? Создать" : "Уже есть аккаунт? Войти";
         });
 
         async function ensureUserProfile(user, additionalData = {}) {
@@ -277,48 +359,45 @@
             if (!snap.exists()) {
                 await setDoc(userRef, {
                     displayName: user.displayName || additionalData.displayName || "Новый пользователь",
-                    bio: "",
-                    photoURL: user.photoURL || "https://i.ibb.co/30Zc4Fq/default-avatar.png", // Заглушка
+                    bio: "ПРОСТО Я ЛУЧШИЙ",
+                    photoURL: user.photoURL || "https://i.ibb.co/30Zc4Fq/default-avatar.png",
                     coverURL: "https://i.ibb.co/z4V8z1z/default-cover.png",
                     followersCount: 0, followingCount: 0, likesCount: 0
                 });
             }
-            const freshSnap = await getDoc(userRef);
-            return freshSnap.data();
+            return (await getDoc(userRef)).data();
         }
 
-        authForm.addEventListener('submit', async (e) => {
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('authSubmitBtn');
             btn.disabled = true; btn.textContent = "Загрузка...";
             try {
                 const email = document.getElementById('authEmail').value;
-                const password = document.getElementById('authPassword').value;
-                if (isLoginMode) await signInWithEmailAndPassword(auth, email, password);
+                const pwd = document.getElementById('authPassword').value;
+                if (isLoginMode) await signInWithEmailAndPassword(auth, email, pwd);
                 else {
-                    const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
                     await ensureUserProfile(cred.user, { displayName: email.split('@')[0] });
-                    showToast("Аккаунт создан!", "success");
+                    showToast("Аккаунт создан!");
                 }
             } catch (err) { showToast(err.message, "error"); } 
             finally { btn.disabled = false; btn.textContent = isLoginMode ? "Войти" : "Создать аккаунт"; }
         });
 
         document.getElementById('googleLoginBtn').addEventListener('click', async () => {
-            try {
-                const cred = await signInWithPopup(auth, new GoogleAuthProvider());
-                await ensureUserProfile(cred.user);
-            } catch (err) { showToast(err.message, "error"); }
+            try { await ensureUserProfile((await signInWithPopup(auth, new GoogleAuthProvider())).user); } 
+            catch (err) { showToast(err.message, "error"); }
         });
 
-        document.getElementById('navLogout').addEventListener('click', () => signOut(auth));
+        document.getElementById('navLogout')?.addEventListener('click', () => signOut(auth));
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 authModal.classList.add('hidden');
                 userDataCache = await ensureUserProfile(user);
-                loadPosts(true); // Загружаем первую партию постов
+                loadPosts(true);
             } else {
                 currentUser = null; userDataCache = null;
                 authModal.classList.remove('hidden');
@@ -326,14 +405,14 @@
             }
         });
 
-        // === 5. ПРОФИЛЬ ===
+        // Профиль
         window.openProfile = async (uid) => {
             const panel = document.getElementById('profilePanel');
             const userSnap = await getDoc(doc(db, "users", uid));
             if (userSnap.exists()) {
                 const data = userSnap.data();
                 document.getElementById('profileName').textContent = data.displayName;
-                document.getElementById('profileBio').textContent = data.bio || "Пока нет описания.";
+                document.getElementById('profileBio').textContent = data.bio || "";
                 document.getElementById('profileAvatar').src = data.photoURL;
                 document.getElementById('profileCover').style.backgroundImage = `url(${data.coverURL})`;
                 document.getElementById('profileFollowing').textContent = data.followingCount || 0;
@@ -347,63 +426,62 @@
                 } else { editBtn.classList.add('hidden'); }
                 
                 panel.classList.remove('translate-x-full');
-            } else {
-                showToast("Пользователь не найден", "error");
+
+                // Загрузка постов пользователя
+                const pFeed = document.getElementById('profilePostsFeed');
+                pFeed.innerHTML = '<div class="text-center py-10"><i class="bx bx-loader-alt bx-spin text-4xl text-primary"></i></div>';
+                const pq = query(collection(db, "posts"), where("authorId", "==", uid), orderBy("createdAt", "desc"));
+                const pSnap = await getDocs(pq);
+                pFeed.innerHTML = '';
+                if(pSnap.empty) {
+                    pFeed.innerHTML = '<div class="text-center text-gray-500 py-10 bg-[#121212] rounded-custom">У пользователя пока нет постов</div>';
+                } else {
+                    for(const d of pSnap.docs) await renderPost(d, pFeed, true);
+                }
             }
         };
 
         document.getElementById('navProfile').addEventListener('click', () => { if(currentUser) openProfile(currentUser.uid); });
         document.getElementById('closeProfileBtn').addEventListener('click', () => document.getElementById('profilePanel').classList.add('translate-x-full'));
 
-        // Редактирование профиля
-        const editProfileModal = document.getElementById('editProfileModal');
-        document.getElementById('editProfileBtn').addEventListener('click', () => editProfileModal.classList.remove('hidden'));
+        document.getElementById('editProfileBtn').addEventListener('click', () => document.getElementById('editProfileModal').classList.remove('hidden'));
 
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('editProfileSubmitBtn');
             btn.disabled = true; btn.textContent = "Сохраняем...";
             try {
-                const updates = {
-                    displayName: document.getElementById('editName').value,
-                    bio: document.getElementById('editBio').value
-                };
+                const updates = { displayName: document.getElementById('editName').value, bio: document.getElementById('editBio').value };
                 const avatar = document.getElementById('editAvatar').files[0];
                 const cover = document.getElementById('editCover').files[0];
                 if (avatar) updates.photoURL = await uploadToImgBB(avatar);
                 if (cover) updates.coverURL = await uploadToImgBB(cover);
 
                 await updateDoc(doc(db, "users", currentUser.uid), updates);
-                userDataCache = { ...userDataCache, ...updates }; // обновляем кэш
-                editProfileModal.classList.add('hidden');
+                userDataCache = { ...userDataCache, ...updates };
+                document.getElementById('editProfileModal').classList.add('hidden');
                 openProfile(currentUser.uid);
-                showToast("Профиль обновлен", "success");
-                loadPosts(true); // Перезагрузка для обновления аватарок в ленте
+                showToast("Профиль обновлен");
+                loadPosts(true); 
             } catch (err) { showToast(err.message, "error"); }
-            finally { btn.disabled = false; btn.textContent = "Сохранить"; }
+            finally { btn.disabled = false; btn.textContent = "Сохранить изменения"; }
         });
 
-        // === 6. ПРОСМОТР ИЗОБРАЖЕНИЙ ===
+        // Картинки
         const imgModal = document.getElementById('imageViewerModal');
-        const imgViewer = document.getElementById('viewerImage');
-        window.openImage = (url) => {
-            imgViewer.src = url;
-            imgModal.classList.remove('hidden');
-        };
+        window.openImage = (url) => { document.getElementById('viewerImage').src = url; imgModal.classList.remove('hidden'); };
         document.getElementById('closeImageViewer').addEventListener('click', () => imgModal.classList.add('hidden'));
 
-        // === 7. СОЗДАНИЕ ПОСТА ===
-        const createModal = document.getElementById('createPostModal');
-        document.getElementById('navCreatePost').addEventListener('click', () => createModal.classList.remove('hidden'));
+        // Создание
+        document.getElementById('navCreatePost').addEventListener('click', () => document.getElementById('createPostModal').classList.remove('hidden'));
         
-        // Превью фоток перед загрузкой
         document.getElementById('postImages').addEventListener('change', function() {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
             Array.from(this.files).forEach(file => {
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
-                img.className = "w-16 h-16 object-cover rounded-lg border border-gray-700";
+                img.className = "w-20 h-20 object-cover rounded-xl border-2 border-gray-700 shadow-md";
                 preview.appendChild(img);
             });
         });
@@ -411,7 +489,7 @@
         document.getElementById('createPostForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('postSubmitBtn');
-            btn.disabled = true; btn.innerHTML = "<i class='bx bx-loader-alt bx-spin text-xl'></i> Публикуем...";
+            btn.disabled = true; btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Публикуем...";
             try {
                 const files = document.getElementById('postImages').files;
                 const uploadPromises = Array.from(files).map(f => uploadToImgBB(f));
@@ -423,212 +501,178 @@
                     images: imageUrls,
                     authorId: currentUser.uid,
                     createdAt: new Date().toISOString(),
-                    likes: [], // Массив UID лайкнувших
-                    comments: [] // Массив объектов комментов
+                    likes: [], comments: []
                 });
-                createModal.classList.add('hidden');
+                document.getElementById('createPostModal').classList.add('hidden');
                 document.getElementById('createPostForm').reset();
                 document.getElementById('imagePreview').innerHTML = '';
-                showToast("Пост опубликован!", "success");
+                showToast("Пост опубликован!");
                 loadPosts(true);
             } catch (err) { showToast(err.message, "error"); }
             finally { btn.disabled = false; btn.innerHTML = "Опубликовать"; }
         });
 
-        // === 8. ЛЕНТА ПОСТОВ (С ПАГИНАЦИЕЙ, ЛАЙКАМИ И КОММЕНТАМИ) ===
+        // Лента и Взаимодействие
         const postsFeed = document.getElementById('postsFeed');
 
-        // Функция лайка
         window.toggleLike = async (postId, btnElement) => {
             try {
                 const postRef = doc(db, "posts", postId);
                 const snap = await getDoc(postRef);
                 const likes = snap.data().likes || [];
                 const isLiked = likes.includes(currentUser.uid);
-                
                 const newLikes = isLiked ? likes.filter(id => id !== currentUser.uid) : [...likes, currentUser.uid];
                 await updateDoc(postRef, { likes: newLikes });
                 
-                const icon = btnElement.querySelector('i');
-                const count = btnElement.querySelector('span');
-                icon.className = isLiked ? 'bx bx-heart text-2xl' : 'bx bxs-heart text-2xl text-red-500';
-                count.textContent = newLikes.length;
-            } catch (e) { showToast("Ошибка лайка", "error"); }
+                btnElement.innerHTML = isLiked 
+                    ? `<i class='bx bx-heart text-3xl'></i> <span class="font-bold text-lg">${newLikes.length}</span>`
+                    : `<i class='bx bxs-heart text-3xl text-red-500 drop-shadow-md'></i> <span class="font-bold text-lg">${newLikes.length}</span>`;
+            } catch (e) { showToast("Ошибка", "error"); }
         };
 
-        // Функция отправки коммента
         window.submitComment = async (postId, inputElementId) => {
             const input = document.getElementById(inputElementId);
             const text = input.value.trim();
             if (!text) return;
-            
             try {
                 input.disabled = true;
-                const newComment = {
-                    uid: currentUser.uid,
-                    name: userDataCache.displayName,
-                    photo: userDataCache.photoURL,
-                    text: text,
-                    date: new Date().toISOString()
-                };
                 await updateDoc(doc(db, "posts", postId), {
-                    comments: arrayUnion(newComment)
+                    comments: arrayUnion({ uid: currentUser.uid, name: userDataCache.displayName, photo: userDataCache.photoURL, text: text, date: new Date().toISOString() })
                 });
                 input.value = '';
-                showToast("Комментарий добавлен", "success");
-                // Для простоты перезагружаем ленту, чтобы обновить комменты. В идеале нужен локальный ререндер поста.
+                showToast("Комментарий добавлен");
                 loadPosts(true); 
             } catch (e) { showToast("Ошибка", "error"); }
             finally { input.disabled = false; }
         };
 
-        // Управление видимостью комментов
         window.toggleComments = (postId) => {
             const hiddenBox = document.getElementById(`hidden-comments-${postId}`);
             const btn = document.getElementById(`toggle-btn-${postId}`);
             if (hiddenBox.classList.contains('hidden')) {
                 hiddenBox.classList.remove('hidden');
-                btn.textContent = "Скрыть комментарии";
+                btn.innerHTML = "Скрыть комментарии <i class='bx bx-chevron-up'></i>";
             } else {
                 hiddenBox.classList.add('hidden');
-                btn.textContent = `Показать все комментарии`;
+                btn.innerHTML = `Показать все комментарии <i class='bx bx-chevron-down'></i>`;
             }
         };
 
-        // Рендер одного поста
-        async function renderPost(docSnap, container) {
+        async function renderPost(docSnap, container, compact = false) {
             const post = docSnap.data();
             const postId = docSnap.id;
             
-            // Получаем актуальные данные автора (чтобы при смене аватарки они подтягивались)
-            let authorName = "Неизвестный";
-            let authorPhoto = "https://i.ibb.co/30Zc4Fq/default-avatar.png";
+            let authorName = "User"; let authorPhoto = "https://i.ibb.co/30Zc4Fq/default-avatar.png";
             try {
                 const authorSnap = await getDoc(doc(db, "users", post.authorId));
-                if(authorSnap.exists()) {
-                    authorName = authorSnap.data().displayName;
-                    authorPhoto = authorSnap.data().photoURL;
-                }
+                if(authorSnap.exists()) { authorName = authorSnap.data().displayName; authorPhoto = authorSnap.data().photoURL; }
             } catch(e){}
 
-            // Изображения
             let imagesHtml = '';
             if (post.images && post.images.length > 0) {
                 const gridClass = post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2';
-                imagesHtml = `<div class="grid ${gridClass} gap-2 mt-4 rounded-custom overflow-hidden">`;
+                imagesHtml = `<div class="grid ${gridClass} gap-3 mt-5 rounded-custom overflow-hidden">`;
                 post.images.forEach(url => {
-                    imagesHtml += `<img src="${url}" onclick="openImage('${url}')" class="w-full h-72 object-cover cursor-pointer hover:opacity-90 transition" alt="Post">`;
+                    imagesHtml += `<img src="${url}" onclick="openImage('${url}')" class="w-full ${compact ? 'h-48' : 'h-64 sm:h-96'} object-cover cursor-pointer hover:scale-105 transition duration-500" alt="Post">`;
                 });
                 imagesHtml += `</div>`;
             }
 
-            // Лайки
             const likesCount = post.likes ? post.likes.length : 0;
             const isLiked = post.likes && post.likes.includes(currentUser.uid);
-            const heartIcon = isLiked ? 'bxs-heart text-red-500' : 'bx-heart';
-
-            // Комментарии
-            const comments = post.comments || [];
-            let commentsHtml = '';
-            let hiddenCommentsHtml = '';
+            const heartHtml = isLiked ? `<i class='bx bxs-heart text-3xl text-red-500 drop-shadow-md'></i>` : `<i class='bx bx-heart text-3xl'></i>`;
             
-            if (comments.length > 0) {
-                comments.forEach((c, index) => {
+            const comments = post.comments || [];
+            let commentsHtml = ''; let hiddenCommentsHtml = '';
+            
+            if (comments.length > 0 && !compact) {
+                comments.forEach((c, i) => {
                     const cHtml = `
-                        <div class="flex gap-3 text-sm mb-3">
-                            <img src="${c.photo}" class="w-8 h-8 rounded-full object-cover cursor-pointer" onclick="openProfile('${c.uid}')">
-                            <div class="bg-darkHover p-3 rounded-custom rounded-tl-none flex-1">
-                                <span class="font-bold cursor-pointer hover:underline" onclick="openProfile('${c.uid}')">${c.name}</span>
-                                <p class="text-gray-300 mt-1">${c.text}</p>
+                        <div class="flex gap-4 mb-4">
+                            <img src="${c.photo}" class="w-10 h-10 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${c.uid}')">
+                            <div class="bg-[#121212] p-4 rounded-custom rounded-tl-none flex-1 border border-gray-800">
+                                <span class="font-bold cursor-pointer hover:text-primary transition" onclick="openProfile('${c.uid}')">${c.name}</span>
+                                <p class="text-gray-300 mt-2 text-base">${c.text}</p>
                             </div>
                         </div>`;
-                    if (index < 3) commentsHtml += cHtml;
-                    else hiddenCommentsHtml += cHtml;
+                    if (i < 3) commentsHtml += cHtml; else hiddenCommentsHtml += cHtml;
                 });
             }
 
             const postEl = document.createElement('article');
-            postEl.className = "bg-darkPanel rounded-custom border border-gray-800 p-5 sm:p-6 shadow-lg";
+            postEl.className = "bg-darkPanel rounded-custom border border-gray-800 p-5 sm:p-8 shadow-xl hover:border-gray-700 transition";
             postEl.innerHTML = `
-                <div class="flex items-center space-x-3 mb-4 cursor-pointer" onclick="openProfile('${post.authorId}')">
-                    <img src="${authorPhoto}" class="w-12 h-12 rounded-full object-cover border-2 border-transparent hover:border-blue-500 transition">
+                <div class="flex items-center space-x-4 mb-6 cursor-pointer" onclick="openProfile('${post.authorId}')">
+                    <img src="${authorPhoto}" class="w-14 h-14 rounded-full object-cover border-2 border-transparent hover:border-primary transition shadow-md">
                     <div>
-                        <h3 class="font-bold hover:underline">${authorName}</h3>
-                        <span class="text-xs text-gray-500">${new Date(post.createdAt).toLocaleDateString()}</span>
+                        <h3 class="text-lg font-bold hover:text-primary transition">${authorName}</h3>
+                        <span class="text-sm text-gray-500">${new Date(post.createdAt).toLocaleDateString()}</span>
                     </div>
                 </div>
-                <h2 class="text-xl font-bold mb-2">${post.title}</h2>
-                <p class="text-gray-300 whitespace-pre-wrap leading-relaxed">${post.description}</p>
+                <h2 class="text-2xl font-bold mb-3">${post.title}</h2>
+                <p class="text-gray-300 text-lg whitespace-pre-wrap leading-relaxed">${post.description}</p>
                 ${imagesHtml}
                 
-                <div class="mt-5 flex items-center gap-6 border-t border-gray-800 pt-4">
-                    <button onclick="toggleLike('${postId}', this)" class="flex items-center gap-2 text-gray-400 hover:text-white transition">
-                        <i class='bx ${heartIcon} text-2xl'></i> <span class="font-bold">${likesCount}</span>
+                <div class="mt-6 flex items-center gap-8 border-t border-gray-800 pt-5">
+                    <button onclick="toggleLike('${postId}', this)" class="flex items-center gap-3 text-gray-400 hover:text-white transition">
+                        ${heartHtml} <span class="font-bold text-lg">${likesCount}</span>
                     </button>
-                    <div class="flex items-center gap-2 text-gray-400">
-                        <i class='bx bx-message-rounded text-2xl'></i> <span class="font-bold">${comments.length}</span>
+                    <div class="flex items-center gap-3 text-gray-400">
+                        <i class='bx bx-message-rounded text-3xl'></i> <span class="font-bold text-lg">${comments.length}</span>
                     </div>
                 </div>
 
-                <!-- Блок комментариев -->
-                <div class="mt-5 border-t border-gray-800 pt-4">
+                ${!compact ? `
+                <div class="mt-6 border-t border-gray-800 pt-5">
                     <div class="mb-2">${commentsHtml}</div>
                     ${hiddenCommentsHtml ? `
                         <div id="hidden-comments-${postId}" class="hidden mb-2">${hiddenCommentsHtml}</div>
-                        <button id="toggle-btn-${postId}" onclick="toggleComments('${postId}')" class="text-sm text-blue-500 hover:text-blue-400 font-medium mb-4">Показать все комментарии (${comments.length})</button>
+                        <button id="toggle-btn-${postId}" onclick="toggleComments('${postId}')" class="text-base text-primary hover:opacity-80 font-bold mb-5 flex items-center gap-1">Показать все комментарии <i class='bx bx-chevron-down'></i></button>
                     ` : ''}
                     
-                    <!-- Поле ввода коммента -->
-                    <div class="flex gap-3 mt-4 items-center">
-                        <img src="${userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png'}" class="w-10 h-10 rounded-full object-cover">
-                        <input type="text" id="comment-input-${postId}" placeholder="Написать комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-3 text-sm outline-none focus:border-blue-500 transition" onkeypress="if(event.key === 'Enter') submitComment('${postId}', 'comment-input-${postId}')">
-                        <button onclick="submitComment('${postId}', 'comment-input-${postId}')" class="bg-white text-black w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-200 transition">
-                            <i class='bx bx-send'></i>
+                    <div class="flex gap-4 mt-5 items-center">
+                        <img src="${userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png'}" class="w-12 h-12 rounded-full object-cover shadow-md">
+                        <input type="text" id="comment-input-${postId}" placeholder="Оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-5 py-4 text-base outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${postId}', 'comment-input-${postId}')">
+                        <button onclick="submitComment('${postId}', 'comment-input-${postId}')" class="bg-primary text-white w-14 h-14 rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg">
+                            <i class='bx bx-send text-2xl'></i>
                         </button>
                     </div>
-                </div>
+                </div>` : ''}
             `;
             container.appendChild(postEl);
         }
 
         async function loadPosts(reset = false) {
             if (reset) { postsFeed.innerHTML = ''; lastVisiblePost = null; }
-            
-            const loadBtnId = 'loadMoreBtn';
-            const oldBtn = document.getElementById(loadBtnId);
+            const oldBtn = document.getElementById('loadMoreBtn');
             if(oldBtn) oldBtn.remove();
 
-            let q;
-            if (lastVisiblePost) {
-                q = query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastVisiblePost), limit(20));
-            } else {
-                q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(20));
-            }
+            let q = lastVisiblePost 
+                ? query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastVisiblePost), limit(15))
+                : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(15));
 
             try {
                 const snap = await getDocs(q);
                 if (snap.empty && reset) {
-                    postsFeed.innerHTML = '<div class="text-center text-gray-500 mt-10 p-6 bg-darkPanel rounded-custom border border-gray-800">Постов пока нет.</div>';
+                    postsFeed.innerHTML = '<div class="text-center text-gray-500 mt-10 p-8 bg-darkPanel rounded-custom border border-gray-800 text-lg">Пока ничего нет. Напиши первый пост!</div>';
                     return;
                 }
 
-                for (const docSnap of snap.docs) {
-                    await renderPost(docSnap, postsFeed);
-                }
+                for (const docSnap of snap.docs) await renderPost(docSnap, postsFeed);
 
-                if (snap.docs.length === 20) {
+                if (snap.docs.length === 15) {
                     lastVisiblePost = snap.docs[snap.docs.length - 1];
-                    const loadMoreBtn = document.createElement('button');
-                    loadMoreBtn.id = loadBtnId;
-                    loadMoreBtn.className = "w-full py-4 bg-darkPanel border border-gray-800 rounded-custom font-bold text-gray-400 hover:text-white transition mt-4";
-                    loadMoreBtn.textContent = "Загрузить еще";
-                    loadMoreBtn.onclick = () => loadPosts(false);
-                    postsFeed.appendChild(loadMoreBtn);
+                    const btn = document.createElement('button');
+                    btn.id = 'loadMoreBtn';
+                    btn.className = "w-full py-5 bg-darkPanel border border-gray-800 rounded-custom font-bold text-gray-400 hover:text-white hover:border-gray-600 transition mt-6 text-lg";
+                    btn.textContent = "Загрузить еще";
+                    btn.onclick = () => loadPosts(false);
+                    postsFeed.appendChild(btn);
                 }
-            } catch (e) { showToast("Ошибка загрузки ленты", "error"); }
+            } catch (e) { showToast("Ошибка загрузки", "error"); }
         }
 
-        // === 9. ПОИСК ===
+        // Поиск на весь экран
         const searchModal = document.getElementById('searchModal');
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
@@ -639,30 +683,23 @@
         });
 
         searchInput.addEventListener('input', async (e) => {
-            const queryText = e.target.value.toLowerCase();
-            if(queryText.length < 3) { searchResults.innerHTML = ''; return; }
+            const val = e.target.value.toLowerCase();
+            if(val.length < 2) { searchResults.innerHTML = '<div class="text-center text-gray-500 mt-10"><i class="bx bx-search text-6xl opacity-20 mb-4"></i><br>Введите запрос</div>'; return; }
             
-            searchResults.innerHTML = '<div class="text-center text-gray-500"><i class="bx bx-loader-alt bx-spin text-2xl"></i> Ищем...</div>';
+            searchResults.innerHTML = '<div class="text-center text-primary mt-10"><i class="bx bx-loader-alt bx-spin text-5xl"></i></div>';
             try {
-                // Примечание: Firestore не поддерживает полноценный полнотекстовый поиск из коробки (без Algolia), 
-                // поэтому для демо мы выгружаем последние 50 постов и фильтруем на клиенте.
                 const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50)));
                 searchResults.innerHTML = '';
                 let found = 0;
                 
-                snap.forEach(docSnap => {
+                for(const docSnap of snap.docs) {
                     const data = docSnap.data();
-                    if (data.title.toLowerCase().includes(queryText) || data.description.toLowerCase().includes(queryText)) {
+                    if (data.title.toLowerCase().includes(val) || data.description.toLowerCase().includes(val)) {
                         found++;
-                        const el = document.createElement('div');
-                        el.className = "bg-[#121212] p-4 rounded-custom border border-gray-800 cursor-pointer hover:border-gray-600 transition";
-                        el.innerHTML = `<h4 class="font-bold">${data.title}</h4><p class="text-sm text-gray-400 line-clamp-2">${data.description}</p>`;
-                        // При клике на результат - закрываем поиск и скроллим/открываем пост (здесь для простоты закроем модалку)
-                        el.onclick = () => { searchModal.classList.add('hidden'); showToast("Пост найден! (пролистайте ленту)"); };
-                        searchResults.appendChild(el);
+                        await renderPost(docSnap, searchResults, false); // Рендерим полноценный пост прямо в поиске
                     }
-                });
-                if(found === 0) searchResults.innerHTML = '<div class="text-center text-gray-500">Ничего не найдено</div>';
+                }
+                if(found === 0) searchResults.innerHTML = '<div class="text-center text-gray-500 mt-10 text-xl">Ничего не найдено</div>';
             } catch(err) { searchResults.innerHTML = '<div class="text-center text-red-500">Ошибка поиска</div>'; }
         });
     </script>
