@@ -94,7 +94,7 @@
                 <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Рекомендации</span>
             </button>
 
-            <button id="navCreatePost" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <button onclick="document.getElementById('createPostModal').classList.remove('hidden')" id="navCreatePost" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-plus-circle text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-primary transition-colors'></i>
                 <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text text-primary whitespace-nowrap">Создать</span>
             </button>
@@ -150,6 +150,7 @@
                 
                 <div class="mt-1">
                     <h2 id="profileName" class="text-2xl font-bold"></h2>
+                    <p id="profileEmail" class="text-primary text-sm font-medium mt-1"></p>
                     <p id="profileBio" class="text-gray-400 mt-2 text-sm leading-relaxed whitespace-pre-wrap"></p>
                 </div>
 
@@ -161,7 +162,7 @@
         </div>
     </div>
 
-    <!-- Панель Уведомлений с анимацией -->
+    <!-- Панель Уведомлений -->
     <div id="notificationsPanel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-darkPanel shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
         <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-darkPanel sticky top-0 z-10 backdrop-blur-sm bg-opacity-90">
             <h2 class="text-xl font-bold flex items-center gap-2"><i class='bx bx-bell text-primary'></i> Уведомления</h2>
@@ -225,8 +226,8 @@
             <h2 class="text-2xl font-bold mb-6 text-red-500 flex items-center gap-2"><i class='bx bx-shield-quarter'></i> Админ-Панель</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">UID пользователя</label>
-                    <input type="text" id="banUid" placeholder="Введите UID" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-red-500 outline-none transition text-base">
+                    <label class="block text-sm font-medium text-gray-400 mb-1">email пользователя</label>
+                    <input type="email" id="banEmail" placeholder="введите email" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-red-500 outline-none transition text-base">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Причина блокировки</label>
@@ -288,7 +289,7 @@
 
         window.currentUser = null;
         window.userDataCache = null; 
-        const userCache = {}; // Глобальный кэш для автообновления аватарок/имен
+        const userCache = {};
 
         window.showToast = (msg, type = 'info') => {
             const container = document.getElementById('toastContainer');
@@ -315,15 +316,15 @@
                 userCache[uid] = snap.data();
                 return userCache[uid];
             }
-            return { displayName: 'User', photoURL: 'https://i.ibb.co/30Zc4Fq/default-avatar.png' };
+            return { displayName: 'user', photoURL: 'https://i.ibb.co/30Zc4Fq/default-avatar.png', email: '' };
         }
 
         let isLoginMode = true;
         document.getElementById('authToggleBtn').addEventListener('click', (e) => {
             isLoginMode = !isLoginMode;
-            document.getElementById('authTitle').textContent = isLoginMode ? "Вход в MesWy" : "Регистрация";
-            document.getElementById('authSubmitBtn').textContent = isLoginMode ? "Войти" : "Создать аккаунт";
-            e.target.textContent = isLoginMode ? "Нет аккаунта? Создать" : "Уже есть аккаунт? Войти";
+            document.getElementById('authTitle').textContent = isLoginMode ? "вход в meswy" : "регистрация";
+            document.getElementById('authSubmitBtn').textContent = isLoginMode ? "войти" : "создать аккаунт";
+            e.target.textContent = isLoginMode ? "нет аккаунта? создать" : "уже есть аккаунт? войти";
         });
 
         async function ensureUserProfile(user) {
@@ -333,7 +334,7 @@
                 await setDoc(userRef, {
                     email: user.email,
                     displayName: user.email.split('@')[0],
-                    bio: "ПРОСТО Я ЛУЧШИЙ",
+                    bio: "я лучший",
                     photoURL: "https://i.ibb.co/30Zc4Fq/default-avatar.png",
                     notifications: []
                 });
@@ -346,17 +347,17 @@
             const em = document.getElementById('authEmail').value;
             const pw = document.getElementById('authPassword').value;
             const btn = document.getElementById('authSubmitBtn');
-            btn.disabled = true; btn.textContent = "Загрузка...";
+            btn.disabled = true; btn.textContent = "загрузка...";
             try {
                 if (isLoginMode) {
                     await signInWithEmailAndPassword(auth, em, pw);
                 } else {
                     const cr = await createUserWithEmailAndPassword(auth, em, pw);
                     await ensureUserProfile(cr.user);
-                    showToast("Аккаунт создан!");
+                    showToast("аккаунт создан");
                 }
             } catch(e) { showToast(e.message, "error"); }
-            finally { btn.disabled = false; btn.textContent = isLoginMode ? "Войти" : "Создать аккаунт"; }
+            finally { btn.disabled = false; btn.textContent = isLoginMode ? "войти" : "создать аккаунт"; }
         });
 
         document.getElementById('navLogout')?.addEventListener('click', () => signOut(auth));
@@ -366,8 +367,8 @@
                 const data = await ensureUserProfile(user);
                 if(data.banned && new Date(data.banned.until) > new Date()) {
                     document.getElementById('banScreen').classList.remove('hidden');
-                    document.getElementById('banReason').innerText = "Причина: " + data.banned.reason;
-                    document.getElementById('banUntil').innerText = "До: " + new Date(data.banned.until).toLocaleString();
+                    document.getElementById('banReason').innerText = "причина: " + data.banned.reason;
+                    document.getElementById('banUntil').innerText = "до: " + new Date(data.banned.until).toLocaleString();
                     return;
                 }
                 window.currentUser = user; window.userDataCache = data;
@@ -387,16 +388,21 @@
         });
 
         window.banUser = async () => {
-            const uid = document.getElementById('banUid').value;
+            const email = document.getElementById('banEmail').value.trim();
             const reason = document.getElementById('banReasonInput').value;
             const days = parseInt(document.getElementById('banDays').value || 1);
-            if(!uid) return showToast("Введите UID", "error");
+            if(!email) return showToast("введите email", "error");
             try {
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const snap = await getDocs(q);
+                if(snap.empty) return showToast("пользователь не найден", "error");
+                
+                const targetUid = snap.docs[0].id;
                 const until = new Date(); until.setDate(until.getDate() + days);
-                await updateDoc(doc(db, "users", uid), { banned: { reason, until: until.toISOString() } });
-                showToast("Пользователь забанен");
+                await updateDoc(doc(db, "users", targetUid), { banned: { reason, until: until.toISOString() } });
+                showToast("пользователь забанен");
                 document.getElementById('adminModal').classList.add('hidden');
-            } catch(e) { showToast("Ошибка бана", "error"); }
+            } catch(e) { showToast("ошибка бана", "error"); }
         };
 
         window.sendNotification = async (targetUid, type, postId) => {
@@ -418,7 +424,7 @@
                 list.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
                 
                 if(!data.notifications || data.notifications.length === 0) {
-                    list.innerHTML = '<p class="text-gray-500 text-center mt-5 bg-[#121212] p-4 rounded-custom text-sm border border-gray-800">У вас пока нет уведомлений</p>';
+                    list.innerHTML = '<p class="text-gray-500 text-center mt-5 bg-[#121212] p-4 rounded-custom text-sm border border-gray-800">у вас пока нет уведомлений</p>';
                 } else {
                     list.innerHTML = '';
                     const notifs = data.notifications.sort((a,b)=>new Date(b.date)-new Date(a.date)).reverse();
@@ -454,6 +460,7 @@
             const d = await getUserData(uid);
             
             document.getElementById('profileName').innerText = d.displayName;
+            document.getElementById('profileEmail').innerText = d.email || '';
             document.getElementById('profileBio').innerText = d.bio || '';
             document.getElementById('profileAvatar').src = d.photoURL;
             
@@ -467,9 +474,9 @@
             try {
                 const s = await getDocs(query(collection(db, "posts"), where("authorId", "==", uid), orderBy("createdAt", "desc")));
                 pFeed.innerHTML = '';
-                if(s.empty) pFeed.innerHTML = '<div class="text-center text-gray-500 py-6 bg-[#121212] rounded-custom text-sm">Нет публикаций</div>';
+                if(s.empty) pFeed.innerHTML = '<div class="text-center text-gray-500 py-6 bg-[#121212] rounded-custom text-sm">нет публикаций</div>';
                 for(const d of s.docs) await renderPost(d, pFeed, true);
-            } catch(e) { pFeed.innerHTML = '<div class="text-center text-red-500 text-sm py-4">Ошибка загрузки</div>'; }
+            } catch(e) { pFeed.innerHTML = '<div class="text-center text-red-500 text-sm py-4">ошибка загрузки</div>'; }
         };
 
         window.toggleLike = async (postId, authorId, btn) => {
@@ -484,7 +491,7 @@
                 if(!isLiked) sendNotification(authorId, 'like', postId);
                 
                 btn.innerHTML = `<i class='bx ${isLiked ? 'bx-heart' : 'bxs-heart text-red-500 drop-shadow-md'} text-2xl'></i> <span class="font-bold text-base">${nl.length}</span>`;
-            } catch(e) { showToast("Ошибка", "error"); }
+            } catch(e) { showToast("ошибка", "error"); }
         };
 
         window.submitComment = async (postId, authorId, inputId) => {
@@ -497,22 +504,22 @@
                     comments: arrayUnion({ uid: currentUser.uid, text: text, date: new Date().toISOString() })
                 });
                 sendNotification(authorId, 'comment', postId);
-                i.value = ''; showToast('Комментарий отправлен');
+                i.value = ''; showToast('комментарий отправлен');
                 loadPosts(true);
-            } catch(e) { showToast("Ошибка", "error"); }
+            } catch(e) { showToast("ошибка", "error"); }
             finally { i.disabled = false; }
         };
 
         async function renderPost(docSnap, container, compact=false) {
             const p = docSnap.data();
-            const u = await getUserData(p.authorId); // Автообновление
+            const u = await getUserData(p.authorId);
             
             let imgs = '';
             if(p.images && p.images.length > 0) {
                 const gridClass = p.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2';
                 imgs = `<div class="grid ${gridClass} gap-2 mt-4 rounded-custom overflow-hidden">`;
                 p.images.forEach(url => {
-                    imgs += `<img src="${url}" onclick="openImage('${url}')" class="w-full ${compact ? 'h-36' : 'h-48 sm:h-64'} object-cover cursor-pointer hover:scale-105 transition duration-500 shadow-sm" alt="Post">`;
+                    imgs += `<img src="${url}" onclick="openImage('${url}')" class="w-full ${compact ? 'h-36' : 'h-48 sm:h-64'} object-cover cursor-pointer hover:scale-105 transition duration-500 shadow-sm" alt="post">`;
                 });
                 imgs += `</div>`;
             }
@@ -520,7 +527,7 @@
             let coms = '';
             if(p.comments && !compact && p.comments.length > 0) {
                 for(let c of p.comments.slice(-3)) {
-                    const cu = await getUserData(c.uid); // Глобальное обновление комментатора
+                    const cu = await getUserData(c.uid);
                     coms += `
                         <div class="flex gap-3 mb-3">
                             <img src="${cu.photoURL}" class="w-8 h-8 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${c.uid}')">
@@ -562,7 +569,7 @@
                     <div class="mb-2">${coms}</div>
                     <div class="flex gap-3 mt-4 items-center">
                         <img src="${userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png'}" class="w-10 h-10 rounded-full object-cover shadow-md">
-                        <input type="text" id="c-${docSnap.id}" placeholder="Оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')">
+                        <input type="text" id="c-${docSnap.id}" placeholder="оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')">
                         <button onclick="submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg shrink-0">
                             <i class='bx bx-send text-xl'></i>
                         </button>
@@ -587,7 +594,7 @@
             try {
                 const s = await getDocs(q);
                 if (s.empty && reset) {
-                    feed.innerHTML = '<div class="text-center text-gray-500 mt-8 p-6 bg-darkPanel rounded-custom border border-gray-800 text-base">Пока ничего нет. Напиши первый пост!</div>';
+                    feed.innerHTML = '<div class="text-center text-gray-500 mt-8 p-6 bg-darkPanel rounded-custom border border-gray-800 text-base">пока ничего нет напиши первый пост</div>';
                     return;
                 }
                 for(const d of s.docs) await renderPost(d, feed);
@@ -597,11 +604,11 @@
                     const btn = document.createElement('button');
                     btn.id = 'loadMoreBtn';
                     btn.className = "w-full py-4 bg-darkPanel border border-gray-800 rounded-custom font-bold text-gray-400 hover:text-white hover:border-gray-600 transition mt-4 text-base";
-                    btn.textContent = "Загрузить еще";
+                    btn.textContent = "загрузить еще";
                     btn.onclick = () => loadPosts(false);
                     feed.appendChild(btn);
                 }
-            } catch(e) { showToast("Ошибка загрузки", "error"); }
+            } catch(e) { showToast("ошибка загрузки", "error"); }
         };
 
         window.loadRecs = async () => {
@@ -609,13 +616,12 @@
             feed.innerHTML = '<div class="text-center py-10"><i class="bx bx-loader-alt bx-spin text-4xl text-primary"></i></div>';
             try {
                 const s = await getDocs(query(collection(db, "posts"), limit(30))); 
-                feed.innerHTML = '<div class="bg-primary/10 border border-primary/20 text-primary p-4 rounded-custom mb-4 font-bold flex items-center gap-2"><i class="bx bx-trending-up text-xl"></i> Рекомендации для вас</div>';
+                feed.innerHTML = '<div class="bg-primary/10 border border-primary/20 text-primary p-4 rounded-custom mb-4 font-bold flex items-center gap-2"><i class="bx bx-trending-up text-xl"></i> рекомендации для вас</div>';
                 const docs = s.docs.sort(() => 0.5 - Math.random()).slice(0, 10);
                 for(const d of docs) await renderPost(d, feed);
-            } catch(e) { showToast("Ошибка", "error"); }
+            } catch(e) { showToast("ошибка", "error"); }
         };
 
-        // Зум картинок
         let zoomScale = 1;
         const vImg = document.getElementById('viewerImage');
         const imgZoomContainer = document.getElementById('imageZoomContainer');
@@ -638,7 +644,6 @@
             vImg.style.transform = `scale(${zoomScale})`;
         });
 
-        // Поиск
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
         
@@ -649,7 +654,7 @@
 
         searchInput.addEventListener('input', async (e) => {
             const val = e.target.value.toLowerCase();
-            if(val.length < 2) { searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8"><i class="bx bx-search text-5xl opacity-20 mb-3"></i><br>Введите запрос</div>'; return; }
+            if(val.length < 2) { searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8"><i class="bx bx-search text-5xl opacity-20 mb-3"></i><br>введите запрос</div>'; return; }
             
             searchResults.innerHTML = '<div class="text-center text-primary mt-8"><i class="bx bx-loader-alt bx-spin text-4xl"></i></div>';
             try {
@@ -664,11 +669,10 @@
                         await renderPost(docSnap, searchResults, true);
                     }
                 }
-                if(found === 0) searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8 text-base bg-[#121212] p-4 rounded-custom border border-gray-800">Ничего не найдено</div>';
-            } catch(err) { searchResults.innerHTML = '<div class="text-center text-red-500">Ошибка поиска</div>'; }
+                if(found === 0) searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8 text-base bg-[#121212] p-4 rounded-custom border border-gray-800">ничего не найдено</div>';
+            } catch(err) { searchResults.innerHTML = '<div class="text-center text-red-500">ошибка поиска</div>'; }
         });
 
-        // Создание поста
         document.getElementById('postImages').addEventListener('change', function() {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
@@ -683,7 +687,7 @@
         document.getElementById('createPostForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('postSubmitBtn');
-            btn.disabled = true; btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Публикуем...";
+            btn.disabled = true; btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> публикуем...";
             try {
                 const files = document.getElementById('postImages').files;
                 const uploadPromises = Array.from(files).map(f => uploadToImgBB(f));
@@ -700,10 +704,10 @@
                 document.getElementById('createPostModal').classList.add('hidden');
                 document.getElementById('createPostForm').reset();
                 document.getElementById('imagePreview').innerHTML = '';
-                showToast("Пост опубликован!");
+                showToast("пост опубликован");
                 loadPosts(true);
             } catch (err) { showToast(err.message, "error"); }
-            finally { btn.disabled = false; btn.innerHTML = "Опубликовать"; }
+            finally { btn.disabled = false; btn.innerHTML = "опубликовать"; }
         });
 
         async function uploadToImgBB(file) {
@@ -714,11 +718,10 @@
             } catch(e) { return null; }
         }
 
-        // Редактирование профиля
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('editProfileSubmitBtn');
-            btn.disabled = true; btn.textContent = "Сохраняем...";
+            btn.disabled = true; btn.textContent = "сохраняем...";
             try {
                 const updates = { 
                     displayName: document.getElementById('editName').value, 
@@ -728,15 +731,15 @@
                 if(f) updates.photoURL = await uploadToImgBB(f);
                 
                 await updateDoc(doc(db, "users", currentUser.uid), updates);
-                userCache[currentUser.uid] = { ...userCache[currentUser.uid], ...updates }; // Обновляем локальный кэш
+                userCache[currentUser.uid] = { ...userCache[currentUser.uid], ...updates }; 
                 userDataCache = { ...userDataCache, ...updates };
                 
                 document.getElementById('editProfileModal').classList.add('hidden');
                 openProfile(currentUser.uid); 
-                loadPosts(true); // Перезагружаем ленту чтобы аватарки обновились
-                showToast("Профиль обновлен");
-            } catch(e) { showToast("Ошибка", "error"); }
-            finally { btn.disabled = false; btn.textContent = "Сохранить"; }
+                loadPosts(true); 
+                showToast("профиль обновлен");
+            } catch(e) { showToast("ошибка", "error"); }
+            finally { btn.disabled = false; btn.textContent = "сохранить"; }
         });
     </script>
 </body>
