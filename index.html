@@ -31,13 +31,9 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .nav-btn { transition: all 0.2s; }
         .nav-btn.active i { color: #2563eb !important; }
         .nav-btn.active .nav-label { color: #2563eb !important; }
-        .nav-btn { transition: all 0.2s; }
-        @media (max-width: 640px) {
-            .nav-label { display: none; }
-            .nav-btn { justify-content: center; }
-        }
         .follow-btn-post {
             position: absolute;
             top: 12px;
@@ -60,6 +56,25 @@
         }
         .follow-btn-post:hover { transform: scale(1.1); background: #1d4ed8; }
         .follow-btn-post.following { background: #1f1f22; color: #888; box-shadow: none; }
+        .color-preset {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .color-preset:hover { transform: scale(1.1); }
+        .color-preset.active { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,0.3); }
+        .comments-modal .comment-item {
+            border-bottom: 1px solid #2a2a2e;
+            padding: 12px 0;
+        }
+        .comments-modal .comment-item:last-child { border-bottom: none; }
+        @media (max-width: 640px) {
+            .nav-label { display: none; }
+            .nav-btn { justify-content: center; }
+        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden font-sans text-gray-200 selection:bg-primary selection:text-white">
@@ -67,12 +82,15 @@
     <!-- Toasts -->
     <div id="toastContainer" class="fixed bottom-20 sm:bottom-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
-    <!-- Бан -->
+    <!-- Экран бана -->
     <div id="banScreen" class="hidden fixed inset-0 z-[10000] bg-red-600 flex flex-col items-center justify-center p-6 text-center">
         <i class='bx bx-block text-8xl text-white mb-6'></i>
         <h1 class="text-4xl font-bold text-white mb-4">Аккаунт заблокирован</h1>
         <p id="banReason" class="text-xl text-white mb-2 font-medium"></p>
-        <p id="banUntil" class="text-lg text-white/80"></p>
+        <p id="banUntil" class="text-lg text-white/80 mb-6"></p>
+        <button id="banLogoutBtn" class="bg-white text-red-600 font-bold px-8 py-3 rounded-custom hover:bg-gray-200 transition shadow-lg text-lg">
+            <i class='bx bx-log-out'></i> Выйти
+        </button>
     </div>
 
     <!-- Авторизация -->
@@ -97,55 +115,55 @@
                 <span class="ml-2 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">MesWy</span>
             </div>
             
+            <!-- 1. Лента -->
             <button onclick="loadPosts(true); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom active">
                 <i class='bx bx-home-alt-2 text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Лента</span>
             </button>
 
-            <button id="navSearch" onclick="openSearch(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <!-- 2. Поиск (модалка) -->
+            <button onclick="openSearch(); setActiveNav(null)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-search text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Поиск</span>
             </button>
 
+            <!-- 3. Рекомендации -->
             <button onclick="loadRecs(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-trending-up text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Рекомендации</span>
             </button>
 
-            <button onclick="document.getElementById('createPostModal').classList.remove('hidden'); setActiveNav(this)" id="navCreatePost" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <!-- 4. Создать (модалка) -->
+            <button onclick="document.getElementById('createPostModal').classList.remove('hidden'); setActiveNav(null)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-plus-circle text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity text-primary whitespace-nowrap">Создать</span>
             </button>
 
+            <!-- 5. Уведомления (панель) -->
             <button onclick="toggleNotifications(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom relative">
                 <i class='bx bx-bell text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Уведомления</span>
                 <span id="notifBadge" class="hidden absolute top-2 sm:top-3 left-6 sm:left-10 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel"></span>
             </button>
 
+            <!-- 6. Профиль (панель) -->
             <button onclick="if(currentUser) openProfile(currentUser.uid); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-user text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Профиль</span>
             </button>
 
-            <!-- НОВОЕ: Настройки (мобилка) -->
-            <button onclick="openSettings(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <!-- 7. Настройки (модалка редактирования) -->
+            <button onclick="openSettings(); setActiveNav(null)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-cog text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Настройки</span>
             </button>
 
-            <!-- НОВОЕ: Выход (мобилка) -->
-            <button id="navLogoutMobile" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <!-- 8. (запасной слот, если нужен) — оставим пустым -->
+
+            <!-- 9. Выход (последний) -->
+            <button id="navLogout" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-log-out text-2xl sm:text-3xl sm:min-w-[3rem] text-center'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Выйти</span>
-            </button>
-        </div>
-
-        <!-- Выход (ПК) -->
-        <div class="hidden sm:flex flex-col w-full mb-2">
-            <button id="navLogout" class="flex items-center w-full p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer text-left rounded-r-custom">
-                <i class='bx bx-log-out text-3xl min-w-[3rem] text-center'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Выйти</span>
             </button>
         </div>
     </aside>
@@ -157,11 +175,11 @@
         </div>
     </main>
 
-    <!-- Профиль (панель) -->
+    <!-- Панель профиля -->
     <div id="profilePanel" class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
         <div class="flex-1 overflow-y-auto hide-scroll pb-20 sm:pb-4">
             <div id="profileCover" class="h-40 sm:h-48 bg-gray-800 bg-cover bg-center relative">
-                <button onclick="document.getElementById('profilePanel').classList.add('translate-x-full')" class="absolute top-3 right-3 bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80 flex items-center justify-center transition backdrop-blur-sm z-50">
+                <button onclick="closeProfilePanel()" class="absolute top-3 right-3 bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80 flex items-center justify-center transition backdrop-blur-sm z-50">
                     <i class='bx bx-x text-2xl'></i>
                 </button>
             </div>
@@ -172,7 +190,7 @@
                         <button id="adminPanelBtn" onclick="document.getElementById('adminModal').classList.remove('hidden')" class="hidden bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-custom font-bold transition shadow-lg shadow-red-600/20 text-sm">
                             <i class='bx bx-shield-quarter'></i> Админ
                         </button>
-                        <button id="editProfileBtn" onclick="document.getElementById('editProfileModal').classList.remove('hidden')" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-5 py-2 rounded-custom font-bold transition border border-gray-700 text-sm">
+                        <button id="editProfileBtn" onclick="openSettings()" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-5 py-2 rounded-custom font-bold transition border border-gray-700 text-sm">
                             Редактировать
                         </button>
                     </div>
@@ -190,11 +208,11 @@
         </div>
     </div>
 
-    <!-- Уведомления (панель) -->
+    <!-- Панель уведомлений -->
     <div id="notificationsPanel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-darkPanel shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
         <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-darkPanel sticky top-0 z-10 backdrop-blur-sm bg-opacity-90">
             <h2 class="text-xl font-bold flex items-center gap-2"><i class='bx bx-bell text-primary'></i> Уведомления</h2>
-            <button onclick="toggleNotifications()" class="text-gray-400 hover:text-white transition bg-[#121212] w-8 h-8 rounded-full flex items-center justify-center border border-gray-800">
+            <button onclick="closeNotificationsPanel()" class="text-gray-400 hover:text-white transition bg-[#121212] w-8 h-8 rounded-full flex items-center justify-center border border-gray-800">
                 <i class='bx bx-x text-xl'></i>
             </button>
         </div>
@@ -203,9 +221,9 @@
         </div>
     </div>
 
-    <!-- Поиск (полноэкранный) -->
+    <!-- Поиск (модалка) -->
     <div id="searchModal" class="hidden fixed inset-0 z-[60] bg-[#121212] flex flex-col p-4 overflow-y-auto hide-scroll pb-20">
-        <button onclick="document.getElementById('searchModal').classList.add('hidden')" class="fixed top-4 right-4 text-gray-400 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-darkPanel border border-gray-800 z-50 transition">
+        <button onclick="closeSearch()" class="fixed top-4 right-4 text-gray-400 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-darkPanel border border-gray-800 z-50 transition">
             <i class='bx bx-x text-2xl'></i>
         </button>
         <div class="max-w-2xl w-full mx-auto mt-8 sm:mt-6">
@@ -220,7 +238,7 @@
         </div>
     </div>
 
-    <!-- Создание поста -->
+    <!-- Создание поста (модалка) -->
     <div id="createPostModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800">
             <button onclick="document.getElementById('createPostModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
@@ -240,6 +258,26 @@
                 </div>
                 <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">Опубликовать</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Модалка комментариев -->
+    <div id="commentsModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col border border-gray-800 relative">
+            <button onclick="closeCommentsModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
+                <i class='bx bx-x text-xl'></i>
+            </button>
+            <h3 class="text-xl font-bold mb-3" id="commentsModalTitle">Комментарии</h3>
+            <div id="commentsList" class="flex-1 overflow-y-auto hide-scroll mb-4 space-y-2">
+                <!-- Комментарии рендерятся сюда -->
+            </div>
+            <div class="flex gap-3 items-center border-t border-gray-800 pt-3">
+                <img id="commentsModalAvatar" src="" class="w-10 h-10 rounded-full object-cover shadow-md">
+                <input type="text" id="commentsModalInput" placeholder="Написать комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key==='Enter') sendCommentFromModal()">
+                <button onclick="sendCommentFromModal()" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg shrink-0">
+                    <i class='bx bx-send text-xl'></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -274,7 +312,7 @@
             <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
                 <i class='bx bx-x text-xl'></i>
             </button>
-            <h2 class="text-2xl font-bold mb-4">Редактирование профиля</h2>
+            <h2 class="text-2xl font-bold mb-4">Настройки профиля</h2>
             <form id="editProfileForm" class="space-y-4">
                 <input type="text" id="editName" placeholder="Имя пользователя" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
                 <textarea id="editBio" placeholder="О себе" rows="3" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-base"></textarea>
@@ -282,10 +320,19 @@
                     <label class="block text-sm font-medium text-gray-400 mb-2">Сменить аватарку</label>
                     <input type="file" id="editAvatar" accept="image/*" class="w-full text-xs file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1.5 file:cursor-pointer">
                 </div>
-                <!-- НОВОЕ: настройка фона -->
+                <!-- Выбор цвета фона -->
                 <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
                     <label class="block text-sm font-medium text-gray-400 mb-2">Цвет фона</label>
-                    <div class="flex items-center gap-4">
+                    <div class="flex flex-wrap gap-3 items-center mb-3">
+                        <button type="button" class="color-preset" style="background:#121212" data-color="#121212" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#444" data-color="#444" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#2563eb" data-color="#2563eb" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#22c55e" data-color="#22c55e" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#ef4444" data-color="#ef4444" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#8b5cf6" data-color="#8b5cf6" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#f97316" data-color="#f97316" onclick="selectColor(this)"></button>
+                    </div>
+                    <div class="flex items-center gap-3">
                         <input type="color" id="bgColorInput" value="#121212" class="w-12 h-12 rounded border-0 cursor-pointer bg-transparent">
                         <button type="button" id="applyBgBtn" class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-custom text-sm">Применить</button>
                     </div>
@@ -350,10 +397,24 @@
             return { displayName: 'Пользователь', photoURL: 'https://i.ibb.co/30Zc4Fq/default-avatar.png', email: '' };
         }
 
-        // --- Активная вкладка ---
+        // --- Управление активной вкладкой ---
         window.setActiveNav = (btn) => {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
+        };
+
+        // --- Закрытие панелей ---
+        window.closeProfilePanel = () => {
+            document.getElementById('profilePanel').classList.add('translate-x-full');
+        };
+        window.closeNotificationsPanel = () => {
+            document.getElementById('notificationsPanel').classList.add('translate-x-full');
+        };
+        window.closeSearch = () => {
+            document.getElementById('searchModal').classList.add('hidden');
+        };
+        window.closeCommentsModal = () => {
+            document.getElementById('commentsModal').classList.add('hidden');
         };
 
         // --- Авторизация ---
@@ -399,9 +460,9 @@
             finally { btn.disabled = false; btn.textContent = isLoginMode ? "Войти" : "Создать аккаунт"; }
         });
 
-        // Выход (обе кнопки)
+        // Выход (общая кнопка)
         document.getElementById('navLogout').addEventListener('click', () => signOut(auth));
-        document.getElementById('navLogoutMobile').addEventListener('click', () => signOut(auth));
+        document.getElementById('banLogoutBtn').addEventListener('click', () => signOut(auth));
 
         // --- Состояние пользователя ---
         onAuthStateChanged(auth, async (user) => {
@@ -422,7 +483,6 @@
                 } else {
                     document.getElementById('adminPanelBtn').classList.add('hidden');
                 }
-                // Применить фон из настроек
                 if(data.background) {
                     document.body.style.backgroundColor = data.background;
                     document.getElementById('bgColorInput').value = data.background;
@@ -433,6 +493,11 @@
                 window.currentUser = null;
                 window.userDataCache = null;
                 document.getElementById('authModal').classList.remove('hidden');
+                // Закрываем все панели
+                closeProfilePanel();
+                closeNotificationsPanel();
+                closeSearch();
+                closeCommentsModal();
             }
         });
 
@@ -475,34 +540,41 @@
 
         window.toggleNotifications = async () => {
             const panel = document.getElementById('notificationsPanel');
+            // Если панель уже открыта, закрываем
+            if(!panel.classList.contains('translate-x-full')) {
+                closeNotificationsPanel();
+                return;
+            }
+            // Закрываем другие панели
+            closeProfilePanel();
+            closeSearch();
+            closeCommentsModal();
+            panel.classList.remove('translate-x-full');
+            document.getElementById('notifBadge').classList.add('hidden');
             const list = document.getElementById('notificationsList');
-            if(panel.classList.contains('translate-x-full')) {
-                panel.classList.remove('translate-x-full');
-                document.getElementById('notifBadge').classList.add('hidden');
-                const data = await getUserData(currentUser.uid);
-                list.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
-                if(!data.notifications || data.notifications.length === 0) {
-                    list.innerHTML = '<p class="text-gray-500 text-center mt-5 bg-[#121212] p-4 rounded-custom text-sm border border-gray-800">У вас пока нет уведомлений</p>';
-                } else {
-                    list.innerHTML = '';
-                    const notifs = data.notifications.slice().reverse();
-                    for(const n of notifs) {
-                        const u = await getUserData(n.from);
-                        const txt = n.type === 'like' ? 'оценил(а) ваш пост' : 'прокомментировал(а) ваш пост';
-                        const icon = n.type === 'like' ? 'bxs-heart text-red-500' : 'bx-message-rounded text-primary';
-                        const el = document.createElement('div');
-                        el.className = "bg-[#121212] p-4 rounded-custom flex gap-3 items-center border border-gray-800 hover:border-gray-600 transition duration-300 cursor-pointer shadow-lg";
-                        el.innerHTML = `
-                            <img src="${n.fromAvatar || u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
-                            <div class="flex-1 text-sm">
-                                <span class="font-bold hover:text-primary transition" onclick="openProfile('${n.from}')">${n.fromName || u.displayName}</span>
-                                <div class="text-gray-400 mt-0.5 flex items-center gap-1"><i class='bx ${icon}'></i> ${txt}</div>
-                            </div>
-                        `;
-                        list.prepend(el);
-                    }
+            const data = await getUserData(currentUser.uid);
+            list.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
+            if(!data.notifications || data.notifications.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center mt-5 bg-[#121212] p-4 rounded-custom text-sm border border-gray-800">У вас пока нет уведомлений</p>';
+            } else {
+                list.innerHTML = '';
+                const notifs = data.notifications.slice().reverse();
+                for(const n of notifs) {
+                    const u = await getUserData(n.from);
+                    const txt = n.type === 'like' ? 'оценил(а) ваш пост' : 'прокомментировал(а) ваш пост';
+                    const icon = n.type === 'like' ? 'bxs-heart text-red-500' : 'bx-message-rounded text-primary';
+                    const el = document.createElement('div');
+                    el.className = "bg-[#121212] p-4 rounded-custom flex gap-3 items-center border border-gray-800 hover:border-gray-600 transition duration-300 cursor-pointer shadow-lg";
+                    el.innerHTML = `
+                        <img src="${n.fromAvatar || u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
+                        <div class="flex-1 text-sm">
+                            <span class="font-bold hover:text-primary transition" onclick="openProfile('${n.from}')">${n.fromName || u.displayName}</span>
+                            <div class="text-gray-400 mt-0.5 flex items-center gap-1"><i class='bx ${icon}'></i> ${txt}</div>
+                        </div>
+                    `;
+                    list.prepend(el);
                 }
-            } else { panel.classList.add('translate-x-full'); }
+            }
         };
 
         async function checkNotifications() {
@@ -515,6 +587,15 @@
         // --- Открытие профиля ---
         window.openProfile = async (uid) => {
             const panel = document.getElementById('profilePanel');
+            // Если уже открыт, закрываем
+            if(!panel.classList.contains('translate-x-full')) {
+                closeProfilePanel();
+                return;
+            }
+            // Закрываем другие панели
+            closeNotificationsPanel();
+            closeSearch();
+            closeCommentsModal();
             const d = await getUserData(uid);
             document.getElementById('profileName').innerText = d.displayName;
             document.getElementById('profileEmail').innerText = d.email || '';
@@ -547,47 +628,75 @@
             } catch(e) { showToast("Ошибка", "error"); }
         };
 
-        // --- Комментарий (без перезагрузки ленты) ---
-        window.submitComment = async (postId, authorId, inputId) => {
-            const i = document.getElementById(inputId);
-            const text = i.value.trim();
-            if(!text) return;
+        // --- Комментарии (модалка) ---
+        let currentCommentsPostId = null;
+        let currentCommentsAuthorId = null;
+
+        window.openCommentsModal = async (postId, authorId) => {
+            currentCommentsPostId = postId;
+            currentCommentsAuthorId = authorId;
+            const modal = document.getElementById('commentsModal');
+            const list = document.getElementById('commentsList');
+            const avatar = document.getElementById('commentsModalAvatar');
+            avatar.src = userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png';
+            modal.classList.remove('hidden');
+            // Закрываем другие панели
+            closeProfilePanel();
+            closeNotificationsPanel();
+            closeSearch();
+            // Загружаем комментарии
+            list.innerHTML = '<div class="text-center py-4"><i class="bx bx-loader-alt bx-spin text-2xl text-primary"></i></div>';
             try {
-                i.disabled = true;
-                const postRef = doc(db, "posts", postId);
+                const snap = await getDoc(doc(db, "posts", postId));
+                const data = snap.data();
+                const comments = data.comments || [];
+                list.innerHTML = '';
+                if(comments.length === 0) {
+                    list.innerHTML = '<p class="text-gray-400 text-center py-4">Пока нет комментариев. Будьте первым!</p>';
+                } else {
+                    for(let c of comments.slice().reverse()) {
+                        const u = await getUserData(c.uid);
+                        const div = document.createElement('div');
+                        div.className = "comment-item flex gap-3";
+                        div.innerHTML = `
+                            <img src="${u.photoURL}" class="w-10 h-10 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${c.uid}')">
+                            <div class="flex-1">
+                                <span class="font-bold text-sm cursor-pointer hover:text-primary transition" onclick="openProfile('${c.uid}')">${u.displayName}</span>
+                                <p class="text-gray-300 text-sm mt-1">${c.text}</p>
+                                <span class="text-xs text-gray-500">${new Date(c.date).toLocaleString()}</span>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    }
+                }
+                document.getElementById('commentsModalInput').value = '';
+                document.getElementById('commentsModalInput').focus();
+            } catch(e) {
+                list.innerHTML = '<div class="text-red-400 text-center">Ошибка загрузки</div>';
+            }
+        };
+
+        window.sendCommentFromModal = async () => {
+            const input = document.getElementById('commentsModalInput');
+            const text = input.value.trim();
+            if(!text || !currentCommentsPostId) return;
+            try {
+                input.disabled = true;
+                const postRef = doc(db, "posts", currentCommentsPostId);
                 const snap = await getDoc(postRef);
                 const comments = snap.data().comments || [];
                 const newComment = { uid: currentUser.uid, text: text, date: new Date().toISOString() };
                 await updateDoc(postRef, { comments: arrayUnion(newComment) });
-                sendNotification(authorId, 'comment', postId);
-                i.value = '';
+                sendNotification(currentCommentsAuthorId, 'comment', currentCommentsPostId);
                 showToast("Комментарий отправлен");
-                // Локально добавим комментарий в DOM
-                const commentContainer = document.getElementById(`comments-${postId}`);
-                if(commentContainer) {
-                    const u = await getUserData(currentUser.uid);
-                    const div = document.createElement('div');
-                    div.className = "flex gap-3 mb-3";
-                    div.innerHTML = `
-                        <img src="${u.photoURL}" class="w-8 h-8 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${currentUser.uid}')">
-                        <div class="bg-[#121212] p-3 rounded-custom rounded-tl-none flex-1 border border-gray-800">
-                            <span class="font-bold text-sm cursor-pointer hover:text-primary transition" onclick="openProfile('${currentUser.uid}')">${u.displayName}</span>
-                            <p class="text-gray-300 mt-1 text-sm">${text}</p>
-                        </div>
-                    `;
-                    commentContainer.prepend(div);
-                    // Обновить счётчик комментариев
-                    const commentCount = document.getElementById(`comment-count-${postId}`);
-                    if(commentCount) {
-                        const current = parseInt(commentCount.textContent) || 0;
-                        commentCount.textContent = current + 1;
-                    }
-                }
+                input.value = '';
+                // Перезагружаем комментарии
+                await openCommentsModal(currentCommentsPostId, currentCommentsAuthorId);
             } catch(e) { showToast("Ошибка", "error"); }
-            finally { i.disabled = false; }
+            finally { input.disabled = false; }
         };
 
-        // --- Подписка с поста ---
+        // --- Подписка ---
         window.toggleFollow = async (targetUid, btn) => {
             if(targetUid === currentUser.uid) return;
             try {
@@ -624,22 +733,6 @@
                 imgs += `</div>`;
             }
 
-            let coms = '';
-            if(p.comments && !compact && p.comments.length > 0) {
-                const sorted = p.comments.slice(-3);
-                for(let c of sorted) {
-                    const cu = await getUserData(c.uid);
-                    coms += `
-                        <div class="flex gap-3 mb-3">
-                            <img src="${cu.photoURL}" class="w-8 h-8 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${c.uid}')">
-                            <div class="bg-[#121212] p-3 rounded-custom rounded-tl-none flex-1 border border-gray-800">
-                                <span class="font-bold text-sm cursor-pointer hover:text-primary transition" onclick="openProfile('${c.uid}')">${cu.displayName}</span>
-                                <p class="text-gray-300 mt-1 text-sm">${c.text}</p>
-                            </div>
-                        </div>`;
-                }
-            }
-
             const isLiked = p.likes && p.likes.includes(currentUser.uid);
             const commentCount = p.comments?.length || 0;
 
@@ -662,30 +755,18 @@
                         <i class='bx ${isLiked ? 'bxs-heart text-red-500 drop-shadow-md' : 'bx-heart'} text-2xl'></i> 
                         <span class="font-bold text-base">${p.likes?.length || 0}</span>
                     </button>
-                    <div class="flex items-center gap-2 text-gray-400">
+                    <button onclick="openCommentsModal('${docSnap.id}', '${p.authorId}')" class="flex items-center gap-2 text-gray-400 hover:text-white transition">
                         <i class='bx bx-message-rounded text-2xl'></i> 
-                        <span class="font-bold text-base" id="comment-count-${docSnap.id}">${commentCount}</span>
-                    </div>
+                        <span class="font-bold text-base">${commentCount}</span>
+                    </button>
                 </div>
-                ${!compact ? `
-                <div class="mt-4 border-t border-gray-800 pt-4" id="comments-${docSnap.id}">
-                    <div class="mb-2">${coms}</div>
-                    <div class="flex gap-3 mt-4 items-center">
-                        <img src="${userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png'}" class="w-10 h-10 rounded-full object-cover shadow-md">
-                        <input type="text" id="c-${docSnap.id}" placeholder="Оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')">
-                        <button onclick="submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg shrink-0">
-                            <i class='bx bx-send text-xl'></i>
-                        </button>
-                    </div>
-                </div>` : ''}
             `;
 
-            // Кнопка подписки на посте (если не свой пост)
+            // Кнопка подписки
             if(!isOwn) {
                 const followBtn = document.createElement('button');
                 followBtn.className = 'follow-btn-post';
                 followBtn.textContent = '+';
-                // Проверим, подписан ли уже
                 (async () => {
                     const userData = await getUserData(currentUser.uid);
                     const following = userData?.following || [];
@@ -704,7 +785,7 @@
             container.appendChild(el);
         }
 
-        // --- Лента с пагинацией ---
+        // --- Лента ---
         let lastVisiblePost = null;
         window.loadPosts = async (reset = false) => {
             const feed = document.getElementById('postsFeed');
@@ -749,6 +830,9 @@
         // --- Поиск ---
         window.openSearch = () => {
             document.getElementById('searchModal').classList.remove('hidden');
+            closeProfilePanel();
+            closeNotificationsPanel();
+            closeCommentsModal();
             document.getElementById('searchInput').focus();
         };
 
@@ -817,7 +901,38 @@
             } catch(e) { return null; }
         }
 
-        // --- Редактирование профиля + настройка фона ---
+        // --- Настройки (редактирование профиля + фон) ---
+        window.openSettings = () => {
+            document.getElementById('editProfileModal').classList.remove('hidden');
+            closeProfilePanel();
+            closeNotificationsPanel();
+            closeSearch();
+            closeCommentsModal();
+            if(currentUserData) {
+                document.getElementById('editName').value = currentUserData.displayName || '';
+                document.getElementById('editBio').value = currentUserData.bio || '';
+                document.getElementById('bgColorInput').value = currentUserData.background || '#121212';
+                // Подсветить активный пресет
+                document.querySelectorAll('.color-preset').forEach(el => {
+                    el.classList.toggle('active', el.dataset.color === currentUserData.background);
+                });
+            }
+        };
+
+        // Выбор цвета из пресета
+        window.selectColor = (el) => {
+            document.querySelectorAll('.color-preset').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('bgColorInput').value = el.dataset.color;
+        };
+
+        document.getElementById('applyBgBtn').addEventListener('click', async () => {
+            const color = document.getElementById('bgColorInput').value;
+            document.body.style.backgroundColor = color;
+            await updateDoc(doc(db, "users", currentUser.uid), { background: color });
+            showToast("Фон изменён");
+        });
+
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('editProfileSubmitBtn');
@@ -833,31 +948,14 @@
                 userCache[currentUser.uid] = { ...userCache[currentUser.uid], ...updates }; 
                 userDataCache = { ...userDataCache, ...updates };
                 document.getElementById('editProfileModal').classList.add('hidden');
-                openProfile(currentUser.uid); 
+                if(!document.getElementById('profilePanel').classList.contains('translate-x-full')) {
+                    openProfile(currentUser.uid);
+                }
                 loadPosts(true); 
                 showToast("Профиль обновлен");
             } catch(e) { showToast("Ошибка", "error"); }
             finally { btn.disabled = false; btn.textContent = "Сохранить"; }
         });
-
-        // Применить фон
-        document.getElementById('applyBgBtn').addEventListener('click', async () => {
-            const color = document.getElementById('bgColorInput').value;
-            document.body.style.backgroundColor = color;
-            await updateDoc(doc(db, "users", currentUser.uid), { background: color });
-            showToast("Фон изменён");
-        });
-
-        // Открыть настройки (показываем модалку редактирования)
-        window.openSettings = () => {
-            document.getElementById('editProfileModal').classList.remove('hidden');
-            // Заполним поля текущими данными
-            if(currentUserData) {
-                document.getElementById('editName').value = currentUserData.displayName || '';
-                document.getElementById('editBio').value = currentUserData.bio || '';
-                document.getElementById('bgColorInput').value = currentUserData.background || '#121212';
-            }
-        };
 
         // --- Зум изображений ---
         let zoomScale = 1;
