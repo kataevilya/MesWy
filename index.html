@@ -23,105 +23,134 @@
     </script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
+        :root { --accent-color: #2563eb; }
         * { box-sizing: border-box; }
-        body { background: #121212; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; }
-        ::-webkit-scrollbar { width: 5px; }
+        body { background-color: #121212; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 20px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
 
-        /* Навигация */
-        .nav-btn {
-            transition: all 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1 1 0;
-            padding: 8px 0;
-            color: #9ca3af;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            position: relative;
-        }
-        .nav-btn i { font-size: 26px; transition: color 0.15s; }
-        .nav-btn .nav-label { display: none; }
-        .nav-btn.active i { color: #e5e7eb; } /* чуть ярче, но не синий */
-        .nav-btn.active .nav-label { color: #e5e7eb; }
-
-        @media (min-width: 640px) {
-            .nav-btn {
-                padding: 14px 20px;
-                justify-content: flex-start;
-                flex: none;
-                width: 100%;
-                gap: 12px;
-            }
-            .nav-btn i { font-size: 30px; min-width: 3rem; text-align: center; }
-            .nav-btn .nav-label { display: inline; font-weight: 500; opacity: 0.7; transition: opacity 0.2s; white-space: nowrap; }
-            .group:hover .nav-btn .nav-label { opacity: 1; }
-        }
-
-        /* Мобильное меню: плотное, без отступов */
-        .mobile-nav {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            height: 100%;
-            width: 100%;
-            padding: 0 2px;
-        }
-        .mobile-nav .nav-btn {
-            flex: 1;
-            justify-content: center;
-            padding: 4px 0;
-        }
-        .mobile-nav .nav-btn i { font-size: 24px; }
-        @media (max-width: 639px) {
-            .nav-btn .nav-label { display: none; }
-        }
-
-        /* Боковая панель (sidebar) */
+        /* Боковое меню (ПК) — выдвигается при наведении */
         .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 72px;
+            background: #1f1f22;
+            border-right: 1px solid #2a2a2e;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            padding-top: 12px;
+        }
+        .sidebar:hover { width: 220px; }
+        .sidebar .logo-area {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            margin-bottom: 16px;
+            white-space: nowrap;
+        }
+        .sidebar .logo-area i {
+            font-size: 32px;
+            min-width: 40px;
+            color: #2563eb;
+        }
+        .sidebar .logo-area span {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2563eb;
+            opacity: 0;
+            transition: opacity 0.3s;
+            margin-left: 8px;
+        }
+        .sidebar:hover .logo-area span { opacity: 1; }
+
+        .sidebar .nav-list {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 4px;
+            padding: 0 8px;
+        }
+        .sidebar .nav-btn {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 12px;
+            color: #9ca3af;
+            transition: all 0.2s;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 15px;
+            font-weight: 500;
+            gap: 12px;
+        }
+        .sidebar .nav-btn i {
+            font-size: 28px;
+            min-width: 32px;
+            transition: color 0.2s;
+        }
+        .sidebar .nav-btn .nav-label {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar:hover .nav-btn .nav-label { opacity: 1; }
+        .sidebar .nav-btn:hover { background: #2a2a2e; color: #fff; }
+        .sidebar .nav-btn.active i { color: #2563eb !important; }
+        .sidebar .nav-btn.active .nav-label { color: #2563eb !important; }
+        .sidebar .nav-btn.logout { color: #ef4444; }
+        .sidebar .nav-btn.logout:hover { background: #3f1a1a; }
+
+        /* Мобильное меню (нижнее) */
+        .mobile-nav {
+            display: none;
             position: fixed;
             bottom: 0;
             left: 0;
-            width: 100%;
+            right: 0;
             height: 60px;
             background: #1f1f22;
             border-top: 1px solid #2a2a2e;
             z-index: 40;
-            display: flex;
+            justify-content: space-around;
             align-items: center;
+            padding: 0 4px;
+        }
+        .mobile-nav .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            transition: color 0.2s;
+            padding: 4px 8px;
+            font-size: 10px;
+            gap: 2px;
+            flex: 1;
+        }
+        .mobile-nav .nav-btn i { font-size: 24px; }
+        .mobile-nav .nav-btn .nav-label { font-size: 10px; }
+        .mobile-nav .nav-btn.active i { color: #2563eb !important; }
+        .mobile-nav .nav-btn.active .nav-label { color: #2563eb !important; }
+        .mobile-nav .nav-btn.logout { color: #ef4444; }
+
+        @media (max-width: 639px) {
+            .sidebar { display: none; }
+            .mobile-nav { display: flex; }
+            main { padding-bottom: 72px; }
         }
         @media (min-width: 640px) {
-            .sidebar {
-                width: 80px;
-                height: 100%;
-                border-top: none;
-                border-right: 1px solid #2a2a2e;
-                flex-direction: column;
-                justify-content: flex-start;
-                padding-top: 16px;
-                overflow-y: auto;
-            }
-            .sidebar .mobile-nav {
-                flex-direction: column;
-                height: auto;
-                width: 100%;
-                gap: 2px;
-            }
-            .sidebar .mobile-nav .nav-btn {
-                width: 100%;
-                justify-content: flex-start;
-                padding: 12px 16px;
-            }
+            main { margin-left: 72px; }
         }
 
-        /* Выдвижные панели (slide) */
+        /* Панели (выезжающие) */
         .slide-panel {
             position: fixed;
             top: 0;
@@ -132,11 +161,10 @@
             background: #1f1f22;
             z-index: 50;
             transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s ease;
             border-left: 1px solid #2a2a2e;
             display: flex;
             flex-direction: column;
-            box-shadow: -4px 0 24px rgba(0,0,0,0.5);
         }
         .slide-panel.open { transform: translateX(0); }
         .slide-panel .panel-header {
@@ -155,19 +183,6 @@
         }
         .slide-panel .panel-body::-webkit-scrollbar { width: 4px; }
         .slide-panel .panel-body::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
-
-        /* Оверлей для мобильных */
-        .panel-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 45;
-            display: none;
-        }
-        .panel-overlay.active { display: block; }
-        @media (min-width: 640px) {
-            .panel-overlay { display: none !important; }
-        }
 
         /* Кнопка подписки на посте */
         .follow-btn-post {
@@ -191,25 +206,43 @@
             z-index: 10;
         }
         .follow-btn-post:hover { transform: scale(1.1); background: #1d4ed8; }
-        .follow-btn-post.following { background: #2a2a2e; color: #888; box-shadow: none; }
+        .follow-btn-post.following { background: #1f1f22; color: #888; box-shadow: none; }
 
-        /* Пост */
-        .post-card {
-            background: #1f1f22;
-            border-radius: 16px;
-            border: 1px solid #2a2a2e;
-            padding: 16px;
-            position: relative;
-            transition: border-color 0.2s;
-        }
+        /* Комментарии */
+        .comment-item { border-bottom: 1px solid #2a2a2e; padding: 12px 0; }
+        .comment-item:last-child { border-bottom: none; }
+
+        /* Общие */
+        .post-card { background: #1f1f22; border-radius: 16px; border: 1px solid #2a2a2e; padding: 16px; position: relative; transition: border-color 0.2s; }
         .post-card:hover { border-color: #3f3f46; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #2a2a2e; }
         .avatar-sm { width: 32px; height: 32px; }
         #profileEmail { color: #9ca3af !important; }
 
-        /* Комментарии */
-        .comment-item { border-bottom: 1px solid #2a2a2e; padding: 12px 0; }
-        .comment-item:last-child { border-bottom: none; }
+        /* Оверлей для мобильных */
+        .panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 45;
+            display: none;
+        }
+        .panel-overlay.active { display: block; }
+        @media (min-width: 640px) {
+            .panel-overlay { display: none !important; }
+        }
+
+        /* Цветовые пресеты */
+        .color-preset {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .color-preset:hover { transform: scale(1.1); }
+        .color-preset.active { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,0.3); }
     </style>
 </head>
 <body>
@@ -242,14 +275,18 @@
         </div>
     </div>
 
-    <!-- Боковое меню (Sidebar) -->
-    <aside class="sidebar group" id="sidebar">
-        <div class="mobile-nav">
+    <!-- Боковое меню (ПК) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo-area">
+            <i class='bx bx-infinite'></i>
+            <span>MesWy</span>
+        </div>
+        <div class="nav-list">
             <button onclick="loadPosts(true); setActiveNav(this)" class="nav-btn active" id="navFeed">
                 <i class='bx bx-home-alt-2'></i>
                 <span class="nav-label">Лента</span>
             </button>
-            <button onclick="toggleSearchPanel(); setActiveNav(this)" class="nav-btn" id="navSearch">
+            <button onclick="toggleSearchPanel(); setActiveNav(null)" class="nav-btn" id="navSearch">
                 <i class='bx bx-search'></i>
                 <span class="nav-label">Поиск</span>
             </button>
@@ -257,28 +294,57 @@
                 <i class='bx bx-trending-up'></i>
                 <span class="nav-label">Рекомендации</span>
             </button>
-            <button onclick="toggleCreatePanel(); setActiveNav(this)" class="nav-btn" id="navCreate">
+            <button onclick="toggleCreatePanel(); setActiveNav(null)" class="nav-btn" id="navCreate">
                 <i class='bx bx-plus-circle' style="color:#2563eb;"></i>
                 <span class="nav-label" style="color:#2563eb;">Создать</span>
             </button>
             <button onclick="toggleNotifications(); setActiveNav(this)" class="nav-btn" id="navNotif">
                 <i class='bx bx-bell'></i>
                 <span class="nav-label">Уведомления</span>
-                <span id="notifBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel" style="top:4px; right:4px;"></span>
+                <span id="notifBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel" style="top:8px; right:8px;"></span>
             </button>
             <button onclick="if(currentUser) openProfile(currentUser.uid); setActiveNav(this)" class="nav-btn" id="navProfile">
                 <i class='bx bx-user'></i>
                 <span class="nav-label">Профиль</span>
             </button>
-            <button id="navLogout" class="nav-btn text-red-500 hover:text-red-400" style="color:#ef4444;">
+            <button id="navLogout" class="nav-btn logout">
                 <i class='bx bx-log-out'></i>
                 <span class="nav-label">Выйти</span>
             </button>
         </div>
     </aside>
 
-    <!-- Основная лента -->
-    <main id="mainContent" class="w-full h-full overflow-y-auto p-3 sm:p-6 flex justify-center pb-20 sm:pb-6" style="margin-left:0;">
+    <!-- Мобильное меню (нижнее) -->
+    <div class="mobile-nav" id="mobileNav">
+        <button onclick="loadPosts(true); setActiveNav(this)" class="nav-btn active" id="mNavFeed">
+            <i class='bx bx-home-alt-2'></i>
+            <span class="nav-label">Лента</span>
+        </button>
+        <button onclick="toggleSearchPanel(); setActiveNav(null)" class="nav-btn" id="mNavSearch">
+            <i class='bx bx-search'></i>
+            <span class="nav-label">Поиск</span>
+        </button>
+        <button onclick="toggleCreatePanel(); setActiveNav(null)" class="nav-btn" id="mNavCreate">
+            <i class='bx bx-plus-circle' style="color:#2563eb;"></i>
+            <span class="nav-label" style="color:#2563eb;">Создать</span>
+        </button>
+        <button onclick="toggleNotifications(); setActiveNav(this)" class="nav-btn" id="mNavNotif">
+            <i class='bx bx-bell'></i>
+            <span class="nav-label">Уведомления</span>
+            <span id="mNotifBadge" class="hidden absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <button onclick="if(currentUser) openProfile(currentUser.uid); setActiveNav(this)" class="nav-btn" id="mNavProfile">
+            <i class='bx bx-user'></i>
+            <span class="nav-label">Профиль</span>
+        </button>
+        <button id="mNavLogout" class="nav-btn logout">
+            <i class='bx bx-log-out'></i>
+            <span class="nav-label">Выйти</span>
+        </button>
+    </div>
+
+    <!-- Основной контент -->
+    <main id="mainContent" class="w-full h-full overflow-y-auto p-3 sm:p-6 flex justify-center pb-20 sm:pb-6">
         <div class="max-w-xl w-full flex flex-col gap-4" id="postsFeed"></div>
     </main>
 
@@ -292,7 +358,7 @@
             <button onclick="closeProfilePanel()" class="text-gray-400 hover:text-white text-2xl"><i class='bx bx-x'></i></button>
         </div>
         <div class="panel-body">
-            <div id="profileCover" class="h-32 sm:h-40 bg-gray-800 rounded-custom mb-4 bg-cover bg-center"></div>
+            <div id="profileCover" class="h-32 sm:h-40 rounded-custom mb-4 bg-cover bg-center" style="background: #2a2a2e;"></div>
             <div class="flex items-center gap-4 -mt-10 relative z-10">
                 <img id="profileAvatar" src="" class="w-20 h-20 rounded-full border-4 border-darkPanel object-cover bg-darkPanel shadow-lg">
                 <div class="flex-1">
@@ -301,7 +367,7 @@
                     <p id="profileBio" class="text-gray-400 text-sm mt-1 whitespace-pre-wrap"></p>
                 </div>
             </div>
-            <div class="mt-4 flex gap-2">
+            <div class="mt-4 flex gap-2 flex-wrap">
                 <button id="adminPanelBtn" onclick="document.getElementById('adminModal').classList.remove('hidden')" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-custom font-bold text-sm">Админ</button>
                 <button id="editProfileBtn" onclick="openEditProfile()" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-4 py-2 rounded-custom font-bold border border-gray-700 text-sm">Редактировать</button>
             </div>
@@ -405,7 +471,7 @@
         </div>
     </div>
 
-    <!-- Модалка редактирования профиля -->
+    <!-- Редактирование профиля + фон -->
     <div id="editProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-md relative border border-gray-800 overflow-y-auto max-h-[90vh] hide-scroll">
             <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
@@ -418,6 +484,23 @@
                 <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
                     <label class="block text-sm font-medium text-gray-400 mb-2">Сменить аватарку</label>
                     <input type="file" id="editAvatar" accept="image/*" class="w-full text-xs file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1.5 file:cursor-pointer">
+                </div>
+                <!-- Фон профиля -->
+                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Цвет фона профиля</label>
+                    <div class="flex flex-wrap gap-3 items-center mb-3">
+                        <button type="button" class="color-preset" style="background:#121212" data-color="#121212" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#1a1a2e" data-color="#1a1a2e" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#2d2d44" data-color="#2d2d44" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#1e3a5f" data-color="#1e3a5f" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#2d4a22" data-color="#2d4a22" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#4a1a1a" data-color="#4a1a1a" onclick="selectColor(this)"></button>
+                        <button type="button" class="color-preset" style="background:#3d1f4a" data-color="#3d1f4a" onclick="selectColor(this)"></button>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="bgColorInput" value="#121212" class="w-12 h-12 rounded border-0 cursor-pointer bg-transparent">
+                        <button type="button" id="applyBgBtn" class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-custom text-sm">Применить</button>
+                    </div>
                 </div>
                 <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black hover:bg-gray-200 font-bold py-3 rounded-custom transition-all text-base mt-2">Сохранить</button>
             </form>
@@ -437,7 +520,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, limit, startAfter, arrayUnion, where, deleteField } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, limit, startAfter, arrayUnion, arrayRemove, where, deleteField } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const app = initializeApp({
             apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
@@ -479,13 +562,22 @@
             return { displayName: 'Пользователь', photoURL: 'https://i.ibb.co/30Zc4Fq/default-avatar.png', email: '' };
         }
 
-        // --- Активная вкладка (без синей подсветки) ---
+        // Обновить кеш пользователя
+        async function refreshUserCache(uid) {
+            const snap = await getDoc(doc(db, "users", uid));
+            if(snap.exists()) {
+                userCache[uid] = snap.data();
+                if(uid === currentUser?.uid) window.userDataCache = snap.data();
+            }
+        }
+
+        // --- Управление активной вкладкой ---
         window.setActiveNav = (btn) => {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
         };
 
-        // --- Управление панелями ---
+        // --- Панели ---
         function openPanel(panelId) {
             const panel = document.getElementById(panelId);
             if(panel.classList.contains('open')) return;
@@ -502,9 +594,9 @@
         window.closeAllPanels = () => {
             document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('open'));
             document.getElementById('panelOverlay').classList.remove('active');
-            // возвращаем активность ленте
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('navFeed').classList.add('active');
+            document.getElementById('mNavFeed').classList.add('active');
         };
 
         window.closeProfilePanel = () => closePanel('profilePanel');
@@ -512,18 +604,19 @@
         window.closeCreatePanel = () => closePanel('createPanel');
         window.closeSearchPanel = () => closePanel('searchPanel');
 
-        // --- Открытие панелей с подсветкой (но без синего) ---
         window.toggleNotifications = () => {
             const panel = document.getElementById('notificationsPanel');
             if(panel.classList.contains('open')) {
                 closePanel('notificationsPanel');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById('navFeed').classList.add('active');
+                document.getElementById('mNavFeed').classList.add('active');
                 return;
             }
             openPanel('notificationsPanel');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('navNotif').classList.add('active');
+            document.getElementById('mNavNotif').classList.add('active');
             loadNotifications();
         };
 
@@ -533,11 +626,14 @@
                 closePanel('createPanel');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById('navFeed').classList.add('active');
+                document.getElementById('mNavFeed').classList.add('active');
                 return;
             }
             openPanel('createPanel');
+            // Не подсвечиваем "Создать" синим
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('navCreate').classList.add('active');
+            document.getElementById('navFeed').classList.add('active');
+            document.getElementById('mNavFeed').classList.add('active');
         };
 
         window.toggleSearchPanel = () => {
@@ -546,31 +642,42 @@
                 closePanel('searchPanel');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById('navFeed').classList.add('active');
+                document.getElementById('mNavFeed').classList.add('active');
                 return;
             }
             openPanel('searchPanel');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('navSearch').classList.add('active');
+            document.getElementById('navFeed').classList.add('active');
+            document.getElementById('mNavFeed').classList.add('active');
             document.getElementById('searchInput').focus();
         };
 
+        // --- Открытие профиля ---
         window.openProfile = async (uid) => {
             const panel = document.getElementById('profilePanel');
             if(panel.classList.contains('open')) {
                 closePanel('profilePanel');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById('navFeed').classList.add('active');
+                document.getElementById('mNavFeed').classList.add('active');
                 return;
             }
             openPanel('profilePanel');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('navProfile').classList.add('active');
+            document.getElementById('mNavProfile').classList.add('active');
 
             const d = await getUserData(uid);
             document.getElementById('profileName').innerText = d.displayName;
             document.getElementById('profileEmail').innerText = d.email || '';
             document.getElementById('profileBio').innerText = d.bio || '';
             document.getElementById('profileAvatar').src = d.photoURL;
+            // Фон профиля
+            if(d.profileBg) {
+                document.getElementById('profileCover').style.background = d.profileBg;
+            } else {
+                document.getElementById('profileCover').style.background = '#2a2a2e';
+            }
             if(uid === currentUser.uid) document.getElementById('editProfileBtn').classList.remove('hidden');
             else document.getElementById('editProfileBtn').classList.add('hidden');
 
@@ -584,7 +691,7 @@
             } catch(e) { pFeed.innerHTML = '<div class="text-center text-red-500 text-sm py-4">Ошибка загрузки</div>'; }
         };
 
-        // --- Загрузка уведомлений (с именами и аватарками) ---
+        // --- Загрузка уведомлений ---
         async function loadNotifications() {
             const list = document.getElementById('notificationsList');
             const data = await getUserData(currentUser.uid);
@@ -596,15 +703,16 @@
             list.innerHTML = '';
             const notifs = data.notifications.slice().reverse();
             for(const n of notifs) {
+                // Получаем свежие данные отправителя
                 const u = await getUserData(n.from);
                 const txt = n.type === 'like' ? 'оценил(а) ваш пост' : 'прокомментировал(а) ваш пост';
                 const icon = n.type === 'like' ? 'bxs-heart text-red-500' : 'bx-message-rounded text-primary';
                 const el = document.createElement('div');
                 el.className = "bg-[#121212] p-4 rounded-custom flex gap-3 items-center border border-gray-800 hover:border-gray-600 transition duration-300 cursor-pointer shadow-lg";
                 el.innerHTML = `
-                    <img src="${n.fromAvatar || u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
+                    <img src="${u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
                     <div class="flex-1 text-sm">
-                        <span class="font-bold hover:text-primary transition" onclick="openProfile('${n.from}')">${n.fromName || u.displayName}</span>
+                        <span class="font-bold hover:text-primary transition" onclick="openProfile('${n.from}')">${u.displayName}</span>
                         <div class="text-gray-400 mt-0.5 flex items-center gap-1"><i class='bx ${icon}'></i> ${txt}</div>
                         ${n.postId ? `<button class="text-xs text-primary hover:underline mt-1" onclick="openPostById('${n.postId}')">Перейти к посту</button>` : ''}
                     </div>
@@ -613,6 +721,7 @@
             }
         }
 
+        // --- Открытие поста по ID ---
         window.openPostById = async (postId) => {
             closeAllPanels();
             const feed = document.getElementById('postsFeed');
@@ -659,7 +768,8 @@
                     displayName: user.email.split('@')[0],
                     bio: "Я лучший",
                     photoURL: "https://i.ibb.co/30Zc4Fq/default-avatar.png",
-                    notifications: []
+                    notifications: [],
+                    profileBg: '#2a2a2e'
                 });
             }
             return (await getDoc(userRef)).data();
@@ -683,7 +793,9 @@
             finally { btn.disabled = false; btn.textContent = isLoginMode ? "Войти" : "Создать аккаунт"; }
         });
 
+        // Выход
         document.getElementById('navLogout').addEventListener('click', () => signOut(auth));
+        document.getElementById('mNavLogout').addEventListener('click', () => signOut(auth));
         document.getElementById('banLogoutBtn').addEventListener('click', () => signOut(auth));
 
         // --- Состояние пользователя ---
@@ -699,6 +811,7 @@
                 window.currentUser = user;
                 window.userDataCache = data;
                 document.getElementById('authModal').classList.add('hidden');
+                
                 if(user.email === 'ryzik3489@gmail.com') {
                     document.getElementById('adminPanelBtn').classList.remove('hidden');
                 } else {
@@ -747,7 +860,7 @@
             } catch(e) { showToast("Ошибка разбана: " + e.message, "error"); }
         };
 
-        // --- Отправка уведомлений ---
+        // --- Уведомления (отправка) ---
         window.sendNotification = async (targetUid, type, postId) => {
             if(targetUid === currentUser.uid) return;
             try {
@@ -770,10 +883,14 @@
         async function checkNotifications() {
             if(!currentUser) return;
             const data = await getUserData(currentUser.uid);
+            const badge = document.getElementById('notifBadge');
+            const mBadge = document.getElementById('mNotifBadge');
             if(data.notifications && data.notifications.length > 0) {
-                document.getElementById('notifBadge').classList.remove('hidden');
+                badge.classList.remove('hidden');
+                mBadge.classList.remove('hidden');
             } else {
-                document.getElementById('notifBadge').classList.add('hidden');
+                badge.classList.add('hidden');
+                mBadge.classList.add('hidden');
             }
         }
 
@@ -928,6 +1045,7 @@
                 const followBtn = document.createElement('button');
                 followBtn.className = 'follow-btn-post';
                 followBtn.textContent = '+';
+                // Проверяем подписку
                 (async () => {
                     const userData = await getUserData(currentUser.uid);
                     const following = userData?.following || [];
@@ -988,7 +1106,7 @@
             } catch(e) { showToast("Ошибка", "error"); }
         };
 
-        // --- Поиск в панели ---
+        // --- Поиск ---
         document.getElementById('searchInput').addEventListener('input', async (e) => {
             const val = e.target.value.toLowerCase();
             const results = document.getElementById('searchResults');
@@ -1054,14 +1172,34 @@
             } catch(e) { return null; }
         }
 
-        // --- Редактирование профиля ---
+        // --- Редактирование профиля + фон ---
         window.openEditProfile = () => {
             document.getElementById('editProfileModal').classList.remove('hidden');
             if(currentUserData) {
                 document.getElementById('editName').value = currentUserData.displayName || '';
                 document.getElementById('editBio').value = currentUserData.bio || '';
+                document.getElementById('bgColorInput').value = currentUserData.profileBg || '#2a2a2e';
+                document.querySelectorAll('.color-preset').forEach(el => {
+                    el.classList.toggle('active', el.dataset.color === currentUserData.profileBg);
+                });
             }
         };
+
+        window.selectColor = (el) => {
+            document.querySelectorAll('.color-preset').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('bgColorInput').value = el.dataset.color;
+        };
+
+        document.getElementById('applyBgBtn').addEventListener('click', async () => {
+            const color = document.getElementById('bgColorInput').value;
+            await updateDoc(doc(db, "users", currentUser.uid), { profileBg: color });
+            await refreshUserCache(currentUser.uid);
+            showToast("Фон профиля обновлён");
+            if(document.getElementById('profilePanel').classList.contains('open')) {
+                openProfile(currentUser.uid);
+            }
+        });
 
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1075,11 +1213,14 @@
                 const f = document.getElementById('editAvatar').files[0];
                 if(f) updates.photoURL = await uploadToImgBB(f);
                 await updateDoc(doc(db, "users", currentUser.uid), updates);
-                userCache[currentUser.uid] = { ...userCache[currentUser.uid], ...updates }; 
-                userDataCache = { ...userDataCache, ...updates };
+                await refreshUserCache(currentUser.uid);
                 document.getElementById('editProfileModal').classList.add('hidden');
                 if(document.getElementById('profilePanel').classList.contains('open')) {
                     openProfile(currentUser.uid);
+                }
+                // Обновляем уведомления (аватар/имя)
+                if(document.getElementById('notificationsPanel').classList.contains('open')) {
+                    loadNotifications();
                 }
                 loadPosts(true); 
                 showToast("Профиль обновлен");
@@ -1108,6 +1249,7 @@
         // --- Инициализация ---
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('navFeed').classList.add('active');
+            document.getElementById('mNavFeed').classList.add('active');
         });
     </script>
 </body>
