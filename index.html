@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MesWy - Social Network</title>
-    <!-- Tailwind CSS -->
+    <title>MesWy — Социальная сеть</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -17,47 +16,66 @@
                         darkHover: '#2a2a2e',
                         primary: 'var(--accent-color)'
                     },
-                    borderRadius: {
-                        'custom': '16px'
-                    }
+                    borderRadius: { 'custom': '16px' }
                 }
             }
         }
     </script>
-    <!-- Boxicons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        :root {
-            --accent-color: #2563eb; 
-        }
-        body { background-color: #121212; color: #e5e7eb; }
+        :root { --accent-color: #2563eb; }
+        body { background-color: #121212; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 20px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-        
+        .nav-btn.active i { color: #2563eb !important; }
+        .nav-btn.active .nav-label { color: #2563eb !important; }
+        .nav-btn { transition: all 0.2s; }
         @media (max-width: 640px) {
-            .mobile-nav-text { display: none; }
+            .nav-label { display: none; }
+            .nav-btn { justify-content: center; }
         }
+        .follow-btn-post {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            z-index: 10;
+        }
+        .follow-btn-post:hover { transform: scale(1.1); background: #1d4ed8; }
+        .follow-btn-post.following { background: #1f1f22; color: #888; box-shadow: none; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden font-sans text-gray-200 selection:bg-primary selection:text-white">
 
-    <!-- Уведомления (Toasts) -->
+    <!-- Toasts -->
     <div id="toastContainer" class="fixed bottom-20 sm:bottom-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
-    <!-- Экран бана -->
+    <!-- Бан -->
     <div id="banScreen" class="hidden fixed inset-0 z-[10000] bg-red-600 flex flex-col items-center justify-center p-6 text-center">
-        <i class='bx bx-block text-8xl text-white mb-6 shadow-xl rounded-full'></i>
-        <h1 class="text-4xl font-bold text-white mb-4">Ваш аккаунт заблокирован</h1>
+        <i class='bx bx-block text-8xl text-white mb-6'></i>
+        <h1 class="text-4xl font-bold text-white mb-4">Аккаунт заблокирован</h1>
         <p id="banReason" class="text-xl text-white mb-2 font-medium"></p>
         <p id="banUntil" class="text-lg text-white/80"></p>
     </div>
 
-    <!-- Модалка Авторизации -->
+    <!-- Авторизация -->
     <div id="authModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-sm border border-gray-800">
             <div class="flex justify-center mb-4"><i class='bx bx-infinite text-5xl text-primary'></i></div>
@@ -79,38 +97,51 @@
                 <span class="ml-2 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">MesWy</span>
             </div>
             
-            <button onclick="loadPosts(true)" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <button onclick="loadPosts(true); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom active">
                 <i class='bx bx-home-alt-2 text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Лента</span>
+                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Лента</span>
             </button>
 
-            <button id="navSearch" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <button id="navSearch" onclick="openSearch(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-search text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Поиск</span>
+                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Поиск</span>
             </button>
 
-            <button onclick="loadRecs()" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <button onclick="loadRecs(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-trending-up text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Рекомендации</span>
+                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Рекомендации</span>
             </button>
 
-            <button onclick="document.getElementById('createPostModal').classList.remove('hidden')" id="navCreatePost" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <button onclick="document.getElementById('createPostModal').classList.remove('hidden'); setActiveNav(this)" id="navCreatePost" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-plus-circle text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text text-primary whitespace-nowrap">Создать</span>
+                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity text-primary whitespace-nowrap">Создать</span>
             </button>
 
-            <button onclick="toggleNotifications()" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom relative">
+            <button onclick="toggleNotifications(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom relative">
                 <i class='bx bx-bell text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Уведомления</span>
+                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Уведомления</span>
                 <span id="notifBadge" class="hidden absolute top-2 sm:top-3 left-6 sm:left-10 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel"></span>
             </button>
 
-            <button onclick="if(currentUser) openProfile(currentUser.uid)" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <button onclick="if(currentUser) openProfile(currentUser.uid); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-user text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Профиль</span>
+                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Профиль</span>
+            </button>
+
+            <!-- НОВОЕ: Настройки (мобилка) -->
+            <button onclick="openSettings(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-cog text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Настройки</span>
+            </button>
+
+            <!-- НОВОЕ: Выход (мобилка) -->
+            <button id="navLogoutMobile" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-log-out text-2xl sm:text-3xl sm:min-w-[3rem] text-center'></i>
+                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Выйти</span>
             </button>
         </div>
 
+        <!-- Выход (ПК) -->
         <div class="hidden sm:flex flex-col w-full mb-2">
             <button id="navLogout" class="flex items-center w-full p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer text-left rounded-r-custom">
                 <i class='bx bx-log-out text-3xl min-w-[3rem] text-center'></i>
@@ -119,14 +150,14 @@
         </div>
     </aside>
 
-    <!-- Основная Лента -->
+    <!-- Основная лента -->
     <main class="w-full sm:ml-20 flex-1 h-full overflow-y-auto p-3 sm:p-6 flex justify-center bg-[#121212] pb-20 sm:pb-6">
         <div class="max-w-xl w-full flex flex-col gap-4" id="postsFeed">
-            <!-- Посты рендерятся тут -->
+            <!-- посты рендерятся тут -->
         </div>
     </main>
 
-    <!-- Панель Профиля -->
+    <!-- Профиль (панель) -->
     <div id="profilePanel" class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
         <div class="flex-1 overflow-y-auto hide-scroll pb-20 sm:pb-4">
             <div id="profileCover" class="h-40 sm:h-48 bg-gray-800 bg-cover bg-center relative">
@@ -134,7 +165,6 @@
                     <i class='bx bx-x text-2xl'></i>
                 </button>
             </div>
-            
             <div class="px-5 relative flex flex-col">
                 <div class="flex justify-between items-end -mt-12 sm:-mt-14 relative z-20 mb-3">
                     <img id="profileAvatar" src="" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-darkPanel object-cover bg-darkPanel shadow-lg">
@@ -147,13 +177,11 @@
                         </button>
                     </div>
                 </div>
-                
                 <div class="mt-1">
                     <h2 id="profileName" class="text-2xl font-bold"></h2>
                     <p id="profileEmail" class="text-primary text-sm font-medium mt-1"></p>
                     <p id="profileBio" class="text-gray-400 mt-2 text-sm leading-relaxed whitespace-pre-wrap"></p>
                 </div>
-
                 <div class="mt-6 border-t border-gray-800 pt-5">
                     <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class='bx bx-grid-alt text-primary'></i> Публикации</h3>
                     <div id="profilePostsFeed" class="flex flex-col gap-4"></div>
@@ -162,7 +190,7 @@
         </div>
     </div>
 
-    <!-- Панель Уведомлений -->
+    <!-- Уведомления (панель) -->
     <div id="notificationsPanel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-darkPanel shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
         <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-darkPanel sticky top-0 z-10 backdrop-blur-sm bg-opacity-90">
             <h2 class="text-xl font-bold flex items-center gap-2"><i class='bx bx-bell text-primary'></i> Уведомления</h2>
@@ -175,7 +203,7 @@
         </div>
     </div>
 
-    <!-- Полноэкранный Поиск -->
+    <!-- Поиск (полноэкранный) -->
     <div id="searchModal" class="hidden fixed inset-0 z-[60] bg-[#121212] flex flex-col p-4 overflow-y-auto hide-scroll pb-20">
         <button onclick="document.getElementById('searchModal').classList.add('hidden')" class="fixed top-4 right-4 text-gray-400 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-darkPanel border border-gray-800 z-50 transition">
             <i class='bx bx-x text-2xl'></i>
@@ -192,7 +220,7 @@
         </div>
     </div>
 
-    <!-- Модалка Создания Поста -->
+    <!-- Создание поста -->
     <div id="createPostModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800">
             <button onclick="document.getElementById('createPostModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
@@ -210,14 +238,12 @@
                     </label>
                     <div id="imagePreview" class="mt-3 flex gap-2 overflow-x-auto hide-scroll"></div>
                 </div>
-                <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">
-                    Опубликовать
-                </button>
+                <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">Опубликовать</button>
             </form>
         </div>
     </div>
 
-    <!-- Админ Панель -->
+    <!-- Админка -->
     <div id="adminModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-md border border-red-900/50 relative">
             <button onclick="document.getElementById('adminModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
@@ -226,8 +252,8 @@
             <h2 class="text-2xl font-bold mb-6 text-red-500 flex items-center gap-2"><i class='bx bx-shield-quarter'></i> Админ-Панель</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">email пользователя</label>
-                    <input type="email" id="banEmail" placeholder="введите email" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-red-500 outline-none transition text-base">
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Email пользователя</label>
+                    <input type="email" id="banEmail" placeholder="Введите email" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-red-500 outline-none transition text-base">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Причина блокировки</label>
@@ -237,20 +263,18 @@
                     <label class="block text-sm font-medium text-gray-400 mb-1">Срок (в днях)</label>
                     <input type="number" id="banDays" placeholder="Дней" value="1" min="1" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-red-500 outline-none transition text-base">
                 </div>
-                <button onclick="banUser()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-custom transition-all text-base mt-2">
-                    Выдать блокировку
-                </button>
+                <button onclick="banUser()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-custom transition-all text-base mt-2">Выдать блокировку</button>
             </div>
         </div>
     </div>
 
-    <!-- Редактирование Профиля -->
+    <!-- Редактирование профиля + настройки -->
     <div id="editProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-md relative border border-gray-800 overflow-y-auto max-h-[90vh] hide-scroll">
             <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
                 <i class='bx bx-x text-xl'></i>
             </button>
-            <h2 class="text-2xl font-bold mb-4">Редактирование</h2>
+            <h2 class="text-2xl font-bold mb-4">Редактирование профиля</h2>
             <form id="editProfileForm" class="space-y-4">
                 <input type="text" id="editName" placeholder="Имя пользователя" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
                 <textarea id="editBio" placeholder="О себе" rows="3" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-base"></textarea>
@@ -258,12 +282,20 @@
                     <label class="block text-sm font-medium text-gray-400 mb-2">Сменить аватарку</label>
                     <input type="file" id="editAvatar" accept="image/*" class="w-full text-xs file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1.5 file:cursor-pointer">
                 </div>
+                <!-- НОВОЕ: настройка фона -->
+                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Цвет фона</label>
+                    <div class="flex items-center gap-4">
+                        <input type="color" id="bgColorInput" value="#121212" class="w-12 h-12 rounded border-0 cursor-pointer bg-transparent">
+                        <button type="button" id="applyBgBtn" class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-custom text-sm">Применить</button>
+                    </div>
+                </div>
                 <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black hover:bg-gray-200 font-bold py-3 rounded-custom transition-all text-base mt-2">Сохранить</button>
             </form>
         </div>
     </div>
 
-    <!-- Зум Изображений -->
+    <!-- Зум изображений -->
     <div id="imageViewerModal" class="hidden fixed inset-0 z-[999] bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm">
         <button onclick="closeImage()" class="absolute top-4 right-4 text-white w-10 h-10 bg-gray-900/50 hover:bg-gray-800 rounded-full flex items-center justify-center transition z-50">
             <i class='bx bx-x text-2xl'></i>
@@ -288,18 +320,17 @@
         const IMGBB_KEY = "cfedaeb5c6bb179902b44ba10cb396cb";
 
         window.currentUser = null;
-        window.userDataCache = null; 
+        window.userDataCache = null;
         const userCache = {};
 
+        // --- Вспомогательные ---
         window.showToast = (msg, type = 'info') => {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             const bg = type === 'error' ? 'bg-red-900/90 border-red-700' : 'bg-darkPanel border-gray-700';
             const icon = type === 'error' ? 'bx-error-circle text-red-500' : 'bx-check-circle text-primary';
-            
             toast.className = `toast-enter flex items-center gap-3 p-4 rounded-custom border ${bg} text-white shadow-2xl min-w-[250px] mb-2 text-sm`;
             toast.innerHTML = `<i class='bx ${icon} text-xl'></i> <span class="font-bold">${msg}</span>`;
-            
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
@@ -316,15 +347,22 @@
                 userCache[uid] = snap.data();
                 return userCache[uid];
             }
-            return { displayName: 'user', photoURL: 'https://i.ibb.co/30Zc4Fq/default-avatar.png', email: '' };
+            return { displayName: 'Пользователь', photoURL: 'https://i.ibb.co/30Zc4Fq/default-avatar.png', email: '' };
         }
 
+        // --- Активная вкладка ---
+        window.setActiveNav = (btn) => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+        };
+
+        // --- Авторизация ---
         let isLoginMode = true;
         document.getElementById('authToggleBtn').addEventListener('click', (e) => {
             isLoginMode = !isLoginMode;
-            document.getElementById('authTitle').textContent = isLoginMode ? "вход в meswy" : "регистрация";
-            document.getElementById('authSubmitBtn').textContent = isLoginMode ? "войти" : "создать аккаунт";
-            e.target.textContent = isLoginMode ? "нет аккаунта? создать" : "уже есть аккаунт? войти";
+            document.getElementById('authTitle').textContent = isLoginMode ? "Вход в MesWy" : "Регистрация";
+            document.getElementById('authSubmitBtn').textContent = isLoginMode ? "Войти" : "Создать аккаунт";
+            e.target.textContent = isLoginMode ? "Нет аккаунта? Создать" : "Уже есть аккаунт? Войти";
         });
 
         async function ensureUserProfile(user) {
@@ -334,9 +372,10 @@
                 await setDoc(userRef, {
                     email: user.email,
                     displayName: user.email.split('@')[0],
-                    bio: "я лучший",
+                    bio: "Я лучший",
                     photoURL: "https://i.ibb.co/30Zc4Fq/default-avatar.png",
-                    notifications: []
+                    notifications: [],
+                    background: '#121212'
                 });
             }
             return (await getDoc(userRef)).data();
@@ -347,31 +386,35 @@
             const em = document.getElementById('authEmail').value;
             const pw = document.getElementById('authPassword').value;
             const btn = document.getElementById('authSubmitBtn');
-            btn.disabled = true; btn.textContent = "загрузка...";
+            btn.disabled = true; btn.textContent = "Загрузка...";
             try {
                 if (isLoginMode) {
                     await signInWithEmailAndPassword(auth, em, pw);
                 } else {
                     const cr = await createUserWithEmailAndPassword(auth, em, pw);
                     await ensureUserProfile(cr.user);
-                    showToast("аккаунт создан");
+                    showToast("Аккаунт создан");
                 }
             } catch(e) { showToast(e.message, "error"); }
-            finally { btn.disabled = false; btn.textContent = isLoginMode ? "войти" : "создать аккаунт"; }
+            finally { btn.disabled = false; btn.textContent = isLoginMode ? "Войти" : "Создать аккаунт"; }
         });
 
-        document.getElementById('navLogout')?.addEventListener('click', () => signOut(auth));
+        // Выход (обе кнопки)
+        document.getElementById('navLogout').addEventListener('click', () => signOut(auth));
+        document.getElementById('navLogoutMobile').addEventListener('click', () => signOut(auth));
 
+        // --- Состояние пользователя ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const data = await ensureUserProfile(user);
                 if(data.banned && new Date(data.banned.until) > new Date()) {
                     document.getElementById('banScreen').classList.remove('hidden');
-                    document.getElementById('banReason').innerText = "причина: " + data.banned.reason;
-                    document.getElementById('banUntil').innerText = "до: " + new Date(data.banned.until).toLocaleString();
+                    document.getElementById('banReason').innerText = "Причина: " + data.banned.reason;
+                    document.getElementById('banUntil').innerText = "До: " + new Date(data.banned.until).toLocaleString();
                     return;
                 }
-                window.currentUser = user; window.userDataCache = data;
+                window.currentUser = user;
+                window.userDataCache = data;
                 document.getElementById('authModal').classList.add('hidden');
                 
                 if(user.email === 'ryzik3489@gmail.com') {
@@ -379,37 +422,53 @@
                 } else {
                     document.getElementById('adminPanelBtn').classList.add('hidden');
                 }
+                // Применить фон из настроек
+                if(data.background) {
+                    document.body.style.backgroundColor = data.background;
+                    document.getElementById('bgColorInput').value = data.background;
+                }
                 loadPosts(true);
                 checkNotifications();
             } else {
-                window.currentUser = null; window.userDataCache = null;
+                window.currentUser = null;
+                window.userDataCache = null;
                 document.getElementById('authModal').classList.remove('hidden');
             }
         });
 
+        // --- Админка ---
         window.banUser = async () => {
             const email = document.getElementById('banEmail').value.trim();
             const reason = document.getElementById('banReasonInput').value;
             const days = parseInt(document.getElementById('banDays').value || 1);
-            if(!email) return showToast("введите email", "error");
+            if(!email) return showToast("Введите email", "error");
             try {
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const snap = await getDocs(q);
-                if(snap.empty) return showToast("пользователь не найден", "error");
-                
+                if(snap.empty) return showToast("Пользователь не найден", "error");
                 const targetUid = snap.docs[0].id;
                 const until = new Date(); until.setDate(until.getDate() + days);
                 await updateDoc(doc(db, "users", targetUid), { banned: { reason, until: until.toISOString() } });
-                showToast("пользователь забанен");
+                showToast("Пользователь забанен");
                 document.getElementById('adminModal').classList.add('hidden');
-            } catch(e) { showToast("ошибка бана", "error"); }
+            } catch(e) { showToast("Ошибка бана", "error"); }
         };
 
+        // --- Уведомления ---
         window.sendNotification = async (targetUid, type, postId) => {
             if(targetUid === currentUser.uid) return;
             try {
+                const fromData = await getUserData(currentUser.uid);
+                const notif = { 
+                    type, 
+                    from: currentUser.uid, 
+                    postId, 
+                    date: new Date().toISOString(),
+                    fromName: fromData.displayName,
+                    fromAvatar: fromData.photoURL
+                };
                 await updateDoc(doc(db, "users", targetUid), {
-                    notifications: arrayUnion({ type, from: currentUser.uid, postId, date: new Date().toISOString() })
+                    notifications: arrayUnion(notif)
                 });
             } catch(e) {}
         };
@@ -422,23 +481,21 @@
                 document.getElementById('notifBadge').classList.add('hidden');
                 const data = await getUserData(currentUser.uid);
                 list.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
-                
                 if(!data.notifications || data.notifications.length === 0) {
-                    list.innerHTML = '<p class="text-gray-500 text-center mt-5 bg-[#121212] p-4 rounded-custom text-sm border border-gray-800">у вас пока нет уведомлений</p>';
+                    list.innerHTML = '<p class="text-gray-500 text-center mt-5 bg-[#121212] p-4 rounded-custom text-sm border border-gray-800">У вас пока нет уведомлений</p>';
                 } else {
                     list.innerHTML = '';
-                    const notifs = data.notifications.sort((a,b)=>new Date(b.date)-new Date(a.date)).reverse();
+                    const notifs = data.notifications.slice().reverse();
                     for(const n of notifs) {
                         const u = await getUserData(n.from);
                         const txt = n.type === 'like' ? 'оценил(а) ваш пост' : 'прокомментировал(а) ваш пост';
                         const icon = n.type === 'like' ? 'bxs-heart text-red-500' : 'bx-message-rounded text-primary';
-                        
                         const el = document.createElement('div');
                         el.className = "bg-[#121212] p-4 rounded-custom flex gap-3 items-center border border-gray-800 hover:border-gray-600 transition duration-300 cursor-pointer shadow-lg";
                         el.innerHTML = `
-                            <img src="${u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
+                            <img src="${n.fromAvatar || u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
                             <div class="flex-1 text-sm">
-                                <span class="font-bold hover:text-primary transition" onclick="openProfile('${n.from}')">${u.displayName}</span>
+                                <span class="font-bold hover:text-primary transition" onclick="openProfile('${n.from}')">${n.fromName || u.displayName}</span>
                                 <div class="text-gray-400 mt-0.5 flex items-center gap-1"><i class='bx ${icon}'></i> ${txt}</div>
                             </div>
                         `;
@@ -455,30 +512,28 @@
             }
         }
 
+        // --- Открытие профиля ---
         window.openProfile = async (uid) => {
             const panel = document.getElementById('profilePanel');
             const d = await getUserData(uid);
-            
             document.getElementById('profileName').innerText = d.displayName;
             document.getElementById('profileEmail').innerText = d.email || '';
             document.getElementById('profileBio').innerText = d.bio || '';
             document.getElementById('profileAvatar').src = d.photoURL;
-            
             if(uid === currentUser.uid) document.getElementById('editProfileBtn').classList.remove('hidden');
             else document.getElementById('editProfileBtn').classList.add('hidden');
-            
             panel.classList.remove('translate-x-full');
-            
             const pFeed = document.getElementById('profilePostsFeed');
             pFeed.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
             try {
                 const s = await getDocs(query(collection(db, "posts"), where("authorId", "==", uid), orderBy("createdAt", "desc")));
                 pFeed.innerHTML = '';
-                if(s.empty) pFeed.innerHTML = '<div class="text-center text-gray-500 py-6 bg-[#121212] rounded-custom text-sm">нет публикаций</div>';
+                if(s.empty) pFeed.innerHTML = '<div class="text-center text-gray-500 py-6 bg-[#121212] rounded-custom text-sm">Нет публикаций</div>';
                 for(const d of s.docs) await renderPost(d, pFeed, true);
-            } catch(e) { pFeed.innerHTML = '<div class="text-center text-red-500 text-sm py-4">ошибка загрузки</div>'; }
+            } catch(e) { pFeed.innerHTML = '<div class="text-center text-red-500 text-sm py-4">Ошибка загрузки</div>'; }
         };
 
+        // --- Лайк ---
         window.toggleLike = async (postId, authorId, btn) => {
             try {
                 const ref = doc(db, "posts", postId);
@@ -487,32 +542,77 @@
                 const isLiked = likes.includes(currentUser.uid);
                 const nl = isLiked ? likes.filter(i=>i!==currentUser.uid) : [...likes, currentUser.uid];
                 await updateDoc(ref, { likes: nl });
-                
                 if(!isLiked) sendNotification(authorId, 'like', postId);
-                
                 btn.innerHTML = `<i class='bx ${isLiked ? 'bx-heart' : 'bxs-heart text-red-500 drop-shadow-md'} text-2xl'></i> <span class="font-bold text-base">${nl.length}</span>`;
-            } catch(e) { showToast("ошибка", "error"); }
+            } catch(e) { showToast("Ошибка", "error"); }
         };
 
+        // --- Комментарий (без перезагрузки ленты) ---
         window.submitComment = async (postId, authorId, inputId) => {
             const i = document.getElementById(inputId);
             const text = i.value.trim();
             if(!text) return;
             try {
                 i.disabled = true;
-                await updateDoc(doc(db, "posts", postId), {
-                    comments: arrayUnion({ uid: currentUser.uid, text: text, date: new Date().toISOString() })
-                });
+                const postRef = doc(db, "posts", postId);
+                const snap = await getDoc(postRef);
+                const comments = snap.data().comments || [];
+                const newComment = { uid: currentUser.uid, text: text, date: new Date().toISOString() };
+                await updateDoc(postRef, { comments: arrayUnion(newComment) });
                 sendNotification(authorId, 'comment', postId);
-                i.value = ''; showToast('комментарий отправлен');
-                loadPosts(true);
-            } catch(e) { showToast("ошибка", "error"); }
+                i.value = '';
+                showToast("Комментарий отправлен");
+                // Локально добавим комментарий в DOM
+                const commentContainer = document.getElementById(`comments-${postId}`);
+                if(commentContainer) {
+                    const u = await getUserData(currentUser.uid);
+                    const div = document.createElement('div');
+                    div.className = "flex gap-3 mb-3";
+                    div.innerHTML = `
+                        <img src="${u.photoURL}" class="w-8 h-8 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${currentUser.uid}')">
+                        <div class="bg-[#121212] p-3 rounded-custom rounded-tl-none flex-1 border border-gray-800">
+                            <span class="font-bold text-sm cursor-pointer hover:text-primary transition" onclick="openProfile('${currentUser.uid}')">${u.displayName}</span>
+                            <p class="text-gray-300 mt-1 text-sm">${text}</p>
+                        </div>
+                    `;
+                    commentContainer.prepend(div);
+                    // Обновить счётчик комментариев
+                    const commentCount = document.getElementById(`comment-count-${postId}`);
+                    if(commentCount) {
+                        const current = parseInt(commentCount.textContent) || 0;
+                        commentCount.textContent = current + 1;
+                    }
+                }
+            } catch(e) { showToast("Ошибка", "error"); }
             finally { i.disabled = false; }
         };
 
-        async function renderPost(docSnap, container, compact=false) {
+        // --- Подписка с поста ---
+        window.toggleFollow = async (targetUid, btn) => {
+            if(targetUid === currentUser.uid) return;
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                const snap = await getDoc(userRef);
+                const following = snap.data()?.following || [];
+                const isFollowing = following.includes(targetUid);
+                if(isFollowing) {
+                    await updateDoc(userRef, { following: arrayRemove(targetUid) });
+                    btn.textContent = '+';
+                    btn.classList.remove('following');
+                } else {
+                    await updateDoc(userRef, { following: arrayUnion(targetUid) });
+                    btn.textContent = '✓';
+                    btn.classList.add('following');
+                    sendNotification(targetUid, 'follow', null);
+                }
+            } catch(e) { showToast("Ошибка", "error"); }
+        };
+
+        // --- Рендер одного поста ---
+        async function renderPost(docSnap, container, compact = false) {
             const p = docSnap.data();
             const u = await getUserData(p.authorId);
+            const isOwn = p.authorId === currentUser.uid;
             
             let imgs = '';
             if(p.images && p.images.length > 0) {
@@ -523,10 +623,11 @@
                 });
                 imgs += `</div>`;
             }
-            
+
             let coms = '';
             if(p.comments && !compact && p.comments.length > 0) {
-                for(let c of p.comments.slice(-3)) {
+                const sorted = p.comments.slice(-3);
+                for(let c of sorted) {
                     const cu = await getUserData(c.uid);
                     coms += `
                         <div class="flex gap-3 mb-3">
@@ -540,9 +641,10 @@
             }
 
             const isLiked = p.likes && p.likes.includes(currentUser.uid);
-            
+            const commentCount = p.comments?.length || 0;
+
             const el = document.createElement('article');
-            el.className = "bg-darkPanel rounded-custom border border-gray-800 p-4 sm:p-5 shadow-xl hover:border-gray-700 transition";
+            el.className = "bg-darkPanel rounded-custom border border-gray-800 p-4 sm:p-5 shadow-xl hover:border-gray-700 transition relative";
             el.innerHTML = `
                 <div class="flex items-center space-x-3 mb-4 cursor-pointer" onclick="openProfile('${p.authorId}')">
                     <img src="${u.photoURL}" class="w-10 h-10 rounded-full object-cover border-2 border-transparent hover:border-primary transition shadow-md">
@@ -561,29 +663,52 @@
                         <span class="font-bold text-base">${p.likes?.length || 0}</span>
                     </button>
                     <div class="flex items-center gap-2 text-gray-400">
-                        <i class='bx bx-message-rounded text-2xl'></i> <span class="font-bold text-base">${p.comments?.length || 0}</span>
+                        <i class='bx bx-message-rounded text-2xl'></i> 
+                        <span class="font-bold text-base" id="comment-count-${docSnap.id}">${commentCount}</span>
                     </div>
                 </div>
                 ${!compact ? `
-                <div class="mt-4 border-t border-gray-800 pt-4">
+                <div class="mt-4 border-t border-gray-800 pt-4" id="comments-${docSnap.id}">
                     <div class="mb-2">${coms}</div>
                     <div class="flex gap-3 mt-4 items-center">
                         <img src="${userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png'}" class="w-10 h-10 rounded-full object-cover shadow-md">
-                        <input type="text" id="c-${docSnap.id}" placeholder="оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')">
+                        <input type="text" id="c-${docSnap.id}" placeholder="Оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')">
                         <button onclick="submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg shrink-0">
                             <i class='bx bx-send text-xl'></i>
                         </button>
                     </div>
                 </div>` : ''}
             `;
+
+            // Кнопка подписки на посте (если не свой пост)
+            if(!isOwn) {
+                const followBtn = document.createElement('button');
+                followBtn.className = 'follow-btn-post';
+                followBtn.textContent = '+';
+                // Проверим, подписан ли уже
+                (async () => {
+                    const userData = await getUserData(currentUser.uid);
+                    const following = userData?.following || [];
+                    if(following.includes(p.authorId)) {
+                        followBtn.textContent = '✓';
+                        followBtn.classList.add('following');
+                    }
+                })();
+                followBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleFollow(p.authorId, followBtn);
+                };
+                el.appendChild(followBtn);
+            }
+
             container.appendChild(el);
         }
 
+        // --- Лента с пагинацией ---
         let lastVisiblePost = null;
         window.loadPosts = async (reset = false) => {
             const feed = document.getElementById('postsFeed');
             if(reset) { feed.innerHTML = ''; lastVisiblePost = null; }
-            
             const oldBtn = document.getElementById('loadMoreBtn');
             if(oldBtn) oldBtn.remove();
 
@@ -594,21 +719,20 @@
             try {
                 const s = await getDocs(q);
                 if (s.empty && reset) {
-                    feed.innerHTML = '<div class="text-center text-gray-500 mt-8 p-6 bg-darkPanel rounded-custom border border-gray-800 text-base">пока ничего нет напиши первый пост</div>';
+                    feed.innerHTML = '<div class="text-center text-gray-500 mt-8 p-6 bg-darkPanel rounded-custom border border-gray-800 text-base">Пока ничего нет. Напиши первый пост!</div>';
                     return;
                 }
                 for(const d of s.docs) await renderPost(d, feed);
-
                 if (s.docs.length === 15) {
                     lastVisiblePost = s.docs[s.docs.length - 1];
                     const btn = document.createElement('button');
                     btn.id = 'loadMoreBtn';
                     btn.className = "w-full py-4 bg-darkPanel border border-gray-800 rounded-custom font-bold text-gray-400 hover:text-white hover:border-gray-600 transition mt-4 text-base";
-                    btn.textContent = "загрузить еще";
+                    btn.textContent = "Загрузить еще";
                     btn.onclick = () => loadPosts(false);
                     feed.appendChild(btn);
                 }
-            } catch(e) { showToast("ошибка загрузки", "error"); }
+            } catch(e) { showToast("Ошибка загрузки", "error"); }
         };
 
         window.loadRecs = async () => {
@@ -616,63 +740,39 @@
             feed.innerHTML = '<div class="text-center py-10"><i class="bx bx-loader-alt bx-spin text-4xl text-primary"></i></div>';
             try {
                 const s = await getDocs(query(collection(db, "posts"), limit(30))); 
-                feed.innerHTML = '<div class="bg-primary/10 border border-primary/20 text-primary p-4 rounded-custom mb-4 font-bold flex items-center gap-2"><i class="bx bx-trending-up text-xl"></i> рекомендации для вас</div>';
+                feed.innerHTML = '<div class="bg-primary/10 border border-primary/20 text-primary p-4 rounded-custom mb-4 font-bold flex items-center gap-2"><i class="bx bx-trending-up text-xl"></i> Рекомендации для вас</div>';
                 const docs = s.docs.sort(() => 0.5 - Math.random()).slice(0, 10);
                 for(const d of docs) await renderPost(d, feed);
-            } catch(e) { showToast("ошибка", "error"); }
+            } catch(e) { showToast("Ошибка", "error"); }
         };
 
-        let zoomScale = 1;
-        const vImg = document.getElementById('viewerImage');
-        const imgZoomContainer = document.getElementById('imageZoomContainer');
-        
-        window.openImage = (url) => {
-            zoomScale = 1; 
-            vImg.style.transform = `scale(1)`;
-            vImg.src = url; 
-            document.getElementById('imageViewerModal').classList.remove('hidden');
-        };
-        
-        window.closeImage = () => { 
-            document.getElementById('imageViewerModal').classList.add('hidden'); 
-        };
-        
-        imgZoomContainer.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            zoomScale += e.deltaY * -0.002;
-            zoomScale = Math.min(Math.max(0.5, zoomScale), 5);
-            vImg.style.transform = `scale(${zoomScale})`;
-        });
-
-        const searchInput = document.getElementById('searchInput');
-        const searchResults = document.getElementById('searchResults');
-        
-        document.getElementById('navSearch').addEventListener('click', () => {
+        // --- Поиск ---
+        window.openSearch = () => {
             document.getElementById('searchModal').classList.remove('hidden');
-            searchInput.focus();
-        });
+            document.getElementById('searchInput').focus();
+        };
 
-        searchInput.addEventListener('input', async (e) => {
+        document.getElementById('searchInput').addEventListener('input', async (e) => {
             const val = e.target.value.toLowerCase();
-            if(val.length < 2) { searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8"><i class="bx bx-search text-5xl opacity-20 mb-3"></i><br>введите запрос</div>'; return; }
-            
-            searchResults.innerHTML = '<div class="text-center text-primary mt-8"><i class="bx bx-loader-alt bx-spin text-4xl"></i></div>';
+            const results = document.getElementById('searchResults');
+            if(val.length < 2) { results.innerHTML = '<div class="text-center text-gray-500 mt-8"><i class="bx bx-search text-5xl opacity-20 mb-3"></i><br>Введите запрос</div>'; return; }
+            results.innerHTML = '<div class="text-center text-primary mt-8"><i class="bx bx-loader-alt bx-spin text-4xl"></i></div>';
             try {
                 const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50)));
-                searchResults.innerHTML = '';
+                results.innerHTML = '';
                 let found = 0;
-                
                 for(const docSnap of snap.docs) {
                     const data = docSnap.data();
                     if (data.title?.toLowerCase().includes(val) || data.description?.toLowerCase().includes(val)) {
                         found++;
-                        await renderPost(docSnap, searchResults, true);
+                        await renderPost(docSnap, results, true);
                     }
                 }
-                if(found === 0) searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8 text-base bg-[#121212] p-4 rounded-custom border border-gray-800">ничего не найдено</div>';
-            } catch(err) { searchResults.innerHTML = '<div class="text-center text-red-500">ошибка поиска</div>'; }
+                if(found === 0) results.innerHTML = '<div class="text-center text-gray-500 mt-8 text-base bg-[#121212] p-4 rounded-custom border border-gray-800">Ничего не найдено</div>';
+            } catch(err) { results.innerHTML = '<div class="text-center text-red-500">Ошибка поиска</div>'; }
         });
 
+        // --- Создание поста ---
         document.getElementById('postImages').addEventListener('change', function() {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
@@ -687,12 +787,11 @@
         document.getElementById('createPostForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('postSubmitBtn');
-            btn.disabled = true; btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> публикуем...";
+            btn.disabled = true; btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Публикуем...";
             try {
                 const files = document.getElementById('postImages').files;
                 const uploadPromises = Array.from(files).map(f => uploadToImgBB(f));
                 const imageUrls = (await Promise.all(uploadPromises)).filter(url => url !== null);
-
                 await addDoc(collection(db, "posts"), {
                     title: document.getElementById('postTitle').value,
                     description: document.getElementById('postDesc').value,
@@ -704,10 +803,10 @@
                 document.getElementById('createPostModal').classList.add('hidden');
                 document.getElementById('createPostForm').reset();
                 document.getElementById('imagePreview').innerHTML = '';
-                showToast("пост опубликован");
+                showToast("Пост опубликован");
                 loadPosts(true);
             } catch (err) { showToast(err.message, "error"); }
-            finally { btn.disabled = false; btn.innerHTML = "опубликовать"; }
+            finally { btn.disabled = false; btn.innerHTML = "Опубликовать"; }
         });
 
         async function uploadToImgBB(file) {
@@ -718,10 +817,11 @@
             } catch(e) { return null; }
         }
 
+        // --- Редактирование профиля + настройка фона ---
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('editProfileSubmitBtn');
-            btn.disabled = true; btn.textContent = "сохраняем...";
+            btn.disabled = true; btn.textContent = "Сохраняем...";
             try {
                 const updates = { 
                     displayName: document.getElementById('editName').value, 
@@ -729,17 +829,52 @@
                 };
                 const f = document.getElementById('editAvatar').files[0];
                 if(f) updates.photoURL = await uploadToImgBB(f);
-                
                 await updateDoc(doc(db, "users", currentUser.uid), updates);
                 userCache[currentUser.uid] = { ...userCache[currentUser.uid], ...updates }; 
                 userDataCache = { ...userDataCache, ...updates };
-                
                 document.getElementById('editProfileModal').classList.add('hidden');
                 openProfile(currentUser.uid); 
                 loadPosts(true); 
-                showToast("профиль обновлен");
-            } catch(e) { showToast("ошибка", "error"); }
-            finally { btn.disabled = false; btn.textContent = "сохранить"; }
+                showToast("Профиль обновлен");
+            } catch(e) { showToast("Ошибка", "error"); }
+            finally { btn.disabled = false; btn.textContent = "Сохранить"; }
+        });
+
+        // Применить фон
+        document.getElementById('applyBgBtn').addEventListener('click', async () => {
+            const color = document.getElementById('bgColorInput').value;
+            document.body.style.backgroundColor = color;
+            await updateDoc(doc(db, "users", currentUser.uid), { background: color });
+            showToast("Фон изменён");
+        });
+
+        // Открыть настройки (показываем модалку редактирования)
+        window.openSettings = () => {
+            document.getElementById('editProfileModal').classList.remove('hidden');
+            // Заполним поля текущими данными
+            if(currentUserData) {
+                document.getElementById('editName').value = currentUserData.displayName || '';
+                document.getElementById('editBio').value = currentUserData.bio || '';
+                document.getElementById('bgColorInput').value = currentUserData.background || '#121212';
+            }
+        };
+
+        // --- Зум изображений ---
+        let zoomScale = 1;
+        const vImg = document.getElementById('viewerImage');
+        const imgZoomContainer = document.getElementById('imageZoomContainer');
+        window.openImage = (url) => {
+            zoomScale = 1; 
+            vImg.style.transform = `scale(1)`;
+            vImg.src = url; 
+            document.getElementById('imageViewerModal').classList.remove('hidden');
+        };
+        window.closeImage = () => { document.getElementById('imageViewerModal').classList.add('hidden'); };
+        imgZoomContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoomScale += e.deltaY * -0.002;
+            zoomScale = Math.min(Math.max(0.5, zoomScale), 5);
+            vImg.style.transform = `scale(${zoomScale})`;
         });
     </script>
 </body>
