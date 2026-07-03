@@ -79,20 +79,13 @@
             .nav-label { display: none; }
             .nav-btn { justify-content: center; padding: 8px 0; }
         }
-        /* увеличенные отступы в меню */
-        .menu-container {
-            gap: 4px;
-        }
-        .menu-container .nav-btn {
-            padding-left: 12px;
-            padding-right: 12px;
-        }
+        .menu-container { gap: 4px; }
+        .menu-container .nav-btn { padding-left: 12px; padding-right: 12px; }
         @media (min-width: 640px) {
-            .menu-container .nav-btn {
-                padding-left: 16px;
-                padding-right: 16px;
-            }
+            .menu-container .nav-btn { padding-left: 16px; padding-right: 16px; }
         }
+        /* профиль – убран акцент */
+        #profileEmail { color: #9ca3af !important; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden font-sans text-gray-200 selection:bg-primary selection:text-white">
@@ -125,7 +118,7 @@
         </div>
     </div>
 
-    <!-- Боковое меню (ПК) / Нижнее меню (Мобайл) -->
+    <!-- Боковое меню -->
     <aside class="group fixed bottom-0 w-full h-14 sm:h-full sm:w-20 sm:hover:w-60 bg-darkPanel border-t sm:border-t-0 sm:border-r border-gray-800 transition-all duration-300 flex flex-row sm:flex-col justify-around sm:justify-between z-40 shadow-xl overflow-y-auto hide-scroll">
         <div class="flex flex-row sm:flex-col w-full sm:mt-2 items-center sm:items-stretch h-full sm:h-auto gap-1 sm:gap-1 menu-container">
             <div class="hidden sm:flex items-center w-full p-3 mb-2">
@@ -151,8 +144,8 @@
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Рекомендации</span>
             </button>
 
-            <!-- 4. Создать (модалка) - НЕ ПОДСВЕЧИВАЕТСЯ -->
-            <button onclick="document.getElementById('createPostModal').classList.remove('hidden'); setActiveNav(null)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+            <!-- 4. Создать (панель) -->
+            <button onclick="toggleCreatePanel(); setActiveNav(this)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-plus-circle text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity text-primary whitespace-nowrap">Создать</span>
             </button>
@@ -170,15 +163,11 @@
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Профиль</span>
             </button>
 
-            <!-- 7. Настройки (модалка) -->
-            <button onclick="openSettings(); setActiveNav(null)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-cog text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Настройки</span>
-            </button>
+            <!-- 7. (пусто) -->
 
-            <!-- 8. (запасной) -->
+            <!-- 8. (пусто) -->
 
-            <!-- 9. Выход (последний) -->
+            <!-- 9. Выход -->
             <button id="navLogout" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-log-out text-2xl sm:text-3xl sm:min-w-[3rem] text-center'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Выйти</span>
@@ -208,14 +197,14 @@
                         <button id="adminPanelBtn" onclick="document.getElementById('adminModal').classList.remove('hidden')" class="hidden bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-custom font-bold transition shadow-lg shadow-red-600/20 text-sm">
                             <i class='bx bx-shield-quarter'></i> Админ
                         </button>
-                        <button id="editProfileBtn" onclick="openSettings()" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-5 py-2 rounded-custom font-bold transition border border-gray-700 text-sm">
+                        <button id="editProfileBtn" onclick="openEditProfile()" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-5 py-2 rounded-custom font-bold transition border border-gray-700 text-sm">
                             Редактировать
                         </button>
                     </div>
                 </div>
                 <div class="mt-1">
                     <h2 id="profileName" class="text-2xl font-bold"></h2>
-                    <p id="profileEmail" class="text-primary text-sm font-medium mt-1"></p>
+                    <p id="profileEmail" class="text-sm font-medium mt-1"></p> <!-- убран акцент -->
                     <p id="profileBio" class="text-gray-400 mt-2 text-sm leading-relaxed whitespace-pre-wrap"></p>
                 </div>
                 <div class="mt-6 border-t border-gray-800 pt-5">
@@ -234,8 +223,31 @@
                 <i class='bx bx-x text-xl'></i>
             </button>
         </div>
-        <div id="notificationsList" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 hide-scroll pb-20 sm:pb-4">
-            <!-- Уведомления -->
+        <div id="notificationsList" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 hide-scroll pb-20 sm:pb-4"></div>
+    </div>
+
+    <!-- Панель создания поста -->
+    <div id="createPanel" class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-darkPanel shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
+        <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-darkPanel sticky top-0 z-10 backdrop-blur-sm bg-opacity-90">
+            <h2 class="text-xl font-bold flex items-center gap-2"><i class='bx bx-plus-circle text-primary'></i> Новый пост</h2>
+            <button onclick="closeCreatePanel()" class="text-gray-400 hover:text-white transition bg-[#121212] w-8 h-8 rounded-full flex items-center justify-center border border-gray-800">
+                <i class='bx bx-x text-xl'></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto hide-scroll p-5">
+            <form id="createPostForm" class="space-y-4">
+                <input type="text" id="postTitle" placeholder="Заголовок поста..." required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
+                <textarea id="postDesc" placeholder="Расскажите, что происходит?" rows="4" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-base"></textarea>
+                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800 cursor-pointer hover:border-gray-600 transition group">
+                    <label class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                        <i class='bx bx-images text-4xl text-gray-500 group-hover:text-primary transition-colors mb-2'></i>
+                        <span class="text-sm text-gray-400 font-medium">Прикрепить фото (до 10 шт)</span>
+                        <input type="file" id="postImages" multiple accept="image/*" class="hidden">
+                    </label>
+                    <div id="imagePreview" class="mt-3 flex gap-2 overflow-x-auto hide-scroll"></div>
+                </div>
+                <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">Опубликовать</button>
+            </form>
         </div>
     </div>
 
@@ -256,29 +268,6 @@
         </div>
     </div>
 
-    <!-- Создание поста (модалка) -->
-    <div id="createPostModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800">
-            <button onclick="document.getElementById('createPostModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
-                <i class='bx bx-x text-xl'></i>
-            </button>
-            <h2 class="text-2xl font-bold mb-4">Новый пост</h2>
-            <form id="createPostForm" class="space-y-4">
-                <input type="text" id="postTitle" placeholder="Заголовок поста..." required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
-                <textarea id="postDesc" placeholder="Расскажите, что происходит?" rows="4" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-base"></textarea>
-                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800 cursor-pointer hover:border-gray-600 transition group">
-                    <label class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                        <i class='bx bx-images text-4xl text-gray-500 group-hover:text-primary transition-colors mb-2'></i>
-                        <span class="text-sm text-gray-400 font-medium">Прикрепить фото (до 10 шт)</span>
-                        <input type="file" id="postImages" multiple accept="image/*" class="hidden">
-                    </label>
-                    <div id="imagePreview" class="mt-3 flex gap-2 overflow-x-auto hide-scroll"></div>
-                </div>
-                <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">Опубликовать</button>
-            </form>
-        </div>
-    </div>
-
     <!-- Модалка комментариев -->
     <div id="commentsModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col border border-gray-800 relative">
@@ -286,9 +275,7 @@
                 <i class='bx bx-x text-xl'></i>
             </button>
             <h3 class="text-xl font-bold mb-3" id="commentsModalTitle">Комментарии</h3>
-            <div id="commentsList" class="flex-1 overflow-y-auto hide-scroll mb-4 space-y-2">
-                <!-- Комментарии рендерятся сюда -->
-            </div>
+            <div id="commentsList" class="flex-1 overflow-y-auto hide-scroll mb-4 space-y-2"></div>
             <div class="flex gap-3 items-center border-t border-gray-800 pt-3">
                 <img id="commentsModalAvatar" src="" class="w-10 h-10 rounded-full object-cover shadow-md">
                 <input type="text" id="commentsModalInput" placeholder="Написать комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key==='Enter') sendCommentFromModal()">
@@ -320,42 +307,24 @@
                     <input type="number" id="banDays" placeholder="Дней" value="1" min="1" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-red-500 outline-none transition text-base">
                 </div>
                 <button onclick="banUser()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-custom transition-all text-base mt-2">Выдать блокировку</button>
-                <!-- Новая кнопка: Разбанить -->
                 <button onclick="unbanUser()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-custom transition-all text-base mt-2">Разбанить</button>
             </div>
         </div>
     </div>
 
-    <!-- Редактирование профиля + настройки -->
+    <!-- Модалка редактирования профиля (без настроек) -->
     <div id="editProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-md relative border border-gray-800 overflow-y-auto max-h-[90vh] hide-scroll">
             <button onclick="document.getElementById('editProfileModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
                 <i class='bx bx-x text-xl'></i>
             </button>
-            <h2 class="text-2xl font-bold mb-4">Настройки профиля</h2>
+            <h2 class="text-2xl font-bold mb-4">Редактировать профиль</h2>
             <form id="editProfileForm" class="space-y-4">
                 <input type="text" id="editName" placeholder="Имя пользователя" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
                 <textarea id="editBio" placeholder="О себе" rows="3" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-base"></textarea>
                 <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
                     <label class="block text-sm font-medium text-gray-400 mb-2">Сменить аватарку</label>
                     <input type="file" id="editAvatar" accept="image/*" class="w-full text-xs file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1.5 file:cursor-pointer">
-                </div>
-                <!-- Выбор цвета фона -->
-                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Цвет фона</label>
-                    <div class="flex flex-wrap gap-3 items-center mb-3">
-                        <button type="button" class="color-preset" style="background:#121212" data-color="#121212" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-preset" style="background:#444" data-color="#444" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-preset" style="background:#2563eb" data-color="#2563eb" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-preset" style="background:#22c55e" data-color="#22c55e" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-preset" style="background:#ef4444" data-color="#ef4444" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-preset" style="background:#8b5cf6" data-color="#8b5cf6" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-preset" style="background:#f97316" data-color="#f97316" onclick="selectColor(this)"></button>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <input type="color" id="bgColorInput" value="#121212" class="w-12 h-12 rounded border-0 cursor-pointer bg-transparent">
-                        <button type="button" id="applyBgBtn" class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-custom text-sm">Применить</button>
-                    </div>
                 </div>
                 <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black hover:bg-gray-200 font-bold py-3 rounded-custom transition-all text-base mt-2">Сохранить</button>
             </form>
@@ -423,10 +392,10 @@
             if(btn) btn.classList.add('active');
         };
 
-        // --- Закрытие панелей снятие подсветки ---
+        // --- Закрытие панелей ---
         window.closeProfilePanel = () => {
             document.getElementById('profilePanel').classList.add('translate-x-full');
-            // Снимаем подсветку с кнопки профиля
+            // снимаем подсветку с профиля
             document.querySelectorAll('.nav-btn').forEach(b => {
                 if(b.querySelector('.bx-user')) b.classList.remove('active');
             });
@@ -439,9 +408,15 @@
             });
         };
 
+        window.closeCreatePanel = () => {
+            document.getElementById('createPanel').classList.add('translate-x-full');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                if(b.querySelector('.bx-plus-circle')) b.classList.remove('active');
+            });
+        };
+
         window.closeSearch = () => {
             document.getElementById('searchModal').classList.add('hidden');
-            // Снимаем подсветку с поиска
             document.querySelectorAll('.nav-btn').forEach(b => {
                 if(b.querySelector('.bx-search')) b.classList.remove('active');
             });
@@ -449,6 +424,24 @@
 
         window.closeCommentsModal = () => {
             document.getElementById('commentsModal').classList.add('hidden');
+        };
+
+        // --- Открытие панели создания ---
+        window.toggleCreatePanel = () => {
+            const panel = document.getElementById('createPanel');
+            if(!panel.classList.contains('translate-x-full')) {
+                closeCreatePanel();
+                return;
+            }
+            // закрываем другие панели
+            closeProfilePanel();
+            closeNotificationsPanel();
+            closeSearch();
+            closeCommentsModal();
+            panel.classList.remove('translate-x-full');
+            // подсветка на кнопке "Создать"
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.nav-btn .bx-plus-circle')?.closest('.nav-btn')?.classList.add('active');
         };
 
         // --- Авторизация ---
@@ -469,8 +462,7 @@
                     displayName: user.email.split('@')[0],
                     bio: "Я лучший",
                     photoURL: "https://i.ibb.co/30Zc4Fq/default-avatar.png",
-                    notifications: [],
-                    background: '#121212'
+                    notifications: []
                 });
             }
             return (await getDoc(userRef)).data();
@@ -494,7 +486,6 @@
             finally { btn.disabled = false; btn.textContent = isLoginMode ? "Войти" : "Создать аккаунт"; }
         });
 
-        // Выход (общая кнопка и кнопка на экране бана)
         document.getElementById('navLogout').addEventListener('click', () => signOut(auth));
         document.getElementById('banLogoutBtn').addEventListener('click', () => signOut(auth));
 
@@ -517,27 +508,22 @@
                 } else {
                     document.getElementById('adminPanelBtn').classList.add('hidden');
                 }
-                if(data.background) {
-                    document.body.style.backgroundColor = data.background;
-                    document.getElementById('bgColorInput').value = data.background;
-                }
                 loadPosts(true);
                 checkNotifications();
             } else {
                 window.currentUser = null;
                 window.userDataCache = null;
                 document.getElementById('authModal').classList.remove('hidden');
-                // Закрываем все панели
                 closeProfilePanel();
                 closeNotificationsPanel();
+                closeCreatePanel();
                 closeSearch();
                 closeCommentsModal();
-                // Снимаем все подсветки
                 setActiveNav(null);
             }
         });
 
-        // --- Админка: бан и разбан ---
+        // --- Админка ---
         window.banUser = async () => {
             const email = document.getElementById('banEmail').value.trim();
             const reason = document.getElementById('banReasonInput').value;
@@ -595,10 +581,10 @@
                 return;
             }
             closeProfilePanel();
+            closeCreatePanel();
             closeSearch();
             closeCommentsModal();
             panel.classList.remove('translate-x-full');
-            // Устанавливаем active на кнопку уведомлений
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelector('.nav-btn .bx-bell')?.closest('.nav-btn')?.classList.add('active');
             
@@ -644,9 +630,9 @@
                 return;
             }
             closeNotificationsPanel();
+            closeCreatePanel();
             closeSearch();
             closeCommentsModal();
-            // Устанавливаем active на кнопку профиля
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelector('.nav-btn .bx-user')?.closest('.nav-btn')?.classList.add('active');
             
@@ -682,7 +668,7 @@
             } catch(e) { showToast("Ошибка", "error"); }
         };
 
-        // --- Комментарии (модалка) ---
+        // --- Комментарии ---
         let currentCommentsPostId = null;
         let currentCommentsAuthorId = null;
 
@@ -696,6 +682,7 @@
             modal.classList.remove('hidden');
             closeProfilePanel();
             closeNotificationsPanel();
+            closeCreatePanel();
             closeSearch();
             list.innerHTML = '<div class="text-center py-4"><i class="bx bx-loader-alt bx-spin text-2xl text-primary"></i></div>';
             try {
@@ -747,7 +734,7 @@
             finally { input.disabled = false; }
         };
 
-        // --- Подписка ---
+        // --- Подписка (исправлена) ---
         window.toggleFollow = async (targetUid, btn) => {
             if(targetUid === currentUser.uid) return;
             try {
@@ -765,10 +752,10 @@
                     btn.classList.add('following');
                     sendNotification(targetUid, 'follow', null);
                 }
-            } catch(e) { showToast("Ошибка", "error"); }
+            } catch(e) { showToast("Ошибка подписки", "error"); }
         };
 
-        // --- Рендер одного поста ---
+        // --- Рендер поста ---
         async function renderPost(docSnap, container, compact = false) {
             const p = docSnap.data();
             const u = await getUserData(p.authorId);
@@ -817,6 +804,7 @@
                 const followBtn = document.createElement('button');
                 followBtn.className = 'follow-btn-post';
                 followBtn.textContent = '+';
+                // Проверяем подписку и устанавливаем начальное состояние
                 (async () => {
                     const userData = await getUserData(currentUser.uid);
                     const following = userData?.following || [];
@@ -882,9 +870,9 @@
             document.getElementById('searchModal').classList.remove('hidden');
             closeProfilePanel();
             closeNotificationsPanel();
+            closeCreatePanel();
             closeCommentsModal();
             document.getElementById('searchInput').focus();
-            // Снимаем активную подсветку
             setActiveNav(null);
         };
 
@@ -908,7 +896,7 @@
             } catch(err) { results.innerHTML = '<div class="text-center text-red-500">Ошибка поиска</div>'; }
         });
 
-        // --- Создание поста ---
+        // --- Создание поста (из панели) ---
         document.getElementById('postImages').addEventListener('change', function() {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
@@ -936,7 +924,7 @@
                     createdAt: new Date().toISOString(),
                     likes: [], comments: []
                 });
-                document.getElementById('createPostModal').classList.add('hidden');
+                closeCreatePanel();
                 document.getElementById('createPostForm').reset();
                 document.getElementById('imagePreview').innerHTML = '';
                 showToast("Пост опубликован");
@@ -953,37 +941,14 @@
             } catch(e) { return null; }
         }
 
-        // --- Настройки (редактирование профиля + фон) ---
-        window.openSettings = () => {
+        // --- Редактирование профиля ---
+        window.openEditProfile = () => {
             document.getElementById('editProfileModal').classList.remove('hidden');
-            closeProfilePanel();
-            closeNotificationsPanel();
-            closeSearch();
-            closeCommentsModal();
-            // Снимаем активную подсветку
-            setActiveNav(null);
             if(currentUserData) {
                 document.getElementById('editName').value = currentUserData.displayName || '';
                 document.getElementById('editBio').value = currentUserData.bio || '';
-                document.getElementById('bgColorInput').value = currentUserData.background || '#121212';
-                document.querySelectorAll('.color-preset').forEach(el => {
-                    el.classList.toggle('active', el.dataset.color === currentUserData.background);
-                });
             }
         };
-
-        window.selectColor = (el) => {
-            document.querySelectorAll('.color-preset').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById('bgColorInput').value = el.dataset.color;
-        };
-
-        document.getElementById('applyBgBtn').addEventListener('click', async () => {
-            const color = document.getElementById('bgColorInput').value;
-            document.body.style.backgroundColor = color;
-            await updateDoc(doc(db, "users", currentUser.uid), { background: color });
-            showToast("Фон изменён");
-        });
 
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
