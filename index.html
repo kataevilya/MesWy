@@ -18,7 +18,7 @@
                         primary: 'var(--accent-color)'
                     },
                     borderRadius: {
-                        'custom': '20px'
+                        'custom': '16px'
                     }
                 }
             }
@@ -28,7 +28,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
         :root {
-            --accent-color: #2563eb; /* По умолчанию синий */
+            --accent-color: #2563eb; 
         }
         body { background-color: #121212; color: #e5e7eb; }
         ::-webkit-scrollbar { width: 6px; }
@@ -39,7 +39,6 @@
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
         
-        /* Фикс для мобильного меню */
         @media (max-width: 640px) {
             .mobile-nav-text { display: none; }
         }
@@ -48,117 +47,116 @@
 <body class="flex h-screen overflow-hidden font-sans text-gray-200 selection:bg-primary selection:text-white">
 
     <!-- Уведомления (Toasts) -->
-    <div id="toastContainer" class="fixed bottom-20 sm:bottom-6 right-6 z-[9999] flex flex-col gap-3"></div>
+    <div id="toastContainer" class="fixed bottom-16 sm:bottom-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
     <!-- Модалка Авторизации -->
     <div id="authModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-darkPanel p-8 rounded-custom shadow-2xl w-full max-w-md border border-gray-800">
-            <div class="flex justify-center mb-6"><i class='bx bx-infinite text-6xl text-primary'></i></div>
-            <h2 id="authTitle" class="text-3xl font-bold mb-6 text-center">Вход в MesWy</h2>
-            <form id="authForm" class="space-y-4">
-                <input type="email" id="authEmail" placeholder="Email" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-lg">
-                <input type="password" id="authPassword" placeholder="Пароль" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-lg">
-                <button type="submit" id="authSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-4 rounded-custom transition-all text-lg">Войти</button>
+        <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-sm border border-gray-800">
+            <div class="flex justify-center mb-4"><i class='bx bx-infinite text-5xl text-primary'></i></div>
+            <h2 id="authTitle" class="text-2xl font-bold mb-4 text-center">Вход в MesWy</h2>
+            <form id="authForm" class="space-y-3">
+                <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
+                <input type="password" id="authPassword" placeholder="Пароль" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
+                <button type="submit" id="authSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">Войти</button>
             </form>
-            <button id="googleLoginBtn" class="mt-4 w-full bg-white text-black hover:bg-gray-200 font-bold py-4 rounded-custom transition-all flex justify-center items-center gap-2 text-lg">
-                <i class='bx bxl-google text-2xl'></i> Google
+            <button id="googleLoginBtn" class="mt-3 w-full bg-white text-black hover:bg-gray-200 font-bold py-3 rounded-custom transition-all flex justify-center items-center gap-2 text-base">
+                <i class='bx bxl-google text-xl'></i> Google
             </button>
-            <p class="mt-6 text-center text-gray-400 cursor-pointer hover:text-white transition" id="authToggleBtn">Нет аккаунта? Создать</p>
+            <p class="mt-4 text-center text-gray-400 text-sm cursor-pointer hover:text-white transition" id="authToggleBtn">Нет аккаунта? Создать</p>
         </div>
     </div>
 
     <!-- Боковое меню (ПК) / Нижнее меню (Мобайл) -->
-    <aside class="group fixed bottom-0 w-full h-16 sm:h-full sm:w-24 sm:hover:w-72 bg-darkPanel border-t sm:border-t-0 sm:border-r border-gray-800 transition-all duration-300 flex flex-row sm:flex-col justify-around sm:justify-between z-40 shadow-xl overflow-y-auto hide-scroll">
-        <div class="flex flex-row sm:flex-col w-full sm:mt-4 items-center sm:items-stretch h-full sm:h-auto">
-            <div class="hidden sm:flex items-center w-full p-4 mb-4">
-                <i class='bx bx-infinite text-4xl text-primary min-w-[3.5rem] text-center'></i>
-                <span class="ml-2 text-2xl font-bold opacity-0 group-hover:opacity-100 transition-opacity">MesWy</span>
+    <aside class="group fixed bottom-0 w-full h-14 sm:h-full sm:w-20 sm:hover:w-60 bg-darkPanel border-t sm:border-t-0 sm:border-r border-gray-800 transition-all duration-300 flex flex-row sm:flex-col justify-around sm:justify-between z-40 shadow-xl overflow-y-auto hide-scroll">
+        <div class="flex flex-row sm:flex-col w-full sm:mt-2 items-center sm:items-stretch h-full sm:h-auto gap-1 sm:gap-0">
+            <div class="hidden sm:flex items-center w-full p-3 mb-2">
+                <i class='bx bx-infinite text-3xl text-primary min-w-[3rem] text-center'></i>
+                <span class="ml-2 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">MesWy</span>
             </div>
             
-            <button onclick="document.getElementById('postsFeed').scrollIntoView()" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-home-alt-2 text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Лента</span>
+            <button onclick="document.getElementById('postsFeed').scrollIntoView()" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-home-alt-2 text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Лента</span>
             </button>
 
-            <button id="navSearch" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-search text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Поиск</span>
+            <button id="navSearch" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-search text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Поиск</span>
             </button>
 
-            <button id="navPopular" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-trending-up text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Популярное</span>
+            <button id="navPopular" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-trending-up text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Популярное</span>
             </button>
 
-            <button id="navCreatePost" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-plus-circle text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text text-primary">Создать</span>
+            <button id="navCreatePost" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-plus-circle text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text text-primary whitespace-nowrap">Создать</span>
             </button>
 
-            <button id="navNotifications" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom relative">
-                <i class='bx bx-bell text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Уведомления</span>
-                <span class="absolute top-3 sm:top-5 left-8 sm:left-12 w-3 h-3 bg-red-500 rounded-full border-2 border-darkPanel"></span>
+            <button id="navNotifications" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom relative">
+                <i class='bx bx-bell text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Уведомления</span>
+                <span class="absolute top-2 sm:top-3 left-6 sm:left-10 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel"></span>
             </button>
 
-            <button id="navProfile" class="flex items-center sm:w-full p-3 sm:p-5 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-user text-3xl sm:text-4xl sm:min-w-[3.5rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text">Профиль</span>
+            <button id="navProfile" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
+                <i class='bx bx-user text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
+                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Профиль</span>
             </button>
         </div>
 
-        <div class="hidden sm:flex flex-col w-full mb-6">
-            <button id="navSettings" class="flex items-center w-full p-5 hover:bg-darkHover transition-colors cursor-pointer text-left rounded-r-custom">
-                <i class='bx bx-cog text-4xl min-w-[3.5rem] text-center text-gray-400 hover:text-white'></i>
-                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity">Настройки</span>
+        <div class="hidden sm:flex flex-col w-full mb-2">
+            <button id="navSettings" class="flex items-center w-full p-3 hover:bg-darkHover transition-colors cursor-pointer text-left rounded-r-custom">
+                <i class='bx bx-cog text-3xl min-w-[3rem] text-center text-gray-400 hover:text-white'></i>
+                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Настройки</span>
             </button>
-            <button id="navLogout" class="flex items-center w-full p-5 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer text-left rounded-r-custom">
-                <i class='bx bx-log-out text-4xl min-w-[3.5rem] text-center'></i>
-                <span class="ml-2 font-medium text-lg opacity-0 group-hover:opacity-100 transition-opacity">Выйти</span>
+            <button id="navLogout" class="flex items-center w-full p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer text-left rounded-r-custom">
+                <i class='bx bx-log-out text-3xl min-w-[3rem] text-center'></i>
+                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Выйти</span>
             </button>
         </div>
     </aside>
 
     <!-- Основная Лента -->
-    <main class="w-full sm:ml-24 flex-1 h-full overflow-y-auto p-4 sm:p-8 flex justify-center bg-[#121212] pb-24 sm:pb-8">
-        <div class="max-w-2xl w-full flex flex-col gap-6" id="postsFeed">
+    <main class="w-full sm:ml-20 flex-1 h-full overflow-y-auto p-3 sm:p-6 flex justify-center bg-[#121212] pb-20 sm:pb-6">
+        <div class="max-w-xl w-full flex flex-col gap-4" id="postsFeed">
             <!-- Посты рендерятся тут -->
         </div>
     </main>
 
     <!-- Панель Профиля -->
-    <div id="profilePanel" class="fixed top-0 right-0 h-full w-full sm:w-[600px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
-        <div class="flex-1 overflow-y-auto hide-scroll pb-24 sm:pb-6">
+    <div id="profilePanel" class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
+        <div class="flex-1 overflow-y-auto hide-scroll pb-20 sm:pb-4">
             <!-- Обложка -->
-            <div id="profileCover" class="h-48 sm:h-64 bg-gray-800 bg-cover bg-center relative">
-                <button id="closeProfileBtn" class="absolute top-4 right-4 bg-black/60 text-white w-12 h-12 rounded-full hover:bg-black/80 flex items-center justify-center transition backdrop-blur-sm z-50">
-                    <i class='bx bx-x text-3xl'></i>
+            <div id="profileCover" class="h-40 sm:h-48 bg-gray-800 bg-cover bg-center relative">
+                <button id="closeProfileBtn" class="absolute top-3 right-3 bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80 flex items-center justify-center transition backdrop-blur-sm z-50">
+                    <i class='bx bx-x text-2xl'></i>
                 </button>
             </div>
             
-            <div class="px-6 relative flex flex-col">
-                <!-- Аватарка вынесена наверх, перекрытие исправлено -->
-                <div class="flex justify-between items-end -mt-14 sm:-mt-16 relative z-20 mb-4">
-                    <img id="profileAvatar" src="" class="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-darkPanel object-cover bg-darkPanel shadow-lg">
-                    <button id="editProfileBtn" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-6 py-2.5 rounded-custom font-bold transition border border-gray-700 text-sm sm:text-base mb-2">
+            <div class="px-5 relative flex flex-col">
+                <div class="flex justify-between items-end -mt-12 sm:-mt-14 relative z-20 mb-3">
+                    <img id="profileAvatar" src="" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-darkPanel object-cover bg-darkPanel shadow-lg">
+                    <button id="editProfileBtn" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-5 py-2 rounded-custom font-bold transition border border-gray-700 text-sm mb-1">
                         Редактировать
                     </button>
                 </div>
                 
-                <div class="mt-2">
-                    <h2 id="profileName" class="text-3xl font-bold">Имя</h2>
-                    <p id="profileBio" class="text-gray-400 mt-3 text-base leading-relaxed whitespace-pre-wrap">Описание...</p>
+                <div class="mt-1">
+                    <h2 id="profileName" class="text-2xl font-bold">Имя</h2>
+                    <p id="profileBio" class="text-gray-400 mt-2 text-sm leading-relaxed whitespace-pre-wrap">Описание...</p>
                 </div>
                 
-                <div class="flex gap-4 mt-6 bg-[#121212] p-4 rounded-custom border border-gray-800">
-                    <div class="text-center flex-1"><span class="block font-bold text-2xl text-white" id="profileFollowing">0</span> <span class="text-gray-500 text-sm">Подписок</span></div>
-                    <div class="text-center flex-1 border-l border-gray-800"><span class="block font-bold text-2xl text-white" id="profileLikes">0</span> <span class="text-gray-500 text-sm">Лайков</span></div>
+                <div class="flex gap-3 mt-4 bg-[#121212] p-3 rounded-custom border border-gray-800">
+                    <div class="text-center flex-1"><span class="block font-bold text-xl text-white" id="profileFollowing">0</span> <span class="text-gray-500 text-xs">Подписок</span></div>
+                    <div class="text-center flex-1 border-l border-gray-800"><span class="block font-bold text-xl text-white" id="profileLikes">0</span> <span class="text-gray-500 text-xs">Лайков</span></div>
                 </div>
 
                 <!-- Посты пользователя -->
-                <div class="mt-8 border-t border-gray-800 pt-6">
-                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2"><i class='bx bx-grid-alt text-primary'></i> Публикации</h3>
-                    <div id="profilePostsFeed" class="flex flex-col gap-6">
+                <div class="mt-6 border-t border-gray-800 pt-5">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class='bx bx-grid-alt text-primary'></i> Публикации</h3>
+                    <div id="profilePostsFeed" class="flex flex-col gap-4">
                         <!-- Посты пользователя рендерятся тут -->
                     </div>
                 </div>
@@ -167,42 +165,41 @@
     </div>
 
     <!-- Полноэкранный Поиск -->
-    <div id="searchModal" class="hidden fixed inset-0 z-[60] bg-[#121212] flex flex-col p-4 sm:p-8 overflow-y-auto hide-scroll pb-24">
-        <button class="close-modal-btn fixed top-6 right-6 text-gray-400 hover:text-white w-12 h-12 flex items-center justify-center rounded-full bg-darkPanel border border-gray-800 z-50 transition">
-            <i class='bx bx-x text-3xl'></i>
+    <div id="searchModal" class="hidden fixed inset-0 z-[60] bg-[#121212] flex flex-col p-4 overflow-y-auto hide-scroll pb-20">
+        <button class="close-modal-btn fixed top-4 right-4 text-gray-400 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-darkPanel border border-gray-800 z-50 transition">
+            <i class='bx bx-x text-2xl'></i>
         </button>
-        <div class="max-w-3xl w-full mx-auto mt-12 sm:mt-8">
-            <h2 class="text-3xl font-bold mb-6 text-center">Поиск по MesWy</h2>
-            <div class="relative mb-8">
-                <i class='bx bx-search absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-gray-500'></i>
-                <input type="text" id="searchInput" placeholder="Введите текст для поиска постов..." class="w-full pl-14 p-5 rounded-custom bg-darkPanel border border-gray-800 focus:border-primary outline-none transition text-lg shadow-xl">
+        <div class="max-w-2xl w-full mx-auto mt-8 sm:mt-6">
+            <h2 class="text-2xl font-bold mb-4 text-center">Поиск по MesWy</h2>
+            <div class="relative mb-6">
+                <i class='bx bx-search absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-500'></i>
+                <input type="text" id="searchInput" placeholder="Введите текст для поиска постов..." class="w-full pl-12 p-4 rounded-custom bg-darkPanel border border-gray-800 focus:border-primary outline-none transition text-base shadow-xl">
             </div>
-            <div id="searchResults" class="flex flex-col gap-6">
-                <!-- Найденные полноценные посты -->
-                <div class="text-center text-gray-500 mt-10"><i class='bx bx-search text-6xl opacity-20 mb-4'></i><br>Начните вводить запрос</div>
+            <div id="searchResults" class="flex flex-col gap-4">
+                <div class="text-center text-gray-500 mt-8"><i class='bx bx-search text-5xl opacity-20 mb-3'></i><br>Начните вводить запрос</div>
             </div>
         </div>
     </div>
 
     <!-- Модалка Создания Поста -->
     <div id="createPostModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-darkPanel p-6 sm:p-8 rounded-custom shadow-2xl w-full max-w-xl relative border border-gray-800">
-            <button class="close-modal-btn absolute top-6 right-6 text-gray-500 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-[#121212] transition">
-                <i class='bx bx-x text-2xl'></i>
+        <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800">
+            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
+                <i class='bx bx-x text-xl'></i>
             </button>
-            <h2 class="text-3xl font-bold mb-6">Новый пост</h2>
-            <form id="createPostForm" class="space-y-5">
-                <input type="text" id="postTitle" placeholder="Заголовок поста..." required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-lg">
-                <textarea id="postDesc" placeholder="Расскажите, что происходит?" rows="5" class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-lg"></textarea>
-                <div class="bg-[#121212] p-6 rounded-custom border border-gray-800 cursor-pointer hover:border-gray-600 transition group">
+            <h2 class="text-2xl font-bold mb-4">Новый пост</h2>
+            <form id="createPostForm" class="space-y-4">
+                <input type="text" id="postTitle" placeholder="Заголовок поста..." required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
+                <textarea id="postDesc" placeholder="Расскажите, что происходит?" rows="4" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-base"></textarea>
+                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800 cursor-pointer hover:border-gray-600 transition group">
                     <label class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                        <i class='bx bx-images text-5xl text-gray-500 group-hover:text-primary transition-colors mb-3'></i>
-                        <span class="text-base text-gray-400 font-medium">Прикрепить фото (до 10 шт)</span>
+                        <i class='bx bx-images text-4xl text-gray-500 group-hover:text-primary transition-colors mb-2'></i>
+                        <span class="text-sm text-gray-400 font-medium">Прикрепить фото (до 10 шт)</span>
                         <input type="file" id="postImages" multiple accept="image/*" class="hidden">
                     </label>
-                    <div id="imagePreview" class="mt-4 flex gap-3 overflow-x-auto hide-scroll"></div>
+                    <div id="imagePreview" class="mt-3 flex gap-2 overflow-x-auto hide-scroll"></div>
                 </div>
-                <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-4 rounded-custom transition-all text-lg">
+                <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">
                     Опубликовать
                 </button>
             </form>
@@ -211,28 +208,28 @@
 
     <!-- Настройки / Кастомизация -->
     <div id="settingsModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-darkPanel p-8 rounded-custom shadow-2xl w-full max-w-md relative border border-gray-800">
-            <button class="close-modal-btn absolute top-6 right-6 text-gray-500 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-[#121212]">
-                <i class='bx bx-x text-2xl'></i>
+        <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-sm relative border border-gray-800">
+            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212]">
+                <i class='bx bx-x text-xl'></i>
             </button>
-            <h2 class="text-3xl font-bold mb-8">Настройки</h2>
+            <h2 class="text-2xl font-bold mb-6">Настройки</h2>
             
-            <div class="space-y-6">
+            <div class="space-y-5">
                 <div>
-                    <h3 class="text-lg font-bold mb-4 text-gray-300">Цвет интерфейса (Accent Color)</h3>
-                    <div class="flex gap-4 flex-wrap">
-                        <button onclick="changeThemeColor('#2563eb')" class="w-12 h-12 rounded-full bg-[#2563eb] border-2 border-transparent hover:scale-110 transition"></button>
-                        <button onclick="changeThemeColor('#dc2626')" class="w-12 h-12 rounded-full bg-[#dc2626] border-2 border-transparent hover:scale-110 transition"></button>
-                        <button onclick="changeThemeColor('#16a34a')" class="w-12 h-12 rounded-full bg-[#16a34a] border-2 border-transparent hover:scale-110 transition"></button>
-                        <button onclick="changeThemeColor('#9333ea')" class="w-12 h-12 rounded-full bg-[#9333ea] border-2 border-transparent hover:scale-110 transition"></button>
-                        <button onclick="changeThemeColor('#ea580c')" class="w-12 h-12 rounded-full bg-[#ea580c] border-2 border-transparent hover:scale-110 transition"></button>
+                    <h3 class="text-base font-bold mb-3 text-gray-300">Цвет интерфейса</h3>
+                    <div class="flex gap-3 flex-wrap">
+                        <button onclick="changeThemeColor('#2563eb')" class="w-10 h-10 rounded-full bg-[#2563eb] border-2 border-transparent hover:scale-110 transition"></button>
+                        <button onclick="changeThemeColor('#dc2626')" class="w-10 h-10 rounded-full bg-[#dc2626] border-2 border-transparent hover:scale-110 transition"></button>
+                        <button onclick="changeThemeColor('#16a34a')" class="w-10 h-10 rounded-full bg-[#16a34a] border-2 border-transparent hover:scale-110 transition"></button>
+                        <button onclick="changeThemeColor('#9333ea')" class="w-10 h-10 rounded-full bg-[#9333ea] border-2 border-transparent hover:scale-110 transition"></button>
+                        <button onclick="changeThemeColor('#ea580c')" class="w-10 h-10 rounded-full bg-[#ea580c] border-2 border-transparent hover:scale-110 transition"></button>
                     </div>
                 </div>
 
-                <div class="border-t border-gray-800 pt-6">
-                    <button class="w-full flex items-center justify-between p-4 bg-[#121212] rounded-custom hover:bg-gray-800 transition">
-                        <span class="font-bold">Управление аккаунтом</span>
-                        <i class='bx bx-chevron-right text-2xl text-gray-500'></i>
+                <div class="border-t border-gray-800 pt-5">
+                    <button class="w-full flex items-center justify-between p-3 bg-[#121212] rounded-custom hover:bg-gray-800 transition">
+                        <span class="font-bold text-sm">Управление аккаунтом</span>
+                        <i class='bx bx-chevron-right text-xl text-gray-500'></i>
                     </button>
                 </div>
             </div>
@@ -241,33 +238,33 @@
 
     <!-- Редактирование Профиля -->
     <div id="editProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-darkPanel p-6 sm:p-8 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800 overflow-y-auto max-h-[90vh] hide-scroll">
-            <button class="close-modal-btn absolute top-6 right-6 text-gray-500 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-[#121212]">
-                <i class='bx bx-x text-2xl'></i>
+        <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-md relative border border-gray-800 overflow-y-auto max-h-[90vh] hide-scroll">
+            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212]">
+                <i class='bx bx-x text-xl'></i>
             </button>
-            <h2 class="text-3xl font-bold mb-6">Редактирование</h2>
-            <form id="editProfileForm" class="space-y-5">
-                <input type="text" id="editName" placeholder="Имя пользователя" required class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 outline-none text-lg">
-                <textarea id="editBio" placeholder="О себе" rows="4" class="w-full p-4 rounded-custom bg-[#121212] border border-gray-800 outline-none resize-none text-lg"></textarea>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-[#121212] p-5 rounded-custom border border-gray-800">
-                        <label class="block text-base font-medium text-gray-400 mb-3">Сменить аватарку</label>
-                        <input type="file" id="editAvatar" accept="image/*" class="w-full text-sm file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-4 file:py-2 file:cursor-pointer">
+            <h2 class="text-2xl font-bold mb-4">Редактирование</h2>
+            <form id="editProfileForm" class="space-y-4">
+                <input type="text" id="editName" placeholder="Имя пользователя" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none text-base">
+                <textarea id="editBio" placeholder="О себе" rows="3" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none resize-none text-base"></textarea>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Сменить аватарку</label>
+                        <input type="file" id="editAvatar" accept="image/*" class="w-full text-xs file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1.5 file:cursor-pointer">
                     </div>
-                    <div class="bg-[#121212] p-5 rounded-custom border border-gray-800">
-                        <label class="block text-base font-medium text-gray-400 mb-3">Сменить обложку</label>
-                        <input type="file" id="editCover" accept="image/*" class="w-full text-sm file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-4 file:py-2 file:cursor-pointer">
+                    <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Сменить обложку</label>
+                        <input type="file" id="editCover" accept="image/*" class="w-full text-xs file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1.5 file:cursor-pointer">
                     </div>
                 </div>
-                <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black hover:bg-gray-200 font-bold py-4 rounded-custom transition-all text-lg mt-4">Сохранить изменения</button>
+                <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black hover:bg-gray-200 font-bold py-3 rounded-custom transition-all text-base mt-2">Сохранить</button>
             </form>
         </div>
     </div>
 
     <!-- Просмотр Изображений -->
     <div id="imageViewerModal" class="hidden fixed inset-0 z-[999] bg-black/95 flex items-center justify-center p-4">
-        <button id="closeImageViewer" class="absolute top-6 right-6 text-white w-14 h-14 bg-gray-900/50 hover:bg-gray-800 rounded-full flex items-center justify-center transition backdrop-blur-md">
-            <i class='bx bx-x text-4xl'></i>
+        <button id="closeImageViewer" class="absolute top-4 right-4 text-white w-10 h-10 bg-gray-900/50 hover:bg-gray-800 rounded-full flex items-center justify-center transition backdrop-blur-md">
+            <i class='bx bx-x text-2xl'></i>
         </button>
         <img id="viewerImage" src="" class="max-w-full max-h-full object-contain rounded-custom shadow-2xl">
     </div>
@@ -295,7 +292,6 @@
         let userDataCache = null; 
         let lastVisiblePost = null; 
 
-        // Кастомизация цвета
         window.changeThemeColor = (color) => {
             document.documentElement.style.setProperty('--accent-color', color);
             localStorage.setItem('themeColor', color);
@@ -303,15 +299,14 @@
         const savedColor = localStorage.getItem('themeColor');
         if(savedColor) changeThemeColor(savedColor);
 
-        // Уведомления
         window.showToast = (message, type = 'info') => {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             const bg = type === 'error' ? 'bg-red-900/90 border-red-700' : 'bg-darkPanel border-gray-700';
             const icon = type === 'error' ? 'bx-error-circle text-red-500' : 'bx-check-circle text-primary';
             
-            toast.className = `toast-enter flex items-center gap-4 p-5 rounded-custom border ${bg} text-white shadow-2xl min-w-[300px] mb-3`;
-            toast.innerHTML = `<i class='bx ${icon} text-3xl'></i> <span class="font-bold text-lg">${message}</span>`;
+            toast.className = `toast-enter flex items-center gap-3 p-4 rounded-custom border ${bg} text-white shadow-2xl min-w-[250px] mb-2 text-sm`;
+            toast.innerHTML = `<i class='bx ${icon} text-xl'></i> <span class="font-bold">${message}</span>`;
             
             container.appendChild(toast);
             setTimeout(() => {
@@ -322,7 +317,6 @@
             }, 4000);
         };
 
-        // Загрузка в ImgBB
         async function uploadToImgBB(file) {
             const formData = new FormData();
             formData.append('image', file);
@@ -333,7 +327,6 @@
             } catch (e) { showToast("Ошибка картинки", "error"); return null; }
         }
 
-        // Модалки
         document.querySelectorAll('.close-modal-btn').forEach(btn => {
             btn.addEventListener('click', (e) => e.target.closest('div.fixed').classList.add('hidden'));
         });
@@ -342,7 +335,6 @@
         document.getElementById('navNotifications').addEventListener('click', () => showToast("У вас нет новых уведомлений"));
         document.getElementById('navPopular').addEventListener('click', () => { showToast("Загружаем популярное..."); loadPosts(true); });
 
-        // Авторизация
         let isLoginMode = true;
         const authModal = document.getElementById('authModal');
         
@@ -405,7 +397,6 @@
             }
         });
 
-        // Профиль
         window.openProfile = async (uid) => {
             const panel = document.getElementById('profilePanel');
             const userSnap = await getDoc(doc(db, "users", uid));
@@ -427,14 +418,13 @@
                 
                 panel.classList.remove('translate-x-full');
 
-                // Загрузка постов пользователя
                 const pFeed = document.getElementById('profilePostsFeed');
-                pFeed.innerHTML = '<div class="text-center py-10"><i class="bx bx-loader-alt bx-spin text-4xl text-primary"></i></div>';
+                pFeed.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
                 const pq = query(collection(db, "posts"), where("authorId", "==", uid), orderBy("createdAt", "desc"));
                 const pSnap = await getDocs(pq);
                 pFeed.innerHTML = '';
                 if(pSnap.empty) {
-                    pFeed.innerHTML = '<div class="text-center text-gray-500 py-10 bg-[#121212] rounded-custom">У пользователя пока нет постов</div>';
+                    pFeed.innerHTML = '<div class="text-center text-gray-500 py-6 bg-[#121212] rounded-custom text-sm">У пользователя пока нет постов</div>';
                 } else {
                     for(const d of pSnap.docs) await renderPost(d, pFeed, true);
                 }
@@ -464,15 +454,13 @@
                 showToast("Профиль обновлен");
                 loadPosts(true); 
             } catch (err) { showToast(err.message, "error"); }
-            finally { btn.disabled = false; btn.textContent = "Сохранить изменения"; }
+            finally { btn.disabled = false; btn.textContent = "Сохранить"; }
         });
 
-        // Картинки
         const imgModal = document.getElementById('imageViewerModal');
         window.openImage = (url) => { document.getElementById('viewerImage').src = url; imgModal.classList.remove('hidden'); };
         document.getElementById('closeImageViewer').addEventListener('click', () => imgModal.classList.add('hidden'));
 
-        // Создание
         document.getElementById('navCreatePost').addEventListener('click', () => document.getElementById('createPostModal').classList.remove('hidden'));
         
         document.getElementById('postImages').addEventListener('change', function() {
@@ -481,7 +469,7 @@
             Array.from(this.files).forEach(file => {
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
-                img.className = "w-20 h-20 object-cover rounded-xl border-2 border-gray-700 shadow-md";
+                img.className = "w-16 h-16 object-cover rounded-xl border border-gray-700 shadow-md";
                 preview.appendChild(img);
             });
         });
@@ -512,7 +500,6 @@
             finally { btn.disabled = false; btn.innerHTML = "Опубликовать"; }
         });
 
-        // Лента и Взаимодействие
         const postsFeed = document.getElementById('postsFeed');
 
         window.toggleLike = async (postId, btnElement) => {
@@ -525,8 +512,8 @@
                 await updateDoc(postRef, { likes: newLikes });
                 
                 btnElement.innerHTML = isLiked 
-                    ? `<i class='bx bx-heart text-3xl'></i> <span class="font-bold text-lg">${newLikes.length}</span>`
-                    : `<i class='bx bxs-heart text-3xl text-red-500 drop-shadow-md'></i> <span class="font-bold text-lg">${newLikes.length}</span>`;
+                    ? `<i class='bx bx-heart text-2xl'></i> <span class="font-bold text-base">${newLikes.length}</span>`
+                    : `<i class='bx bxs-heart text-2xl text-red-500 drop-shadow-md'></i> <span class="font-bold text-base">${newLikes.length}</span>`;
             } catch (e) { showToast("Ошибка", "error"); }
         };
 
@@ -551,10 +538,10 @@
             const btn = document.getElementById(`toggle-btn-${postId}`);
             if (hiddenBox.classList.contains('hidden')) {
                 hiddenBox.classList.remove('hidden');
-                btn.innerHTML = "Скрыть комментарии <i class='bx bx-chevron-up'></i>";
+                btn.innerHTML = "Скрыть <i class='bx bx-chevron-up'></i>";
             } else {
                 hiddenBox.classList.add('hidden');
-                btn.innerHTML = `Показать все комментарии <i class='bx bx-chevron-down'></i>`;
+                btn.innerHTML = `Показать все <i class='bx bx-chevron-down'></i>`;
             }
         };
 
@@ -571,16 +558,16 @@
             let imagesHtml = '';
             if (post.images && post.images.length > 0) {
                 const gridClass = post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2';
-                imagesHtml = `<div class="grid ${gridClass} gap-3 mt-5 rounded-custom overflow-hidden">`;
+                imagesHtml = `<div class="grid ${gridClass} gap-2 mt-4 rounded-custom overflow-hidden">`;
                 post.images.forEach(url => {
-                    imagesHtml += `<img src="${url}" onclick="openImage('${url}')" class="w-full ${compact ? 'h-48' : 'h-64 sm:h-96'} object-cover cursor-pointer hover:scale-105 transition duration-500" alt="Post">`;
+                    imagesHtml += `<img src="${url}" onclick="openImage('${url}')" class="w-full ${compact ? 'h-36' : 'h-48 sm:h-64'} object-cover cursor-pointer hover:scale-105 transition duration-500" alt="Post">`;
                 });
                 imagesHtml += `</div>`;
             }
 
             const likesCount = post.likes ? post.likes.length : 0;
             const isLiked = post.likes && post.likes.includes(currentUser.uid);
-            const heartHtml = isLiked ? `<i class='bx bxs-heart text-3xl text-red-500 drop-shadow-md'></i>` : `<i class='bx bx-heart text-3xl'></i>`;
+            const heartHtml = isLiked ? `<i class='bx bxs-heart text-2xl text-red-500 drop-shadow-md'></i>` : `<i class='bx bx-heart text-2xl'></i>`;
             
             const comments = post.comments || [];
             let commentsHtml = ''; let hiddenCommentsHtml = '';
@@ -588,11 +575,11 @@
             if (comments.length > 0 && !compact) {
                 comments.forEach((c, i) => {
                     const cHtml = `
-                        <div class="flex gap-4 mb-4">
-                            <img src="${c.photo}" class="w-10 h-10 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${c.uid}')">
-                            <div class="bg-[#121212] p-4 rounded-custom rounded-tl-none flex-1 border border-gray-800">
-                                <span class="font-bold cursor-pointer hover:text-primary transition" onclick="openProfile('${c.uid}')">${c.name}</span>
-                                <p class="text-gray-300 mt-2 text-base">${c.text}</p>
+                        <div class="flex gap-3 mb-3">
+                            <img src="${c.photo}" class="w-8 h-8 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${c.uid}')">
+                            <div class="bg-[#121212] p-3 rounded-custom rounded-tl-none flex-1 border border-gray-800">
+                                <span class="font-bold text-sm cursor-pointer hover:text-primary transition" onclick="openProfile('${c.uid}')">${c.name}</span>
+                                <p class="text-gray-300 mt-1 text-sm">${c.text}</p>
                             </div>
                         </div>`;
                     if (i < 3) commentsHtml += cHtml; else hiddenCommentsHtml += cHtml;
@@ -600,41 +587,41 @@
             }
 
             const postEl = document.createElement('article');
-            postEl.className = "bg-darkPanel rounded-custom border border-gray-800 p-5 sm:p-8 shadow-xl hover:border-gray-700 transition";
+            postEl.className = "bg-darkPanel rounded-custom border border-gray-800 p-4 sm:p-5 shadow-xl hover:border-gray-700 transition";
             postEl.innerHTML = `
-                <div class="flex items-center space-x-4 mb-6 cursor-pointer" onclick="openProfile('${post.authorId}')">
-                    <img src="${authorPhoto}" class="w-14 h-14 rounded-full object-cover border-2 border-transparent hover:border-primary transition shadow-md">
+                <div class="flex items-center space-x-3 mb-4 cursor-pointer" onclick="openProfile('${post.authorId}')">
+                    <img src="${authorPhoto}" class="w-10 h-10 rounded-full object-cover border-2 border-transparent hover:border-primary transition shadow-md">
                     <div>
-                        <h3 class="text-lg font-bold hover:text-primary transition">${authorName}</h3>
-                        <span class="text-sm text-gray-500">${new Date(post.createdAt).toLocaleDateString()}</span>
+                        <h3 class="text-base font-bold hover:text-primary transition">${authorName}</h3>
+                        <span class="text-xs text-gray-500">${new Date(post.createdAt).toLocaleDateString()}</span>
                     </div>
                 </div>
-                <h2 class="text-2xl font-bold mb-3">${post.title}</h2>
-                <p class="text-gray-300 text-lg whitespace-pre-wrap leading-relaxed">${post.description}</p>
+                <h2 class="text-xl font-bold mb-2">${post.title}</h2>
+                <p class="text-gray-300 text-base whitespace-pre-wrap leading-relaxed">${post.description}</p>
                 ${imagesHtml}
                 
-                <div class="mt-6 flex items-center gap-8 border-t border-gray-800 pt-5">
-                    <button onclick="toggleLike('${postId}', this)" class="flex items-center gap-3 text-gray-400 hover:text-white transition">
-                        ${heartHtml} <span class="font-bold text-lg">${likesCount}</span>
+                <div class="mt-4 flex items-center gap-6 border-t border-gray-800 pt-4">
+                    <button onclick="toggleLike('${postId}', this)" class="flex items-center gap-2 text-gray-400 hover:text-white transition">
+                        ${heartHtml} <span class="font-bold text-base">${likesCount}</span>
                     </button>
-                    <div class="flex items-center gap-3 text-gray-400">
-                        <i class='bx bx-message-rounded text-3xl'></i> <span class="font-bold text-lg">${comments.length}</span>
+                    <div class="flex items-center gap-2 text-gray-400">
+                        <i class='bx bx-message-rounded text-2xl'></i> <span class="font-bold text-base">${comments.length}</span>
                     </div>
                 </div>
 
                 ${!compact ? `
-                <div class="mt-6 border-t border-gray-800 pt-5">
+                <div class="mt-4 border-t border-gray-800 pt-4">
                     <div class="mb-2">${commentsHtml}</div>
                     ${hiddenCommentsHtml ? `
                         <div id="hidden-comments-${postId}" class="hidden mb-2">${hiddenCommentsHtml}</div>
-                        <button id="toggle-btn-${postId}" onclick="toggleComments('${postId}')" class="text-base text-primary hover:opacity-80 font-bold mb-5 flex items-center gap-1">Показать все комментарии <i class='bx bx-chevron-down'></i></button>
+                        <button id="toggle-btn-${postId}" onclick="toggleComments('${postId}')" class="text-sm text-primary hover:opacity-80 font-bold mb-4 flex items-center gap-1">Показать все <i class='bx bx-chevron-down'></i></button>
                     ` : ''}
                     
-                    <div class="flex gap-4 mt-5 items-center">
-                        <img src="${userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png'}" class="w-12 h-12 rounded-full object-cover shadow-md">
-                        <input type="text" id="comment-input-${postId}" placeholder="Оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-5 py-4 text-base outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${postId}', 'comment-input-${postId}')">
-                        <button onclick="submitComment('${postId}', 'comment-input-${postId}')" class="bg-primary text-white w-14 h-14 rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg">
-                            <i class='bx bx-send text-2xl'></i>
+                    <div class="flex gap-3 mt-4 items-center">
+                        <img src="${userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png'}" class="w-10 h-10 rounded-full object-cover shadow-md">
+                        <input type="text" id="comment-input-${postId}" placeholder="Оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${postId}', 'comment-input-${postId}')">
+                        <button onclick="submitComment('${postId}', 'comment-input-${postId}')" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg shrink-0">
+                            <i class='bx bx-send text-xl'></i>
                         </button>
                     </div>
                 </div>` : ''}
@@ -654,7 +641,7 @@
             try {
                 const snap = await getDocs(q);
                 if (snap.empty && reset) {
-                    postsFeed.innerHTML = '<div class="text-center text-gray-500 mt-10 p-8 bg-darkPanel rounded-custom border border-gray-800 text-lg">Пока ничего нет. Напиши первый пост!</div>';
+                    postsFeed.innerHTML = '<div class="text-center text-gray-500 mt-8 p-6 bg-darkPanel rounded-custom border border-gray-800 text-base">Пока ничего нет. Напиши первый пост!</div>';
                     return;
                 }
 
@@ -664,7 +651,7 @@
                     lastVisiblePost = snap.docs[snap.docs.length - 1];
                     const btn = document.createElement('button');
                     btn.id = 'loadMoreBtn';
-                    btn.className = "w-full py-5 bg-darkPanel border border-gray-800 rounded-custom font-bold text-gray-400 hover:text-white hover:border-gray-600 transition mt-6 text-lg";
+                    btn.className = "w-full py-4 bg-darkPanel border border-gray-800 rounded-custom font-bold text-gray-400 hover:text-white hover:border-gray-600 transition mt-4 text-base";
                     btn.textContent = "Загрузить еще";
                     btn.onclick = () => loadPosts(false);
                     postsFeed.appendChild(btn);
@@ -672,7 +659,6 @@
             } catch (e) { showToast("Ошибка загрузки", "error"); }
         }
 
-        // Поиск на весь экран
         const searchModal = document.getElementById('searchModal');
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
@@ -684,9 +670,9 @@
 
         searchInput.addEventListener('input', async (e) => {
             const val = e.target.value.toLowerCase();
-            if(val.length < 2) { searchResults.innerHTML = '<div class="text-center text-gray-500 mt-10"><i class="bx bx-search text-6xl opacity-20 mb-4"></i><br>Введите запрос</div>'; return; }
+            if(val.length < 2) { searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8"><i class="bx bx-search text-5xl opacity-20 mb-3"></i><br>Введите запрос</div>'; return; }
             
-            searchResults.innerHTML = '<div class="text-center text-primary mt-10"><i class="bx bx-loader-alt bx-spin text-5xl"></i></div>';
+            searchResults.innerHTML = '<div class="text-center text-primary mt-8"><i class="bx bx-loader-alt bx-spin text-4xl"></i></div>';
             try {
                 const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50)));
                 searchResults.innerHTML = '';
@@ -696,10 +682,10 @@
                     const data = docSnap.data();
                     if (data.title.toLowerCase().includes(val) || data.description.toLowerCase().includes(val)) {
                         found++;
-                        await renderPost(docSnap, searchResults, false); // Рендерим полноценный пост прямо в поиске
+                        await renderPost(docSnap, searchResults, false);
                     }
                 }
-                if(found === 0) searchResults.innerHTML = '<div class="text-center text-gray-500 mt-10 text-xl">Ничего не найдено</div>';
+                if(found === 0) searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8 text-base">Ничего не найдено</div>';
             } catch(err) { searchResults.innerHTML = '<div class="text-center text-red-500">Ошибка поиска</div>'; }
         });
     </script>
