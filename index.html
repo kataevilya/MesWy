@@ -31,7 +31,11 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-        .nav-btn { transition: all 0.2s; }
+        .nav-btn {
+            transition: all 0.2s;
+            padding-top: 12px;
+            padding-bottom: 12px;
+        }
         .nav-btn.active i { color: #2563eb !important; }
         .nav-btn.active .nav-label { color: #2563eb !important; }
         .follow-btn-post {
@@ -73,7 +77,21 @@
         .comments-modal .comment-item:last-child { border-bottom: none; }
         @media (max-width: 640px) {
             .nav-label { display: none; }
-            .nav-btn { justify-content: center; }
+            .nav-btn { justify-content: center; padding: 8px 0; }
+        }
+        /* увеличенные отступы в меню */
+        .menu-container {
+            gap: 4px;
+        }
+        .menu-container .nav-btn {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+        @media (min-width: 640px) {
+            .menu-container .nav-btn {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
         }
     </style>
 </head>
@@ -109,7 +127,7 @@
 
     <!-- Боковое меню (ПК) / Нижнее меню (Мобайл) -->
     <aside class="group fixed bottom-0 w-full h-14 sm:h-full sm:w-20 sm:hover:w-60 bg-darkPanel border-t sm:border-t-0 sm:border-r border-gray-800 transition-all duration-300 flex flex-row sm:flex-col justify-around sm:justify-between z-40 shadow-xl overflow-y-auto hide-scroll">
-        <div class="flex flex-row sm:flex-col w-full sm:mt-2 items-center sm:items-stretch h-full sm:h-auto gap-1 sm:gap-0">
+        <div class="flex flex-row sm:flex-col w-full sm:mt-2 items-center sm:items-stretch h-full sm:h-auto gap-1 sm:gap-1 menu-container">
             <div class="hidden sm:flex items-center w-full p-3 mb-2">
                 <i class='bx bx-infinite text-3xl text-primary min-w-[3rem] text-center'></i>
                 <span class="ml-2 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">MesWy</span>
@@ -133,7 +151,7 @@
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Рекомендации</span>
             </button>
 
-            <!-- 4. Создать (модалка) -->
+            <!-- 4. Создать (модалка) - НЕ ПОДСВЕЧИВАЕТСЯ -->
             <button onclick="document.getElementById('createPostModal').classList.remove('hidden'); setActiveNav(null)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-plus-circle text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity text-primary whitespace-nowrap">Создать</span>
@@ -152,13 +170,13 @@
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Профиль</span>
             </button>
 
-            <!-- 7. Настройки (модалка редактирования) -->
+            <!-- 7. Настройки (модалка) -->
             <button onclick="openSettings(); setActiveNav(null)" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
                 <i class='bx bx-cog text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
                 <span class="nav-label ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Настройки</span>
             </button>
 
-            <!-- 8. (запасной слот, если нужен) — оставим пустым -->
+            <!-- 8. (запасной) -->
 
             <!-- 9. Выход (последний) -->
             <button id="navLogout" class="nav-btn flex items-center sm:w-full p-2 sm:p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
@@ -302,6 +320,8 @@
                     <input type="number" id="banDays" placeholder="Дней" value="1" min="1" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-red-500 outline-none transition text-base">
                 </div>
                 <button onclick="banUser()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-custom transition-all text-base mt-2">Выдать блокировку</button>
+                <!-- Новая кнопка: Разбанить -->
+                <button onclick="unbanUser()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-custom transition-all text-base mt-2">Разбанить</button>
             </div>
         </div>
     </div>
@@ -355,7 +375,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, limit, startAfter, arrayUnion, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, limit, startAfter, arrayUnion, where, deleteField } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const app = initializeApp({
             apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
@@ -403,16 +423,30 @@
             if(btn) btn.classList.add('active');
         };
 
-        // --- Закрытие панелей ---
+        // --- Закрытие панелей снятие подсветки ---
         window.closeProfilePanel = () => {
             document.getElementById('profilePanel').classList.add('translate-x-full');
+            // Снимаем подсветку с кнопки профиля
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                if(b.querySelector('.bx-user')) b.classList.remove('active');
+            });
         };
+
         window.closeNotificationsPanel = () => {
             document.getElementById('notificationsPanel').classList.add('translate-x-full');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                if(b.querySelector('.bx-bell')) b.classList.remove('active');
+            });
         };
+
         window.closeSearch = () => {
             document.getElementById('searchModal').classList.add('hidden');
+            // Снимаем подсветку с поиска
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                if(b.querySelector('.bx-search')) b.classList.remove('active');
+            });
         };
+
         window.closeCommentsModal = () => {
             document.getElementById('commentsModal').classList.add('hidden');
         };
@@ -460,7 +494,7 @@
             finally { btn.disabled = false; btn.textContent = isLoginMode ? "Войти" : "Создать аккаунт"; }
         });
 
-        // Выход (общая кнопка)
+        // Выход (общая кнопка и кнопка на экране бана)
         document.getElementById('navLogout').addEventListener('click', () => signOut(auth));
         document.getElementById('banLogoutBtn').addEventListener('click', () => signOut(auth));
 
@@ -498,10 +532,12 @@
                 closeNotificationsPanel();
                 closeSearch();
                 closeCommentsModal();
+                // Снимаем все подсветки
+                setActiveNav(null);
             }
         });
 
-        // --- Админка ---
+        // --- Админка: бан и разбан ---
         window.banUser = async () => {
             const email = document.getElementById('banEmail').value.trim();
             const reason = document.getElementById('banReasonInput').value;
@@ -517,6 +553,20 @@
                 showToast("Пользователь забанен");
                 document.getElementById('adminModal').classList.add('hidden');
             } catch(e) { showToast("Ошибка бана", "error"); }
+        };
+
+        window.unbanUser = async () => {
+            const email = document.getElementById('banEmail').value.trim();
+            if(!email) return showToast("Введите email", "error");
+            try {
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const snap = await getDocs(q);
+                if(snap.empty) return showToast("Пользователь не найден", "error");
+                const targetUid = snap.docs[0].id;
+                await updateDoc(doc(db, "users", targetUid), { banned: deleteField() });
+                showToast("Пользователь разбанен");
+                document.getElementById('adminModal').classList.add('hidden');
+            } catch(e) { showToast("Ошибка разбана", "error"); }
         };
 
         // --- Уведомления ---
@@ -540,16 +590,18 @@
 
         window.toggleNotifications = async () => {
             const panel = document.getElementById('notificationsPanel');
-            // Если панель уже открыта, закрываем
             if(!panel.classList.contains('translate-x-full')) {
                 closeNotificationsPanel();
                 return;
             }
-            // Закрываем другие панели
             closeProfilePanel();
             closeSearch();
             closeCommentsModal();
             panel.classList.remove('translate-x-full');
+            // Устанавливаем active на кнопку уведомлений
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.nav-btn .bx-bell')?.closest('.nav-btn')?.classList.add('active');
+            
             document.getElementById('notifBadge').classList.add('hidden');
             const list = document.getElementById('notificationsList');
             const data = await getUserData(currentUser.uid);
@@ -587,15 +639,17 @@
         // --- Открытие профиля ---
         window.openProfile = async (uid) => {
             const panel = document.getElementById('profilePanel');
-            // Если уже открыт, закрываем
             if(!panel.classList.contains('translate-x-full')) {
                 closeProfilePanel();
                 return;
             }
-            // Закрываем другие панели
             closeNotificationsPanel();
             closeSearch();
             closeCommentsModal();
+            // Устанавливаем active на кнопку профиля
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.nav-btn .bx-user')?.closest('.nav-btn')?.classList.add('active');
+            
             const d = await getUserData(uid);
             document.getElementById('profileName').innerText = d.displayName;
             document.getElementById('profileEmail').innerText = d.email || '';
@@ -640,11 +694,9 @@
             const avatar = document.getElementById('commentsModalAvatar');
             avatar.src = userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png';
             modal.classList.remove('hidden');
-            // Закрываем другие панели
             closeProfilePanel();
             closeNotificationsPanel();
             closeSearch();
-            // Загружаем комментарии
             list.innerHTML = '<div class="text-center py-4"><i class="bx bx-loader-alt bx-spin text-2xl text-primary"></i></div>';
             try {
                 const snap = await getDoc(doc(db, "posts", postId));
@@ -690,7 +742,6 @@
                 sendNotification(currentCommentsAuthorId, 'comment', currentCommentsPostId);
                 showToast("Комментарий отправлен");
                 input.value = '';
-                // Перезагружаем комментарии
                 await openCommentsModal(currentCommentsPostId, currentCommentsAuthorId);
             } catch(e) { showToast("Ошибка", "error"); }
             finally { input.disabled = false; }
@@ -762,7 +813,6 @@
                 </div>
             `;
 
-            // Кнопка подписки
             if(!isOwn) {
                 const followBtn = document.createElement('button');
                 followBtn.className = 'follow-btn-post';
@@ -834,6 +884,8 @@
             closeNotificationsPanel();
             closeCommentsModal();
             document.getElementById('searchInput').focus();
+            // Снимаем активную подсветку
+            setActiveNav(null);
         };
 
         document.getElementById('searchInput').addEventListener('input', async (e) => {
@@ -908,18 +960,18 @@
             closeNotificationsPanel();
             closeSearch();
             closeCommentsModal();
+            // Снимаем активную подсветку
+            setActiveNav(null);
             if(currentUserData) {
                 document.getElementById('editName').value = currentUserData.displayName || '';
                 document.getElementById('editBio').value = currentUserData.bio || '';
                 document.getElementById('bgColorInput').value = currentUserData.background || '#121212';
-                // Подсветить активный пресет
                 document.querySelectorAll('.color-preset').forEach(el => {
                     el.classList.toggle('active', el.dataset.color === currentUserData.background);
                 });
             }
         };
 
-        // Выбор цвета из пресета
         window.selectColor = (el) => {
             document.querySelectorAll('.color-preset').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
