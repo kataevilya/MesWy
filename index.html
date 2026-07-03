@@ -14,7 +14,7 @@
                         darkBg: '#121212',
                         darkPanel: '#1f1f22',
                         darkHover: '#2a2a2e',
-                        primary: 'var(--accent-color)'
+                        primary: '#2563eb'
                     },
                     borderRadius: { 'custom': '16px' }
                 }
@@ -23,10 +23,9 @@
     </script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        :root { --accent-color: #2563eb; }
         * { box-sizing: border-box; }
-        body { background-color: #121212; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; }
-        ::-webkit-scrollbar { width: 6px; }
+        body { background: #121212; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; }
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 20px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
@@ -35,33 +34,45 @@
 
         /* Навигация */
         .nav-btn {
-            transition: all 0.2s;
+            transition: all 0.15s;
             display: flex;
             align-items: center;
             justify-content: center;
             flex: 1 1 0;
             padding: 8px 0;
-            position: relative;
             color: #9ca3af;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            position: relative;
         }
-        .nav-btn i { font-size: 26px; transition: color 0.2s; }
+        .nav-btn i { font-size: 26px; transition: color 0.15s; }
         .nav-btn .nav-label { display: none; }
-        .nav-btn.active i { color: #2563eb !important; }
-        .nav-btn.active .nav-label { color: #2563eb !important; }
-        /* Для ПК отображаем лейблы при наведении */
+        .nav-btn.active i { color: #e5e7eb; } /* чуть ярче, но не синий */
+        .nav-btn.active .nav-label { color: #e5e7eb; }
+
         @media (min-width: 640px) {
-            .nav-btn { padding: 12px 16px; justify-content: flex-start; flex: none; width: 100%; }
-            .nav-btn i { font-size: 28px; min-width: 3rem; text-align: center; }
-            .nav-btn .nav-label { display: inline; margin-left: 12px; font-weight: 500; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+            .nav-btn {
+                padding: 14px 20px;
+                justify-content: flex-start;
+                flex: none;
+                width: 100%;
+                gap: 12px;
+            }
+            .nav-btn i { font-size: 30px; min-width: 3rem; text-align: center; }
+            .nav-btn .nav-label { display: inline; font-weight: 500; opacity: 0.7; transition: opacity 0.2s; white-space: nowrap; }
             .group:hover .nav-btn .nav-label { opacity: 1; }
         }
-        /* Мобильное меню: без отступов, кнопки по центру */
+
+        /* Мобильное меню: плотное, без отступов */
         .mobile-nav {
             display: flex;
             justify-content: space-around;
             align-items: center;
             height: 100%;
-            padding: 0 4px;
+            width: 100%;
+            padding: 0 2px;
         }
         .mobile-nav .nav-btn {
             flex: 1;
@@ -73,21 +84,59 @@
             .nav-btn .nav-label { display: none; }
         }
 
-        /* Панели (выезжающие) */
+        /* Боковая панель (sidebar) */
+        .sidebar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: #1f1f22;
+            border-top: 1px solid #2a2a2e;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+        }
+        @media (min-width: 640px) {
+            .sidebar {
+                width: 80px;
+                height: 100%;
+                border-top: none;
+                border-right: 1px solid #2a2a2e;
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 16px;
+                overflow-y: auto;
+            }
+            .sidebar .mobile-nav {
+                flex-direction: column;
+                height: auto;
+                width: 100%;
+                gap: 2px;
+            }
+            .sidebar .mobile-nav .nav-btn {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 12px 16px;
+            }
+        }
+
+        /* Выдвижные панели (slide) */
         .slide-panel {
             position: fixed;
             top: 0;
             right: 0;
             height: 100%;
             width: 100%;
-            max-width: 480px;
+            max-width: 460px;
             background: #1f1f22;
             z-index: 50;
             transform: translateX(100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-left: 1px solid #2a2a2e;
             display: flex;
             flex-direction: column;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.5);
         }
         .slide-panel.open { transform: translateX(0); }
         .slide-panel .panel-header {
@@ -106,6 +155,19 @@
         }
         .slide-panel .panel-body::-webkit-scrollbar { width: 4px; }
         .slide-panel .panel-body::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+
+        /* Оверлей для мобильных */
+        .panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 45;
+            display: none;
+        }
+        .panel-overlay.active { display: block; }
+        @media (min-width: 640px) {
+            .panel-overlay { display: none !important; }
+        }
 
         /* Кнопка подписки на посте */
         .follow-btn-post {
@@ -129,68 +191,25 @@
             z-index: 10;
         }
         .follow-btn-post:hover { transform: scale(1.1); background: #1d4ed8; }
-        .follow-btn-post.following { background: #1f1f22; color: #888; box-shadow: none; }
+        .follow-btn-post.following { background: #2a2a2e; color: #888; box-shadow: none; }
+
+        /* Пост */
+        .post-card {
+            background: #1f1f22;
+            border-radius: 16px;
+            border: 1px solid #2a2a2e;
+            padding: 16px;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+        .post-card:hover { border-color: #3f3f46; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #2a2a2e; }
+        .avatar-sm { width: 32px; height: 32px; }
+        #profileEmail { color: #9ca3af !important; }
 
         /* Комментарии */
         .comment-item { border-bottom: 1px solid #2a2a2e; padding: 12px 0; }
         .comment-item:last-child { border-bottom: none; }
-
-        /* Адаптив для ПК: боковая панель меню */
-        .sidebar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: #1f1f22;
-            border-top: 1px solid #2a2a2e;
-            z-index: 40;
-            display: flex;
-            align-items: center;
-        }
-        @media (min-width: 640px) {
-            .sidebar {
-                width: 72px;
-                height: 100%;
-                border-top: none;
-                border-right: 1px solid #2a2a2e;
-                flex-direction: column;
-                justify-content: flex-start;
-                padding-top: 12px;
-                overflow-y: auto;
-            }
-            .sidebar .mobile-nav {
-                flex-direction: column;
-                height: auto;
-                width: 100%;
-                gap: 4px;
-            }
-            .sidebar .mobile-nav .nav-btn {
-                width: 100%;
-                justify-content: flex-start;
-                padding: 10px 16px;
-            }
-        }
-
-        /* Остальное */
-        .post-card { background: #1f1f22; border-radius: 16px; border: 1px solid #2a2a2e; padding: 16px; position: relative; transition: border-color 0.2s; }
-        .post-card:hover { border-color: #3f3f46; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #2a2a2e; }
-        .avatar-sm { width: 32px; height: 32px; }
-        #profileEmail { color: #9ca3af !important; } /* убран акцент */
-
-        /* Тень для панелей при открытии */
-        .panel-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 45;
-            display: none;
-        }
-        .panel-overlay.active { display: block; }
-        @media (min-width: 640px) {
-            .panel-overlay { display: none !important; }
-        }
     </style>
 </head>
 <body>
@@ -226,38 +245,31 @@
     <!-- Боковое меню (Sidebar) -->
     <aside class="sidebar group" id="sidebar">
         <div class="mobile-nav">
-            <!-- 1. Лента -->
             <button onclick="loadPosts(true); setActiveNav(this)" class="nav-btn active" id="navFeed">
                 <i class='bx bx-home-alt-2'></i>
                 <span class="nav-label">Лента</span>
             </button>
-            <!-- 2. Поиск (панель) -->
-            <button onclick="toggleSearchPanel(); setActiveNav(null)" class="nav-btn" id="navSearch">
+            <button onclick="toggleSearchPanel(); setActiveNav(this)" class="nav-btn" id="navSearch">
                 <i class='bx bx-search'></i>
                 <span class="nav-label">Поиск</span>
             </button>
-            <!-- 3. Рекомендации -->
             <button onclick="loadRecs(); setActiveNav(this)" class="nav-btn" id="navRecs">
                 <i class='bx bx-trending-up'></i>
                 <span class="nav-label">Рекомендации</span>
             </button>
-            <!-- 4. Создать (панель) — без подсветки -->
-            <button onclick="toggleCreatePanel(); setActiveNav(null)" class="nav-btn" id="navCreate">
+            <button onclick="toggleCreatePanel(); setActiveNav(this)" class="nav-btn" id="navCreate">
                 <i class='bx bx-plus-circle' style="color:#2563eb;"></i>
                 <span class="nav-label" style="color:#2563eb;">Создать</span>
             </button>
-            <!-- 5. Уведомления (панель) -->
             <button onclick="toggleNotifications(); setActiveNav(this)" class="nav-btn" id="navNotif">
                 <i class='bx bx-bell'></i>
                 <span class="nav-label">Уведомления</span>
                 <span id="notifBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel" style="top:4px; right:4px;"></span>
             </button>
-            <!-- 6. Профиль (панель) -->
             <button onclick="if(currentUser) openProfile(currentUser.uid); setActiveNav(this)" class="nav-btn" id="navProfile">
                 <i class='bx bx-user'></i>
                 <span class="nav-label">Профиль</span>
             </button>
-            <!-- 7. Выход -->
             <button id="navLogout" class="nav-btn text-red-500 hover:text-red-400" style="color:#ef4444;">
                 <i class='bx bx-log-out'></i>
                 <span class="nav-label">Выйти</span>
@@ -266,7 +278,7 @@
     </aside>
 
     <!-- Основная лента -->
-    <main id="mainContent" class="w-full h-full overflow-y-auto p-3 sm:p-6 flex justify-center pb-20 sm:pb-6" style="margin-left:0; transition: margin-left 0.3s;">
+    <main id="mainContent" class="w-full h-full overflow-y-auto p-3 sm:p-6 flex justify-center pb-20 sm:pb-6" style="margin-left:0;">
         <div class="max-w-xl w-full flex flex-col gap-4" id="postsFeed"></div>
     </main>
 
@@ -467,23 +479,19 @@
             return { displayName: 'Пользователь', photoURL: 'https://i.ibb.co/30Zc4Fq/default-avatar.png', email: '' };
         }
 
-        // --- Управление активной вкладкой ---
+        // --- Активная вкладка (без синей подсветки) ---
         window.setActiveNav = (btn) => {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
         };
 
-        // --- Панели: управление оверлеем и открытием/закрытием ---
+        // --- Управление панелями ---
         function openPanel(panelId) {
             const panel = document.getElementById(panelId);
             if(panel.classList.contains('open')) return;
-            // Закрываем все остальные панели
             document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('open'));
             panel.classList.add('open');
-            // Оверлей для мобильных
-            const overlay = document.getElementById('panelOverlay');
-            if(window.innerWidth < 640) overlay.classList.add('active');
-            // Сдвиг контента вправо (для ПК) — не требуется, т.к. панель поверх
+            if(window.innerWidth < 640) document.getElementById('panelOverlay').classList.add('active');
         }
 
         function closePanel(panelId) {
@@ -494,33 +502,28 @@
         window.closeAllPanels = () => {
             document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('open'));
             document.getElementById('panelOverlay').classList.remove('active');
-            // снимаем подсветку с кнопок, кроме ленты
+            // возвращаем активность ленте
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            // подсветим ленту, если она активна
-            const feedBtn = document.getElementById('navFeed');
-            if(feedBtn) feedBtn.classList.add('active');
+            document.getElementById('navFeed').classList.add('active');
         };
 
-        // --- Отдельные функции для панелей ---
         window.closeProfilePanel = () => closePanel('profilePanel');
         window.closeNotificationsPanel = () => closePanel('notificationsPanel');
         window.closeCreatePanel = () => closePanel('createPanel');
         window.closeSearchPanel = () => closePanel('searchPanel');
 
+        // --- Открытие панелей с подсветкой (но без синего) ---
         window.toggleNotifications = () => {
             const panel = document.getElementById('notificationsPanel');
             if(panel.classList.contains('open')) {
                 closePanel('notificationsPanel');
-                // убираем подсветку
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById('navFeed').classList.add('active');
                 return;
             }
             openPanel('notificationsPanel');
-            // подсветка на кнопке уведомлений
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('navNotif').classList.add('active');
-            // загружаем уведомления
             loadNotifications();
         };
 
@@ -533,9 +536,8 @@
                 return;
             }
             openPanel('createPanel');
-            // НЕ подсвечиваем кнопку "Создать"
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('navFeed').classList.add('active');
+            document.getElementById('navCreate').classList.add('active');
         };
 
         window.toggleSearchPanel = () => {
@@ -548,11 +550,10 @@
             }
             openPanel('searchPanel');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('navFeed').classList.add('active');
+            document.getElementById('navSearch').classList.add('active');
             document.getElementById('searchInput').focus();
         };
 
-        // --- Открытие профиля (панель) ---
         window.openProfile = async (uid) => {
             const panel = document.getElementById('profilePanel');
             if(panel.classList.contains('open')) {
@@ -572,7 +573,7 @@
             document.getElementById('profileAvatar').src = d.photoURL;
             if(uid === currentUser.uid) document.getElementById('editProfileBtn').classList.remove('hidden');
             else document.getElementById('editProfileBtn').classList.add('hidden');
-            // загружаем посты пользователя
+
             const pFeed = document.getElementById('profilePostsFeed');
             pFeed.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
             try {
@@ -583,7 +584,7 @@
             } catch(e) { pFeed.innerHTML = '<div class="text-center text-red-500 text-sm py-4">Ошибка загрузки</div>'; }
         };
 
-        // --- Загрузка уведомлений ---
+        // --- Загрузка уведомлений (с именами и аватарками) ---
         async function loadNotifications() {
             const list = document.getElementById('notificationsList');
             const data = await getUserData(currentUser.uid);
@@ -600,8 +601,6 @@
                 const icon = n.type === 'like' ? 'bxs-heart text-red-500' : 'bx-message-rounded text-primary';
                 const el = document.createElement('div');
                 el.className = "bg-[#121212] p-4 rounded-custom flex gap-3 items-center border border-gray-800 hover:border-gray-600 transition duration-300 cursor-pointer shadow-lg";
-                // Если есть postId, сделаем клик на пост
-                const postLink = n.postId ? `onclick="openPostById('${n.postId}')"` : '';
                 el.innerHTML = `
                     <img src="${n.fromAvatar || u.photoURL}" class="w-12 h-12 rounded-full object-cover shadow-md" onclick="openProfile('${n.from}')">
                     <div class="flex-1 text-sm">
@@ -614,13 +613,9 @@
             }
         }
 
-        // --- Открытие поста по ID (прокрутка к нему) ---
         window.openPostById = async (postId) => {
-            // Закрываем все панели
             closeAllPanels();
-            // Ищем пост в ленте, если его нет — загружаем
             const feed = document.getElementById('postsFeed');
-            // Проверим, есть ли уже пост с таким ID
             const existing = feed.querySelector(`[data-postid="${postId}"]`);
             if(existing) {
                 existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -628,11 +623,9 @@
                 setTimeout(() => existing.style.borderColor = '', 3000);
                 return;
             }
-            // Если нет — загружаем один пост
             try {
                 const docSnap = await getDoc(doc(db, "posts", postId));
                 if(docSnap.exists()) {
-                    // Вставляем в начало ленты
                     const container = document.createElement('div');
                     container.dataset.postid = postId;
                     await renderPost(docSnap, container, false);
@@ -706,7 +699,6 @@
                 window.currentUser = user;
                 window.userDataCache = data;
                 document.getElementById('authModal').classList.add('hidden');
-                
                 if(user.email === 'ryzik3489@gmail.com') {
                     document.getElementById('adminPanelBtn').classList.remove('hidden');
                 } else {
@@ -723,7 +715,7 @@
             }
         });
 
-        // --- Админка (бан/разбан) ---
+        // --- Админка ---
         window.banUser = async () => {
             const email = document.getElementById('banEmail').value.trim();
             const reason = document.getElementById('banReasonInput').value;
@@ -755,7 +747,7 @@
             } catch(e) { showToast("Ошибка разбана: " + e.message, "error"); }
         };
 
-        // --- Уведомления (отправка) ---
+        // --- Отправка уведомлений ---
         window.sendNotification = async (targetUid, type, postId) => {
             if(targetUid === currentUser.uid) return;
             try {
@@ -771,7 +763,6 @@
                 await updateDoc(doc(db, "users", targetUid), {
                     notifications: arrayUnion(notif)
                 });
-                // обновим бейдж
                 checkNotifications();
             } catch(e) {}
         };
@@ -937,7 +928,6 @@
                 const followBtn = document.createElement('button');
                 followBtn.className = 'follow-btn-post';
                 followBtn.textContent = '+';
-                // Проверяем подписку
                 (async () => {
                     const userData = await getUserData(currentUser.uid);
                     const following = userData?.following || [];
@@ -1019,7 +1009,7 @@
             } catch(err) { results.innerHTML = '<div class="text-center text-red-500">Ошибка поиска</div>'; }
         });
 
-        // --- Создание поста (из панели) ---
+        // --- Создание поста ---
         document.getElementById('postImages').addEventListener('change', function() {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
@@ -1115,7 +1105,7 @@
             vImg.style.transform = `scale(${zoomScale})`;
         });
 
-        // --- Инициализация активной вкладки ---
+        // --- Инициализация ---
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('navFeed').classList.add('active');
         });
