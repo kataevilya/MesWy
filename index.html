@@ -4,357 +4,246 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MesWy - Social Network</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        darkBg: '#121212',
-                        darkPanel: '#1f1f22',
-                        darkHover: '#2a2a2e',
-                        primary: 'var(--accent-color)'
-                    },
-                    borderRadius: {
-                        'custom': '16px'
-                    }
+                    colors: { darkBg: '#121212', darkPanel: '#1f1f22', darkHover: '#2a2a2e', primary: 'var(--accent-color)' },
+                    borderRadius: { 'custom': '16px' }
                 }
             }
         }
     </script>
-    <!-- Boxicons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        :root {
-            --accent-color: #2563eb; 
-        }
+        :root { --accent-color: #2563eb; }
         body { background-color: #121212; color: #e5e7eb; }
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 20px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-        
-        @media (max-width: 640px) {
-            .mobile-nav-text { display: none; }
-        }
+        @media (max-width: 640px) { .mobile-nav-text { display: none; } }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden font-sans text-gray-200 selection:bg-primary selection:text-white">
 
-    <!-- Уведомления (Toasts) -->
-    <div id="toastContainer" class="fixed bottom-16 sm:bottom-4 right-4 z-[9999] flex flex-col gap-2"></div>
+    <div id="toastContainer" class="fixed bottom-20 sm:bottom-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
-    <!-- Модалка Авторизации -->
+    <!-- экран бана -->
+    <div id="banScreen" class="hidden fixed inset-0 z-[10000] bg-red-600 flex flex-col items-center justify-center p-6 text-center">
+        <i class='bx bx-block text-8xl text-white mb-6'></i>
+        <h1 class="text-4xl font-bold text-white mb-4">ваш аккаунт заблокирован</h1>
+        <p id="banReason" class="text-xl text-white mb-2"></p>
+        <p id="banUntil" class="text-lg text-white/80"></p>
+    </div>
+
+    <!-- авторизация -->
     <div id="authModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-sm border border-gray-800">
             <div class="flex justify-center mb-4"><i class='bx bx-infinite text-5xl text-primary'></i></div>
             <h2 id="authTitle" class="text-2xl font-bold mb-4 text-center">Вход в MesWy</h2>
             <form id="authForm" class="space-y-3">
-                <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
-                <input type="password" id="authPassword" placeholder="Пароль" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
-                <button type="submit" id="authSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">Войти</button>
+                <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none">
+                <input type="password" id="authPassword" placeholder="Пароль" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none">
+                <button type="submit" id="authSubmitBtn" class="w-full bg-primary text-white font-bold py-3 rounded-custom">Войти</button>
             </form>
-            <button id="googleLoginBtn" class="mt-3 w-full bg-white text-black hover:bg-gray-200 font-bold py-3 rounded-custom transition-all flex justify-center items-center gap-2 text-base">
-                <i class='bx bxl-google text-xl'></i> Google
-            </button>
-            <p class="mt-4 text-center text-gray-400 text-sm cursor-pointer hover:text-white transition" id="authToggleBtn">Нет аккаунта? Создать</p>
+            <p class="mt-4 text-center text-gray-400 text-sm cursor-pointer" id="authToggleBtn">Нет аккаунта? Создать</p>
         </div>
     </div>
 
-    <!-- Боковое меню (ПК) / Нижнее меню (Мобайл) -->
-    <aside class="group fixed bottom-0 w-full h-14 sm:h-full sm:w-20 sm:hover:w-60 bg-darkPanel border-t sm:border-t-0 sm:border-r border-gray-800 transition-all duration-300 flex flex-row sm:flex-col justify-around sm:justify-between z-40 shadow-xl overflow-y-auto hide-scroll">
-        <div class="flex flex-row sm:flex-col w-full sm:mt-2 items-center sm:items-stretch h-full sm:h-auto gap-1 sm:gap-0">
+    <!-- навигация -->
+    <aside class="group fixed bottom-0 w-full h-16 sm:h-full sm:w-20 sm:hover:w-60 bg-darkPanel border-t sm:border-t-0 sm:border-r border-gray-800 transition-all duration-300 flex flex-row sm:flex-col justify-between z-40 shadow-xl overflow-x-auto sm:overflow-y-auto hide-scroll">
+        <div class="flex flex-row sm:flex-col w-max sm:w-full items-center sm:items-stretch h-full sm:h-auto px-2 sm:px-0 gap-2 sm:gap-0">
             <div class="hidden sm:flex items-center w-full p-3 mb-2">
                 <i class='bx bx-infinite text-3xl text-primary min-w-[3rem] text-center'></i>
-                <span class="ml-2 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">MesWy</span>
+                <span class="ml-2 text-xl font-bold opacity-0 group-hover:opacity-100 transition-opacity">MesWy</span>
             </div>
             
-            <button onclick="document.getElementById('postsFeed').scrollIntoView()" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-home-alt-2 text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Лента</span>
+            <button onclick="loadPosts(true)" class="flex items-center p-3 sm:w-full hover:bg-darkHover cursor-pointer sm:rounded-r-custom">
+                <i class='bx bx-home-alt-2 text-2xl sm:text-3xl text-gray-300'></i>
+                <span class="ml-2 opacity-0 group-hover:opacity-100 mobile-nav-text">Лента</span>
             </button>
 
-            <button id="navSearch" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-search text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Поиск</span>
+            <button id="navSearch" class="flex items-center p-3 sm:w-full hover:bg-darkHover cursor-pointer sm:rounded-r-custom">
+                <i class='bx bx-search text-2xl sm:text-3xl text-gray-300'></i>
+                <span class="ml-2 opacity-0 group-hover:opacity-100 mobile-nav-text">Поиск</span>
             </button>
 
-            <button id="navPopular" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-trending-up text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Популярное</span>
+            <button onclick="loadRecs()" class="flex items-center p-3 sm:w-full hover:bg-darkHover cursor-pointer sm:rounded-r-custom">
+                <i class='bx bx-trending-up text-2xl sm:text-3xl text-gray-300'></i>
+                <span class="ml-2 opacity-0 group-hover:opacity-100 mobile-nav-text">Рекомендации</span>
             </button>
 
-            <button id="navCreatePost" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-plus-circle text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text text-primary whitespace-nowrap">Создать</span>
+            <button id="navCreatePost" class="flex items-center p-3 sm:w-full hover:bg-darkHover cursor-pointer sm:rounded-r-custom">
+                <i class='bx bx-plus-circle text-2xl sm:text-3xl text-primary'></i>
+                <span class="ml-2 opacity-0 group-hover:opacity-100 mobile-nav-text text-primary">Создать</span>
             </button>
 
-            <button id="navNotifications" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom relative">
-                <i class='bx bx-bell text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Уведомления</span>
-                <span class="absolute top-2 sm:top-3 left-6 sm:left-10 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-darkPanel"></span>
+            <button onclick="toggleNotifications()" class="flex items-center p-3 sm:w-full hover:bg-darkHover cursor-pointer sm:rounded-r-custom relative">
+                <i class='bx bx-bell text-2xl sm:text-3xl text-gray-300'></i>
+                <span class="ml-2 opacity-0 group-hover:opacity-100 mobile-nav-text">Уведомления</span>
+                <span id="notifBadge" class="hidden absolute top-2 right-2 sm:left-10 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
             </button>
 
-            <button id="navProfile" class="flex items-center sm:w-full p-2 sm:p-3 hover:bg-darkHover transition-colors cursor-pointer sm:text-left sm:rounded-r-custom">
-                <i class='bx bx-user text-2xl sm:text-3xl sm:min-w-[3rem] text-center text-gray-300 hover:text-primary transition-colors'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity mobile-nav-text whitespace-nowrap">Профиль</span>
+            <button onclick="if(currentUser) openProfile(currentUser.uid)" class="flex items-center p-3 sm:w-full hover:bg-darkHover cursor-pointer sm:rounded-r-custom">
+                <i class='bx bx-user text-2xl sm:text-3xl text-gray-300'></i>
+                <span class="ml-2 opacity-0 group-hover:opacity-100 mobile-nav-text">Профиль</span>
             </button>
         </div>
-
         <div class="hidden sm:flex flex-col w-full mb-2">
-            <button id="navSettings" class="flex items-center w-full p-3 hover:bg-darkHover transition-colors cursor-pointer text-left rounded-r-custom">
-                <i class='bx bx-cog text-3xl min-w-[3rem] text-center text-gray-400 hover:text-white'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Настройки</span>
-            </button>
-            <button id="navLogout" class="flex items-center w-full p-3 hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer text-left rounded-r-custom">
+            <button id="navLogout" class="flex items-center w-full p-3 hover:bg-red-500/10 text-red-500 rounded-r-custom">
                 <i class='bx bx-log-out text-3xl min-w-[3rem] text-center'></i>
-                <span class="ml-2 font-medium text-base opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Выйти</span>
+                <span class="ml-2 font-medium opacity-0 group-hover:opacity-100">Выйти</span>
             </button>
         </div>
     </aside>
 
-    <!-- Основная Лента -->
-    <main class="w-full sm:ml-20 flex-1 h-full overflow-y-auto p-3 sm:p-6 flex justify-center bg-[#121212] pb-20 sm:pb-6">
-        <div class="max-w-xl w-full flex flex-col gap-4" id="postsFeed">
-            <!-- Посты рендерятся тут -->
-        </div>
+    <main class="w-full sm:ml-20 flex-1 h-full overflow-y-auto p-3 sm:p-6 flex justify-center bg-[#121212] pb-24 sm:pb-6">
+        <div class="max-w-xl w-full flex flex-col gap-4" id="postsFeed"></div>
     </main>
 
-    <!-- Панель Профиля -->
+    <!-- панель профиля -->
     <div id="profilePanel" class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
         <div class="flex-1 overflow-y-auto hide-scroll pb-20 sm:pb-4">
-            <!-- Обложка -->
             <div id="profileCover" class="h-40 sm:h-48 bg-gray-800 bg-cover bg-center relative">
-                <button id="closeProfileBtn" class="absolute top-3 right-3 bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80 flex items-center justify-center transition backdrop-blur-sm z-50">
+                <button onclick="document.getElementById('profilePanel').classList.add('translate-x-full')" class="absolute top-3 right-3 bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center">
                     <i class='bx bx-x text-2xl'></i>
                 </button>
             </div>
-            
             <div class="px-5 relative flex flex-col">
                 <div class="flex justify-between items-end -mt-12 sm:-mt-14 relative z-20 mb-3">
-                    <img id="profileAvatar" src="" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-darkPanel object-cover bg-darkPanel shadow-lg">
-                    <button id="editProfileBtn" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-5 py-2 rounded-custom font-bold transition border border-gray-700 text-sm mb-1">
-                        Редактировать
-                    </button>
-                </div>
-                
-                <div class="mt-1">
-                    <h2 id="profileName" class="text-2xl font-bold">Имя</h2>
-                    <p id="profileBio" class="text-gray-400 mt-2 text-sm leading-relaxed whitespace-pre-wrap">Описание...</p>
-                </div>
-                
-                <div class="flex gap-3 mt-4 bg-[#121212] p-3 rounded-custom border border-gray-800">
-                    <div class="text-center flex-1"><span class="block font-bold text-xl text-white" id="profileFollowing">0</span> <span class="text-gray-500 text-xs">Подписок</span></div>
-                    <div class="text-center flex-1 border-l border-gray-800"><span class="block font-bold text-xl text-white" id="profileLikes">0</span> <span class="text-gray-500 text-xs">Лайков</span></div>
-                </div>
-
-                <!-- Посты пользователя -->
-                <div class="mt-6 border-t border-gray-800 pt-5">
-                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class='bx bx-grid-alt text-primary'></i> Публикации</h3>
-                    <div id="profilePostsFeed" class="flex flex-col gap-4">
-                        <!-- Посты пользователя рендерятся тут -->
+                    <img id="profileAvatar" src="" class="w-24 h-24 rounded-full border-4 border-darkPanel object-cover">
+                    <div class="flex gap-2">
+                        <button id="adminPanelBtn" onclick="document.getElementById('adminModal').classList.remove('hidden')" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-custom font-bold text-sm mb-1 shadow-lg shadow-red-600/20">Админ</button>
+                        <button id="editProfileBtn" onclick="document.getElementById('editProfileModal').classList.remove('hidden')" class="hidden bg-[#121212] hover:bg-gray-800 text-white px-5 py-2 rounded-custom font-bold border border-gray-700 text-sm mb-1">Редактировать</button>
                     </div>
                 </div>
+                <h2 id="profileName" class="text-2xl font-bold"></h2>
+                <p id="profileBio" class="text-gray-400 mt-2 text-sm whitespace-pre-wrap"></p>
+                <div class="mt-6 border-t border-gray-800 pt-5">
+                    <h3 class="text-lg font-bold mb-4">Публикации</h3>
+                    <div id="profilePostsFeed" class="flex flex-col gap-4"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Полноэкранный Поиск -->
-    <div id="searchModal" class="hidden fixed inset-0 z-[60] bg-[#121212] flex flex-col p-4 overflow-y-auto hide-scroll pb-20">
-        <button class="close-modal-btn fixed top-4 right-4 text-gray-400 hover:text-white w-10 h-10 flex items-center justify-center rounded-full bg-darkPanel border border-gray-800 z-50 transition">
-            <i class='bx bx-x text-2xl'></i>
-        </button>
-        <div class="max-w-2xl w-full mx-auto mt-8 sm:mt-6">
-            <h2 class="text-2xl font-bold mb-4 text-center">Поиск по MesWy</h2>
-            <div class="relative mb-6">
-                <i class='bx bx-search absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-500'></i>
-                <input type="text" id="searchInput" placeholder="Введите текст для поиска постов..." class="w-full pl-12 p-4 rounded-custom bg-darkPanel border border-gray-800 focus:border-primary outline-none transition text-base shadow-xl">
-            </div>
-            <div id="searchResults" class="flex flex-col gap-4">
-                <div class="text-center text-gray-500 mt-8"><i class='bx bx-search text-5xl opacity-20 mb-3'></i><br>Начните вводить запрос</div>
+    <!-- панель уведомлений -->
+    <div id="notificationsPanel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-darkPanel shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-800">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-[#1f1f22] sticky top-0 z-10">
+            <h2 class="text-xl font-bold">Уведомления</h2>
+            <button onclick="toggleNotifications()" class="text-gray-400 hover:text-white"><i class='bx bx-x text-3xl'></i></button>
+        </div>
+        <div id="notificationsList" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3"></div>
+    </div>
+
+    <!-- админ панель -->
+    <div id="adminModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-md border border-red-900/50">
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class='bx bx-x text-2xl'></i></button>
+            <h2 class="text-2xl font-bold mb-4 text-red-500 flex items-center gap-2"><i class='bx bx-shield-quarter'></i> Админ-Панель</h2>
+            <div class="space-y-4">
+                <input type="text" id="banUid" placeholder="UID пользователя" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none text-sm">
+                <input type="text" id="banReasonInput" placeholder="Причина бана" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none text-sm">
+                <input type="number" id="banDays" placeholder="Срок бана (дни)" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none text-sm">
+                <button onclick="banUser()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-custom">Забанить пользователя</button>
             </div>
         </div>
     </div>
 
-    <!-- Модалка Создания Поста -->
-    <div id="createPostModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212] transition">
-                <i class='bx bx-x text-xl'></i>
-            </button>
+    <div id="createPostModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/90 p-4">
+        <div class="bg-darkPanel p-5 rounded-custom shadow-2xl w-full max-w-lg relative border border-gray-800">
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-4 right-4 text-gray-500"><i class='bx bx-x text-xl'></i></button>
             <h2 class="text-2xl font-bold mb-4">Новый пост</h2>
             <form id="createPostForm" class="space-y-4">
-                <input type="text" id="postTitle" placeholder="Заголовок поста..." required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition text-base">
-                <textarea id="postDesc" placeholder="Расскажите, что происходит?" rows="4" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 focus:border-primary outline-none transition resize-none text-base"></textarea>
-                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800 cursor-pointer hover:border-gray-600 transition group">
-                    <label class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                        <i class='bx bx-images text-4xl text-gray-500 group-hover:text-primary transition-colors mb-2'></i>
-                        <span class="text-sm text-gray-400 font-medium">Прикрепить фото (до 10 шт)</span>
+                <input type="text" id="postTitle" placeholder="Заголовок" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none">
+                <textarea id="postDesc" placeholder="Что нового?" rows="4" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none resize-none"></textarea>
+                <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
+                    <label class="flex flex-col items-center justify-center cursor-pointer">
+                        <i class='bx bx-images text-4xl text-gray-500 mb-2'></i>
+                        <span class="text-sm text-gray-400">Фото</span>
                         <input type="file" id="postImages" multiple accept="image/*" class="hidden">
                     </label>
                     <div id="imagePreview" class="mt-3 flex gap-2 overflow-x-auto hide-scroll"></div>
                 </div>
-                <button type="submit" id="postSubmitBtn" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-custom transition-all text-base">
-                    Опубликовать
-                </button>
+                <button type="submit" id="postSubmitBtn" class="w-full bg-primary text-white font-bold py-3 rounded-custom">Опубликовать</button>
             </form>
         </div>
     </div>
 
-    <!-- Настройки / Кастомизация -->
-    <div id="settingsModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-darkPanel p-6 rounded-custom shadow-2xl w-full max-w-sm relative border border-gray-800">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212]">
-                <i class='bx bx-x text-xl'></i>
-            </button>
-            <h2 class="text-2xl font-bold mb-6">Настройки</h2>
-            
-            <div class="space-y-5">
-                <div>
-                    <h3 class="text-base font-bold mb-3 text-gray-300">Цвет интерфейса</h3>
-                    <div class="flex gap-3 flex-wrap">
-                        <button onclick="changeThemeColor('#2563eb')" class="w-10 h-10 rounded-full bg-[#2563eb] border-2 border-transparent hover:scale-110 transition"></button>
-                        <button onclick="changeThemeColor('#dc2626')" class="w-10 h-10 rounded-full bg-[#dc2626] border-2 border-transparent hover:scale-110 transition"></button>
-                        <button onclick="changeThemeColor('#16a34a')" class="w-10 h-10 rounded-full bg-[#16a34a] border-2 border-transparent hover:scale-110 transition"></button>
-                        <button onclick="changeThemeColor('#9333ea')" class="w-10 h-10 rounded-full bg-[#9333ea] border-2 border-transparent hover:scale-110 transition"></button>
-                        <button onclick="changeThemeColor('#ea580c')" class="w-10 h-10 rounded-full bg-[#ea580c] border-2 border-transparent hover:scale-110 transition"></button>
-                    </div>
-                </div>
-
-                <div class="border-t border-gray-800 pt-5">
-                    <button class="w-full flex items-center justify-between p-3 bg-[#121212] rounded-custom hover:bg-gray-800 transition">
-                        <span class="font-bold text-sm">Управление аккаунтом</span>
-                        <i class='bx bx-chevron-right text-xl text-gray-500'></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Редактирование Профиля -->
-    <div id="editProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-darkPanel p-5 sm:p-6 rounded-custom shadow-2xl w-full max-w-md relative border border-gray-800 overflow-y-auto max-h-[90vh] hide-scroll">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-[#121212]">
-                <i class='bx bx-x text-xl'></i>
-            </button>
-            <h2 class="text-2xl font-bold mb-4">Редактирование</h2>
-            <form id="editProfileForm" class="space-y-4">
-                <input type="text" id="editName" placeholder="Имя пользователя" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none text-base">
-                <textarea id="editBio" placeholder="О себе" rows="3" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none resize-none text-base"></textarea>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
-                        <label class="block text-sm font-medium text-gray-400 mb-2">Сменить аватарку</label>
-                        <input type="file" id="editAvatar" accept="image/*" class="w-full text-xs file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1.5 file:cursor-pointer">
-                    </div>
-                    <div class="bg-[#121212] p-4 rounded-custom border border-gray-800">
-                        <label class="block text-sm font-medium text-gray-400 mb-2">Сменить обложку</label>
-                        <input type="file" id="editCover" accept="image/*" class="w-full text-xs file:bg-darkHover file:text-white file:border-0 file:rounded-custom file:px-3 file:py-1.5 file:cursor-pointer">
-                    </div>
-                </div>
-                <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black hover:bg-gray-200 font-bold py-3 rounded-custom transition-all text-base mt-2">Сохранить</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Просмотр Изображений -->
+    <!-- зум картинок -->
     <div id="imageViewerModal" class="hidden fixed inset-0 z-[999] bg-black/95 flex items-center justify-center p-4">
-        <button id="closeImageViewer" class="absolute top-4 right-4 text-white w-10 h-10 bg-gray-900/50 hover:bg-gray-800 rounded-full flex items-center justify-center transition backdrop-blur-md">
+        <button onclick="closeImage()" class="absolute top-4 right-4 text-white w-10 h-10 bg-gray-900/50 rounded-full flex items-center justify-center z-50">
             <i class='bx bx-x text-2xl'></i>
         </button>
-        <img id="viewerImage" src="" class="max-w-full max-h-full object-contain rounded-custom shadow-2xl">
+        <div class="w-full h-full flex items-center justify-center overflow-hidden" id="imageZoomContainer">
+            <img id="viewerImage" src="" class="max-w-full max-h-full object-contain transition-transform duration-200 cursor-grab">
+        </div>
     </div>
 
-    <!-- Scripts -->
+    <div id="editProfileModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/90 p-4">
+        <div class="bg-darkPanel p-5 rounded-custom shadow-2xl w-full max-w-md border border-gray-800">
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-4 right-4 text-gray-500"><i class='bx bx-x text-xl'></i></button>
+            <h2 class="text-2xl font-bold mb-4">Редактирование</h2>
+            <form id="editProfileForm" class="space-y-4">
+                <input type="text" id="editName" placeholder="Имя" required class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none">
+                <textarea id="editBio" placeholder="О себе" class="w-full p-3 rounded-custom bg-[#121212] border border-gray-800 outline-none resize-none"></textarea>
+                <input type="file" id="editAvatar" accept="image/*" class="w-full text-xs text-gray-400">
+                <button type="submit" id="editProfileSubmitBtn" class="w-full bg-white text-black font-bold py-3 rounded-custom">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, limit, startAfter, arrayUnion, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, limit, arrayUnion, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        const firebaseConfig = {
+        const app = initializeApp({
             apiKey: "AIzaSyCBSWHaooqAwJTUjDhwjXKDN1z5locXCcM",
             authDomain: "meswy-web.firebaseapp.com",
-            projectId: "meswy-web",
-            storageBucket: "meswy-web.firebasestorage.app",
-            messagingSenderId: "802423553668",
-            appId: "1:802423553668:web:64be6aae3f34b2d0f88cd1"
-        };
-        const app = initializeApp(firebaseConfig);
+            projectId: "meswy-web"
+        });
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const IMGBB_API_KEY = "cfedaeb5c6bb179902b44ba10cb396cb";
+        const IMGBB_KEY = "cfedaeb5c6bb179902b44ba10cb396cb";
 
-        let currentUser = null;
-        let userDataCache = null; 
-        let lastVisiblePost = null; 
+        window.currentUser = null;
+        window.userDataCache = null; 
+        const userCache = {}; // глобальный кэш для обновления аватарок
 
-        window.changeThemeColor = (color) => {
-            document.documentElement.style.setProperty('--accent-color', color);
-            localStorage.setItem('themeColor', color);
-        };
-        const savedColor = localStorage.getItem('themeColor');
-        if(savedColor) changeThemeColor(savedColor);
-
-        window.showToast = (message, type = 'info') => {
-            const container = document.getElementById('toastContainer');
+        window.showToast = (msg) => {
             const toast = document.createElement('div');
-            const bg = type === 'error' ? 'bg-red-900/90 border-red-700' : 'bg-darkPanel border-gray-700';
-            const icon = type === 'error' ? 'bx-error-circle text-red-500' : 'bx-check-circle text-primary';
-            
-            toast.className = `toast-enter flex items-center gap-3 p-4 rounded-custom border ${bg} text-white shadow-2xl min-w-[250px] mb-2 text-sm`;
-            toast.innerHTML = `<i class='bx ${icon} text-xl'></i> <span class="font-bold">${message}</span>`;
-            
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                toast.style.transition = 'all 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            toast.className = `toast-enter p-4 rounded-custom bg-darkPanel border border-gray-700 text-white shadow-xl mb-2 text-sm z-[9999]`;
+            toast.innerText = msg;
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
         };
 
-        async function uploadToImgBB(file) {
-            const formData = new FormData();
-            formData.append('image', file);
-            try {
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
-                const data = await res.json();
-                return data.data.url;
-            } catch (e) { showToast("Ошибка картинки", "error"); return null; }
+        async function getUserData(uid) {
+            if(userCache[uid]) return userCache[uid];
+            const snap = await getDoc(doc(db, "users", uid));
+            if(snap.exists()) {
+                userCache[uid] = snap.data();
+                return userCache[uid];
+            }
+            return { displayName: 'User', photoURL: 'https://i.ibb.co/30Zc4Fq/default-avatar.png' };
         }
 
-        document.querySelectorAll('.close-modal-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => e.target.closest('div.fixed').classList.add('hidden'));
-        });
-
-        document.getElementById('navSettings')?.addEventListener('click', () => document.getElementById('settingsModal').classList.remove('hidden'));
-        document.getElementById('navNotifications').addEventListener('click', () => showToast("У вас нет новых уведомлений"));
-        document.getElementById('navPopular').addEventListener('click', () => { showToast("Загружаем популярное..."); loadPosts(true); });
-
-        let isLoginMode = true;
-        const authModal = document.getElementById('authModal');
-        
-        document.getElementById('authToggleBtn').addEventListener('click', (e) => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('authTitle').textContent = isLoginMode ? "Вход в MesWy" : "Регистрация";
-            document.getElementById('authSubmitBtn').textContent = isLoginMode ? "Войти" : "Создать аккаунт";
-            e.target.textContent = isLoginMode ? "Нет аккаунта? Создать" : "Уже есть аккаунт? Войти";
-        });
-
-        async function ensureUserProfile(user, additionalData = {}) {
+        async function ensureUserProfile(user) {
             const userRef = doc(db, "users", user.uid);
             const snap = await getDoc(userRef);
             if (!snap.exists()) {
                 await setDoc(userRef, {
-                    displayName: user.displayName || additionalData.displayName || "Новый пользователь",
-                    bio: "ПРОСТО Я ЛУЧШИЙ",
-                    photoURL: user.photoURL || "https://i.ibb.co/30Zc4Fq/default-avatar.png",
-                    coverURL: "https://i.ibb.co/z4V8z1z/default-cover.png",
-                    followersCount: 0, followingCount: 0, likesCount: 0
+                    email: user.email,
+                    displayName: user.email.split('@')[0],
+                    bio: "",
+                    photoURL: "https://i.ibb.co/30Zc4Fq/default-avatar.png",
+                    notifications: []
                 });
             }
             return (await getDoc(userRef)).data();
@@ -362,331 +251,224 @@
 
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('authSubmitBtn');
-            btn.disabled = true; btn.textContent = "Загрузка...";
+            const em = document.getElementById('authEmail').value;
+            const pw = document.getElementById('authPassword').value;
             try {
-                const email = document.getElementById('authEmail').value;
-                const pwd = document.getElementById('authPassword').value;
-                if (isLoginMode) await signInWithEmailAndPassword(auth, email, pwd);
-                else {
-                    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-                    await ensureUserProfile(cred.user, { displayName: email.split('@')[0] });
-                    showToast("Аккаунт создан!");
+                try { await signInWithEmailAndPassword(auth, em, pw); } 
+                catch(e) { 
+                    const cr = await createUserWithEmailAndPassword(auth, em, pw);
+                    await ensureUserProfile(cr.user);
                 }
-            } catch (err) { showToast(err.message, "error"); } 
-            finally { btn.disabled = false; btn.textContent = isLoginMode ? "Войти" : "Создать аккаунт"; }
+            } catch(e) { showToast(e.message); }
         });
-
-        document.getElementById('googleLoginBtn').addEventListener('click', async () => {
-            try { await ensureUserProfile((await signInWithPopup(auth, new GoogleAuthProvider())).user); } 
-            catch (err) { showToast(err.message, "error"); }
-        });
-
-        document.getElementById('navLogout')?.addEventListener('click', () => signOut(auth));
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                currentUser = user;
-                authModal.classList.add('hidden');
-                userDataCache = await ensureUserProfile(user);
-                loadPosts(true);
+                const data = await ensureUserProfile(user);
+                if(data.banned && new Date(data.banned.until) > new Date()) {
+                    document.getElementById('banScreen').classList.remove('hidden');
+                    document.getElementById('banReason').innerText = "Причина: " + data.banned.reason;
+                    document.getElementById('banUntil').innerText = "До: " + new Date(data.banned.until).toLocaleString();
+                    return;
+                }
+                window.currentUser = user; window.userDataCache = data;
+                document.getElementById('authModal').classList.add('hidden');
+                
+                if(user.email === 'ryzik3489@gmail.com') {
+                    document.getElementById('adminPanelBtn').classList.remove('hidden');
+                }
+                loadPosts();
+                checkNotifications();
             } else {
-                currentUser = null; userDataCache = null;
-                authModal.classList.remove('hidden');
-                document.getElementById('postsFeed').innerHTML = '';
+                document.getElementById('authModal').classList.remove('hidden');
             }
         });
 
-        window.openProfile = async (uid) => {
-            const panel = document.getElementById('profilePanel');
-            const userSnap = await getDoc(doc(db, "users", uid));
-            if (userSnap.exists()) {
-                const data = userSnap.data();
-                document.getElementById('profileName').textContent = data.displayName;
-                document.getElementById('profileBio').textContent = data.bio || "";
-                document.getElementById('profileAvatar').src = data.photoURL;
-                document.getElementById('profileCover').style.backgroundImage = `url(${data.coverURL})`;
-                document.getElementById('profileFollowing').textContent = data.followingCount || 0;
-                document.getElementById('profileLikes').textContent = data.likesCount || 0;
-                
-                const editBtn = document.getElementById('editProfileBtn');
-                if (uid === currentUser.uid) {
-                    editBtn.classList.remove('hidden');
-                    document.getElementById('editName').value = data.displayName;
-                    document.getElementById('editBio').value = data.bio || "";
-                } else { editBtn.classList.add('hidden'); }
-                
-                panel.classList.remove('translate-x-full');
-
-                const pFeed = document.getElementById('profilePostsFeed');
-                pFeed.innerHTML = '<div class="text-center py-6"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
-                const pq = query(collection(db, "posts"), where("authorId", "==", uid), orderBy("createdAt", "desc"));
-                const pSnap = await getDocs(pq);
-                pFeed.innerHTML = '';
-                if(pSnap.empty) {
-                    pFeed.innerHTML = '<div class="text-center text-gray-500 py-6 bg-[#121212] rounded-custom text-sm">У пользователя пока нет постов</div>';
-                } else {
-                    for(const d of pSnap.docs) await renderPost(d, pFeed, true);
-                }
-            }
+        window.banUser = async () => {
+            const uid = document.getElementById('banUid').value;
+            const reason = document.getElementById('banReasonInput').value;
+            const days = parseInt(document.getElementById('banDays').value || 1);
+            if(!uid) return;
+            const until = new Date(); until.setDate(until.getDate() + days);
+            await updateDoc(doc(db, "users", uid), { banned: { reason, until: until.toISOString() } });
+            showToast("пользователь забанен");
+            document.getElementById('adminModal').classList.add('hidden');
         };
 
-        document.getElementById('navProfile').addEventListener('click', () => { if(currentUser) openProfile(currentUser.uid); });
-        document.getElementById('closeProfileBtn').addEventListener('click', () => document.getElementById('profilePanel').classList.add('translate-x-full'));
+        window.sendNotification = async (targetUid, type, postId) => {
+            if(targetUid === currentUser.uid) return;
+            await updateDoc(doc(db, "users", targetUid), {
+                notifications: arrayUnion({ type, from: currentUser.uid, postId, date: new Date().toISOString() })
+            });
+        };
 
-        document.getElementById('editProfileBtn').addEventListener('click', () => document.getElementById('editProfileModal').classList.remove('hidden'));
+        window.toggleNotifications = async () => {
+            const panel = document.getElementById('notificationsPanel');
+            const list = document.getElementById('notificationsList');
+            if(panel.classList.contains('translate-x-full')) {
+                panel.classList.remove('translate-x-full');
+                document.getElementById('notifBadge').classList.add('hidden');
+                const data = await getUserData(currentUser.uid);
+                list.innerHTML = '';
+                if(!data.notifications || data.notifications.length===0) list.innerHTML = '<p class="text-gray-500 text-center mt-5">нет уведомлений</p>';
+                else {
+                    const notifs = data.notifications.sort((a,b)=>new Date(b.date)-new Date(a.date)).reverse();
+                    for(const n of notifs) {
+                        const u = await getUserData(n.from);
+                        const txt = n.type === 'like' ? 'лайкнул ваш пост' : 'оставил комментарий';
+                        const el = document.createElement('div');
+                        el.className = "bg-[#121212] p-3 rounded-custom flex gap-3 items-center border border-gray-800 transform hover:scale-105 transition duration-300";
+                        el.innerHTML = `
+                            <img src="${u.photoURL}" class="w-10 h-10 rounded-full object-cover">
+                            <div class="text-sm"><span class="font-bold">${u.displayName}</span> ${txt}</div>
+                        `;
+                        list.prepend(el);
+                    }
+                }
+            } else { panel.classList.add('translate-x-full'); }
+        };
+
+        async function checkNotifications() {
+            const data = await getUserData(currentUser.uid);
+            if(data.notifications && data.notifications.length > 0) {
+                document.getElementById('notifBadge').classList.remove('hidden');
+            }
+        }
+
+        window.openProfile = async (uid) => {
+            const d = await getUserData(uid);
+            document.getElementById('profileName').innerText = d.displayName;
+            document.getElementById('profileBio').innerText = d.bio || '';
+            document.getElementById('profileAvatar').src = d.photoURL;
+            if(uid === currentUser.uid) document.getElementById('editProfileBtn').classList.remove('hidden');
+            else document.getElementById('editProfileBtn').classList.add('hidden');
+            document.getElementById('profilePanel').classList.remove('translate-x-full');
+            
+            const pFeed = document.getElementById('profilePostsFeed');
+            pFeed.innerHTML = 'загрузка...';
+            const s = await getDocs(query(collection(db, "posts"), where("authorId", "==", uid)));
+            pFeed.innerHTML = '';
+            for(const d of s.docs) await renderPost(d, pFeed, true);
+        };
+
+        window.toggleLike = async (postId, authorId, btn) => {
+            const ref = doc(db, "posts", postId);
+            const s = await getDoc(ref);
+            const likes = s.data().likes || [];
+            const isLiked = likes.includes(currentUser.uid);
+            const nl = isLiked ? likes.filter(i=>i!==currentUser.uid) : [...likes, currentUser.uid];
+            await updateDoc(ref, { likes: nl });
+            if(!isLiked) sendNotification(authorId, 'like', postId);
+            btn.innerHTML = `<i class='bx ${isLiked ? 'bx-heart' : 'bxs-heart text-red-500'} text-2xl'></i> <span>${nl.length}</span>`;
+        };
+
+        window.submitComment = async (postId, authorId, inputId) => {
+            const i = document.getElementById(inputId);
+            if(!i.value.trim()) return;
+            await updateDoc(doc(db, "posts", postId), {
+                comments: arrayUnion({ uid: currentUser.uid, text: i.value, date: new Date().toISOString() })
+            });
+            sendNotification(authorId, 'comment', postId);
+            i.value = ''; showToast('отправлено');
+            loadPosts();
+        };
+
+        async function renderPost(docSnap, container, compact=false) {
+            const p = docSnap.data();
+            const u = await getUserData(p.authorId);
+            let imgs = '';
+            if(p.images) p.images.forEach(url => imgs += `<img src="${url}" onclick="openImage('${url}')" class="w-full h-48 object-cover rounded-custom mt-2">`);
+            
+            let coms = '';
+            if(p.comments && !compact) {
+                for(let c of p.comments.slice(-3)) {
+                    const cu = await getUserData(c.uid); // глобальное обновление имени/авы
+                    coms += `<div class="flex gap-2 mt-2"><img src="${cu.photoURL}" class="w-6 h-6 rounded-full"><div class="text-sm"><span class="font-bold">${cu.displayName}</span> ${c.text}</div></div>`;
+                }
+            }
+
+            const el = document.createElement('div');
+            el.className = "bg-darkPanel p-4 rounded-custom border border-gray-800";
+            el.innerHTML = `
+                <div class="flex items-center gap-3 mb-2 cursor-pointer" onclick="openProfile('${p.authorId}')">
+                    <img src="${u.photoURL}" class="w-10 h-10 rounded-full object-cover">
+                    <h3 class="font-bold">${u.displayName}</h3>
+                </div>
+                <p class="text-base">${p.description}</p>
+                ${imgs}
+                <div class="flex gap-4 mt-3 pt-3 border-t border-gray-800">
+                    <button onclick="toggleLike('${docSnap.id}', '${p.authorId}', this)" class="flex gap-1 items-center">
+                        <i class='bx ${p.likes?.includes(currentUser.uid) ? 'bxs-heart text-red-500' : 'bx-heart'} text-2xl'></i> <span>${p.likes?.length||0}</span>
+                    </button>
+                </div>
+                ${!compact ? `
+                <div class="mt-2">${coms}</div>
+                <div class="flex gap-2 mt-3">
+                    <input id="c-${docSnap.id}" placeholder="комментарий..." class="flex-1 bg-[#121212] rounded-custom px-3 text-sm outline-none border border-gray-800">
+                    <button onclick="submitComment('${docSnap.id}', '${p.authorId}', 'c-${docSnap.id}')" class="bg-primary px-3 rounded-custom"><i class='bx bx-send'></i></button>
+                </div>` : ''}
+            `;
+            container.appendChild(el);
+        }
+
+        window.loadPosts = async (reset=true) => {
+            if(reset) document.getElementById('postsFeed').innerHTML = '';
+            const s = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(10)));
+            for(const d of s.docs) await renderPost(d, document.getElementById('postsFeed'));
+        };
+
+        window.loadRecs = async () => {
+            document.getElementById('postsFeed').innerHTML = '<div class="text-center p-5">загрузка реков...</div>';
+            const s = await getDocs(query(collection(db, "posts"), limit(20))); // симуляция реков
+            document.getElementById('postsFeed').innerHTML = '<h2 class="font-bold text-xl mb-2 text-primary">Рекомендации</h2>';
+            const docs = s.docs.sort(() => 0.5 - Math.random()).slice(0,5);
+            for(const d of docs) await renderPost(d, document.getElementById('postsFeed'));
+        };
+
+        let zoomScale = 1;
+        const vImg = document.getElementById('viewerImage');
+        window.openImage = (url) => {
+            zoomScale = 1; vImg.style.transform = `scale(1)`;
+            vImg.src = url; document.getElementById('imageViewerModal').classList.remove('hidden');
+        };
+        window.closeImage = () => { document.getElementById('imageViewerModal').classList.add('hidden'); };
+        
+        vImg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoomScale += e.deltaY * -0.002;
+            zoomScale = Math.min(Math.max(0.5, zoomScale), 5);
+            vImg.style.transform = `scale(${zoomScale})`;
+        });
+
+        document.getElementById('navCreatePost').addEventListener('click', () => document.getElementById('createPostModal').classList.remove('hidden'));
+        document.getElementById('createPostForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('postImages').files[0] ? await upload(document.getElementById('postImages').files[0]) : null;
+            await addDoc(collection(db, "posts"), {
+                title: document.getElementById('postTitle').value,
+                description: document.getElementById('postDesc').value,
+                images: url ? [url] : [], authorId: currentUser.uid, createdAt: new Date().toISOString(), likes: [], comments: []
+            });
+            document.getElementById('createPostModal').classList.add('hidden'); loadPosts();
+        });
+
+        async function upload(f) {
+            const fd = new FormData(); fd.append('image', f);
+            const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST',body:fd});
+            return (await r.json()).data.url;
+        }
 
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('editProfileSubmitBtn');
-            btn.disabled = true; btn.textContent = "Сохраняем...";
-            try {
-                const updates = { displayName: document.getElementById('editName').value, bio: document.getElementById('editBio').value };
-                const avatar = document.getElementById('editAvatar').files[0];
-                const cover = document.getElementById('editCover').files[0];
-                if (avatar) updates.photoURL = await uploadToImgBB(avatar);
-                if (cover) updates.coverURL = await uploadToImgBB(cover);
-
-                await updateDoc(doc(db, "users", currentUser.uid), updates);
-                userDataCache = { ...userDataCache, ...updates };
-                document.getElementById('editProfileModal').classList.add('hidden');
-                openProfile(currentUser.uid);
-                showToast("Профиль обновлен");
-                loadPosts(true); 
-            } catch (err) { showToast(err.message, "error"); }
-            finally { btn.disabled = false; btn.textContent = "Сохранить"; }
-        });
-
-        const imgModal = document.getElementById('imageViewerModal');
-        window.openImage = (url) => { document.getElementById('viewerImage').src = url; imgModal.classList.remove('hidden'); };
-        document.getElementById('closeImageViewer').addEventListener('click', () => imgModal.classList.add('hidden'));
-
-        document.getElementById('navCreatePost').addEventListener('click', () => document.getElementById('createPostModal').classList.remove('hidden'));
-        
-        document.getElementById('postImages').addEventListener('change', function() {
-            const preview = document.getElementById('imagePreview');
-            preview.innerHTML = '';
-            Array.from(this.files).forEach(file => {
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                img.className = "w-16 h-16 object-cover rounded-xl border border-gray-700 shadow-md";
-                preview.appendChild(img);
-            });
-        });
-
-        document.getElementById('createPostForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('postSubmitBtn');
-            btn.disabled = true; btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Публикуем...";
-            try {
-                const files = document.getElementById('postImages').files;
-                const uploadPromises = Array.from(files).map(f => uploadToImgBB(f));
-                const imageUrls = (await Promise.all(uploadPromises)).filter(url => url !== null);
-
-                await addDoc(collection(db, "posts"), {
-                    title: document.getElementById('postTitle').value,
-                    description: document.getElementById('postDesc').value,
-                    images: imageUrls,
-                    authorId: currentUser.uid,
-                    createdAt: new Date().toISOString(),
-                    likes: [], comments: []
-                });
-                document.getElementById('createPostModal').classList.add('hidden');
-                document.getElementById('createPostForm').reset();
-                document.getElementById('imagePreview').innerHTML = '';
-                showToast("Пост опубликован!");
-                loadPosts(true);
-            } catch (err) { showToast(err.message, "error"); }
-            finally { btn.disabled = false; btn.innerHTML = "Опубликовать"; }
-        });
-
-        const postsFeed = document.getElementById('postsFeed');
-
-        window.toggleLike = async (postId, btnElement) => {
-            try {
-                const postRef = doc(db, "posts", postId);
-                const snap = await getDoc(postRef);
-                const likes = snap.data().likes || [];
-                const isLiked = likes.includes(currentUser.uid);
-                const newLikes = isLiked ? likes.filter(id => id !== currentUser.uid) : [...likes, currentUser.uid];
-                await updateDoc(postRef, { likes: newLikes });
-                
-                btnElement.innerHTML = isLiked 
-                    ? `<i class='bx bx-heart text-2xl'></i> <span class="font-bold text-base">${newLikes.length}</span>`
-                    : `<i class='bx bxs-heart text-2xl text-red-500 drop-shadow-md'></i> <span class="font-bold text-base">${newLikes.length}</span>`;
-            } catch (e) { showToast("Ошибка", "error"); }
-        };
-
-        window.submitComment = async (postId, inputElementId) => {
-            const input = document.getElementById(inputElementId);
-            const text = input.value.trim();
-            if (!text) return;
-            try {
-                input.disabled = true;
-                await updateDoc(doc(db, "posts", postId), {
-                    comments: arrayUnion({ uid: currentUser.uid, name: userDataCache.displayName, photo: userDataCache.photoURL, text: text, date: new Date().toISOString() })
-                });
-                input.value = '';
-                showToast("Комментарий добавлен");
-                loadPosts(true); 
-            } catch (e) { showToast("Ошибка", "error"); }
-            finally { input.disabled = false; }
-        };
-
-        window.toggleComments = (postId) => {
-            const hiddenBox = document.getElementById(`hidden-comments-${postId}`);
-            const btn = document.getElementById(`toggle-btn-${postId}`);
-            if (hiddenBox.classList.contains('hidden')) {
-                hiddenBox.classList.remove('hidden');
-                btn.innerHTML = "Скрыть <i class='bx bx-chevron-up'></i>";
-            } else {
-                hiddenBox.classList.add('hidden');
-                btn.innerHTML = `Показать все <i class='bx bx-chevron-down'></i>`;
-            }
-        };
-
-        async function renderPost(docSnap, container, compact = false) {
-            const post = docSnap.data();
-            const postId = docSnap.id;
-            
-            let authorName = "User"; let authorPhoto = "https://i.ibb.co/30Zc4Fq/default-avatar.png";
-            try {
-                const authorSnap = await getDoc(doc(db, "users", post.authorId));
-                if(authorSnap.exists()) { authorName = authorSnap.data().displayName; authorPhoto = authorSnap.data().photoURL; }
-            } catch(e){}
-
-            let imagesHtml = '';
-            if (post.images && post.images.length > 0) {
-                const gridClass = post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2';
-                imagesHtml = `<div class="grid ${gridClass} gap-2 mt-4 rounded-custom overflow-hidden">`;
-                post.images.forEach(url => {
-                    imagesHtml += `<img src="${url}" onclick="openImage('${url}')" class="w-full ${compact ? 'h-36' : 'h-48 sm:h-64'} object-cover cursor-pointer hover:scale-105 transition duration-500" alt="Post">`;
-                });
-                imagesHtml += `</div>`;
-            }
-
-            const likesCount = post.likes ? post.likes.length : 0;
-            const isLiked = post.likes && post.likes.includes(currentUser.uid);
-            const heartHtml = isLiked ? `<i class='bx bxs-heart text-2xl text-red-500 drop-shadow-md'></i>` : `<i class='bx bx-heart text-2xl'></i>`;
-            
-            const comments = post.comments || [];
-            let commentsHtml = ''; let hiddenCommentsHtml = '';
-            
-            if (comments.length > 0 && !compact) {
-                comments.forEach((c, i) => {
-                    const cHtml = `
-                        <div class="flex gap-3 mb-3">
-                            <img src="${c.photo}" class="w-8 h-8 rounded-full object-cover cursor-pointer shadow-md" onclick="openProfile('${c.uid}')">
-                            <div class="bg-[#121212] p-3 rounded-custom rounded-tl-none flex-1 border border-gray-800">
-                                <span class="font-bold text-sm cursor-pointer hover:text-primary transition" onclick="openProfile('${c.uid}')">${c.name}</span>
-                                <p class="text-gray-300 mt-1 text-sm">${c.text}</p>
-                            </div>
-                        </div>`;
-                    if (i < 3) commentsHtml += cHtml; else hiddenCommentsHtml += cHtml;
-                });
-            }
-
-            const postEl = document.createElement('article');
-            postEl.className = "bg-darkPanel rounded-custom border border-gray-800 p-4 sm:p-5 shadow-xl hover:border-gray-700 transition";
-            postEl.innerHTML = `
-                <div class="flex items-center space-x-3 mb-4 cursor-pointer" onclick="openProfile('${post.authorId}')">
-                    <img src="${authorPhoto}" class="w-10 h-10 rounded-full object-cover border-2 border-transparent hover:border-primary transition shadow-md">
-                    <div>
-                        <h3 class="text-base font-bold hover:text-primary transition">${authorName}</h3>
-                        <span class="text-xs text-gray-500">${new Date(post.createdAt).toLocaleDateString()}</span>
-                    </div>
-                </div>
-                <h2 class="text-xl font-bold mb-2">${post.title}</h2>
-                <p class="text-gray-300 text-base whitespace-pre-wrap leading-relaxed">${post.description}</p>
-                ${imagesHtml}
-                
-                <div class="mt-4 flex items-center gap-6 border-t border-gray-800 pt-4">
-                    <button onclick="toggleLike('${postId}', this)" class="flex items-center gap-2 text-gray-400 hover:text-white transition">
-                        ${heartHtml} <span class="font-bold text-base">${likesCount}</span>
-                    </button>
-                    <div class="flex items-center gap-2 text-gray-400">
-                        <i class='bx bx-message-rounded text-2xl'></i> <span class="font-bold text-base">${comments.length}</span>
-                    </div>
-                </div>
-
-                ${!compact ? `
-                <div class="mt-4 border-t border-gray-800 pt-4">
-                    <div class="mb-2">${commentsHtml}</div>
-                    ${hiddenCommentsHtml ? `
-                        <div id="hidden-comments-${postId}" class="hidden mb-2">${hiddenCommentsHtml}</div>
-                        <button id="toggle-btn-${postId}" onclick="toggleComments('${postId}')" class="text-sm text-primary hover:opacity-80 font-bold mb-4 flex items-center gap-1">Показать все <i class='bx bx-chevron-down'></i></button>
-                    ` : ''}
-                    
-                    <div class="flex gap-3 mt-4 items-center">
-                        <img src="${userDataCache?.photoURL || 'https://i.ibb.co/30Zc4Fq/default-avatar.png'}" class="w-10 h-10 rounded-full object-cover shadow-md">
-                        <input type="text" id="comment-input-${postId}" placeholder="Оставить комментарий..." class="flex-1 bg-[#121212] border border-gray-800 rounded-custom px-4 py-2.5 text-sm outline-none focus:border-primary transition" onkeypress="if(event.key === 'Enter') submitComment('${postId}', 'comment-input-${postId}')">
-                        <button onclick="submitComment('${postId}', 'comment-input-${postId}')" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg shrink-0">
-                            <i class='bx bx-send text-xl'></i>
-                        </button>
-                    </div>
-                </div>` : ''}
-            `;
-            container.appendChild(postEl);
-        }
-
-        async function loadPosts(reset = false) {
-            if (reset) { postsFeed.innerHTML = ''; lastVisiblePost = null; }
-            const oldBtn = document.getElementById('loadMoreBtn');
-            if(oldBtn) oldBtn.remove();
-
-            let q = lastVisiblePost 
-                ? query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastVisiblePost), limit(15))
-                : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(15));
-
-            try {
-                const snap = await getDocs(q);
-                if (snap.empty && reset) {
-                    postsFeed.innerHTML = '<div class="text-center text-gray-500 mt-8 p-6 bg-darkPanel rounded-custom border border-gray-800 text-base">Пока ничего нет. Напиши первый пост!</div>';
-                    return;
-                }
-
-                for (const docSnap of snap.docs) await renderPost(docSnap, postsFeed);
-
-                if (snap.docs.length === 15) {
-                    lastVisiblePost = snap.docs[snap.docs.length - 1];
-                    const btn = document.createElement('button');
-                    btn.id = 'loadMoreBtn';
-                    btn.className = "w-full py-4 bg-darkPanel border border-gray-800 rounded-custom font-bold text-gray-400 hover:text-white hover:border-gray-600 transition mt-4 text-base";
-                    btn.textContent = "Загрузить еще";
-                    btn.onclick = () => loadPosts(false);
-                    postsFeed.appendChild(btn);
-                }
-            } catch (e) { showToast("Ошибка загрузки", "error"); }
-        }
-
-        const searchModal = document.getElementById('searchModal');
-        const searchInput = document.getElementById('searchInput');
-        const searchResults = document.getElementById('searchResults');
-        
-        document.getElementById('navSearch').addEventListener('click', () => {
-            searchModal.classList.remove('hidden');
-            searchInput.focus();
-        });
-
-        searchInput.addEventListener('input', async (e) => {
-            const val = e.target.value.toLowerCase();
-            if(val.length < 2) { searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8"><i class="bx bx-search text-5xl opacity-20 mb-3"></i><br>Введите запрос</div>'; return; }
-            
-            searchResults.innerHTML = '<div class="text-center text-primary mt-8"><i class="bx bx-loader-alt bx-spin text-4xl"></i></div>';
-            try {
-                const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50)));
-                searchResults.innerHTML = '';
-                let found = 0;
-                
-                for(const docSnap of snap.docs) {
-                    const data = docSnap.data();
-                    if (data.title.toLowerCase().includes(val) || data.description.toLowerCase().includes(val)) {
-                        found++;
-                        await renderPost(docSnap, searchResults, false);
-                    }
-                }
-                if(found === 0) searchResults.innerHTML = '<div class="text-center text-gray-500 mt-8 text-base">Ничего не найдено</div>';
-            } catch(err) { searchResults.innerHTML = '<div class="text-center text-red-500">Ошибка поиска</div>'; }
+            const n = document.getElementById('editName').value;
+            const b = document.getElementById('editBio').value;
+            const f = document.getElementById('editAvatar').files[0];
+            const updates = { displayName: n, bio: b };
+            if(f) updates.photoURL = await upload(f);
+            await updateDoc(doc(db, "users", currentUser.uid), updates);
+            userCache[currentUser.uid] = { ...userCache[currentUser.uid], ...updates };
+            document.getElementById('editProfileModal').classList.add('hidden');
+            openProfile(currentUser.uid); loadPosts();
         });
     </script>
 </body>
