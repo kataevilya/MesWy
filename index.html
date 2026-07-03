@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MesWy - Social Network</title>
+    <title>MesWy — Социальная сеть</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,95 +13,482 @@
     </script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; }
-        .active-tab { color: #2563eb !important; border-right: 2px solid #2563eb; }
-        .glass { background: rgba(25, 25, 25, 0.8); backdrop-filter: blur(10px); }
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            transition: background-color 0.3s;
+        }
+        .active-tab {
+            color: #2563eb !important;
+            border-right: 2px solid #2563eb;
+        }
+        .glass {
+            background: rgba(25, 25, 25, 0.85);
+            backdrop-filter: blur(10px);
+        }
+        .post-card {
+            transition: transform 0.1s;
+        }
+        .post-card:hover {
+            transform: scale(1.01);
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #2d2d2d;
+        }
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+        }
+        .notif-item {
+            border-bottom: 1px solid #1f1f1f;
+        }
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+        .follow-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .follow-btn:hover {
+            background: #1d4ed8;
+            transform: scale(1.1);
+        }
+        .follow-btn.following {
+            background: #1f1f1f;
+            color: #888;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Боковая панель / нижняя навигация -->
     <aside class="fixed bottom-0 w-full h-16 sm:h-full sm:w-64 border-t sm:border-t-0 sm:border-r border-gray-800 glass flex sm:flex-col justify-around sm:justify-start z-50">
         <div class="hidden sm:flex p-6 text-2xl font-bold text-primary">MesWy</div>
         <nav class="flex sm:flex-col w-full sm:w-auto">
-            <a href="#" class="nav-link flex items-center p-4 hover:text-primary transition" data-tab="home"><i class='bx bxs-home text-2xl'></i> <span class="hidden sm:block ml-4">Главная</span></a>
+            <a href="#" class="nav-link flex items-center p-4 hover:text-primary transition active-tab" data-tab="feed"><i class='bx bxs-home text-2xl'></i> <span class="hidden sm:block ml-4">Главная</span></a>
             <a href="#" class="nav-link flex items-center p-4 hover:text-primary transition" data-tab="search"><i class='bx bx-search text-2xl'></i> <span class="hidden sm:block ml-4">Поиск</span></a>
-            <a href="#" class="nav-link flex items-center p-4 hover:text-primary transition" data-tab="notifs"><i class='bx bx-bell text-2xl'></i> <span class="hidden sm:block ml-4">Уведомления</span></a>
+            <a href="#" class="nav-link flex items-center p-4 hover:text-primary transition" data-tab="notifications"><i class='bx bx-bell text-2xl'></i> <span class="hidden sm:block ml-4">Уведомления</span></a>
             <a href="#" class="nav-link flex items-center p-4 hover:text-primary transition" data-tab="profile"><i class='bx bx-user text-2xl'></i> <span class="hidden sm:block ml-4">Профиль</span></a>
+            <a href="#" class="nav-link flex items-center p-4 hover:text-primary transition" data-tab="settings"><i class='bx bx-cog text-2xl'></i> <span class="hidden sm:block ml-4">Настройки</span></a>
         </nav>
-        <div class="mt-auto p-4 hidden sm:block">
-            <button id="logoutBtn" class="text-red-500 font-bold"><i class='bx bx-log-out'></i> Выход</button>
-        </div>
     </aside>
 
+    <!-- Основной контент -->
     <main id="mainContent" class="sm:ml-64 p-4 pb-20">
+        <!-- Лента -->
         <div id="feed" class="max-w-2xl mx-auto space-y-4"></div>
+
+        <!-- Профиль -->
+        <div id="profile" class="max-w-2xl mx-auto hidden">
+            <div class="bg-[#111] p-6 rounded-xl border border-gray-800">
+                <div class="flex items-center gap-4">
+                    <img id="profileAvatar" src="" alt="Аватар" class="avatar w-20 h-20">
+                    <div>
+                        <h2 id="profileName" class="text-2xl font-bold"></h2>
+                        <p id="profileEmail" class="text-gray-400"></p>
+                        <p class="text-sm text-gray-500 mt-1">Подписчиков: <span id="followersCount">0</span></p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="mt-6 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-bold flex items-center gap-2">
+                    <i class='bx bx-log-out'></i> Выйти
+                </button>
+            </div>
+        </div>
+
+        <!-- Уведомления -->
+        <div id="notifications" class="max-w-2xl mx-auto hidden">
+            <h2 class="text-xl font-bold mb-4">Уведомления</h2>
+            <div id="notifList" class="bg-[#111] rounded-xl border border-gray-800 divide-y divide-gray-800"></div>
+        </div>
+
+        <!-- Настройки -->
+        <div id="settings" class="max-w-2xl mx-auto hidden">
+            <h2 class="text-xl font-bold mb-4">Настройки</h2>
+            <div class="bg-[#111] p-6 rounded-xl border border-gray-800 space-y-6">
+                <!-- Смена аватара -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Аватар</label>
+                    <div class="flex items-center gap-4">
+                        <img id="settingsAvatar" src="" alt="Аватар" class="avatar w-16 h-16">
+                        <input type="file" id="avatarInput" accept="image/*" class="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-primary file:text-white file:cursor-pointer">
+                    </div>
+                </div>
+                <!-- Цвет фона -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Цвет фона</label>
+                    <div class="flex items-center gap-4">
+                        <input type="color" id="bgColorInput" value="#000000" class="w-12 h-12 rounded border-0 cursor-pointer">
+                        <button id="applyBgBtn" class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg">Применить</button>
+                    </div>
+                </div>
+                <!-- Кнопка выхода (дубль) -->
+                <button id="logoutBtnSettings" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-bold flex items-center gap-2">
+                    <i class='bx bx-log-out'></i> Выйти
+                </button>
+            </div>
+        </div>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, query, orderBy, onSnapshot, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, onSnapshot, arrayUnion, arrayRemove, serverTimestamp, deleteDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
         const app = initializeApp({ projectId: "meswy-web" });
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         let currentUser = null;
+        let currentUserData = null;
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if(user) renderFeed();
-        });
+        // DOM-элементы
+        const feedEl = document.getElementById('feed');
+        const profileEl = document.getElementById('profile');
+        const notifEl = document.getElementById('notifications');
+        const settingsEl = document.getElementById('settings');
+        const notifList = document.getElementById('notifList');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileAvatar = document.getElementById('profileAvatar');
+        const settingsAvatar = document.getElementById('settingsAvatar');
+        const avatarInput = document.getElementById('avatarInput');
+        const bgColorInput = document.getElementById('bgColorInput');
+        const applyBgBtn = document.getElementById('applyBgBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutBtnSettings = document.getElementById('logoutBtnSettings');
+        const followersCount = document.getElementById('followersCount');
 
-        async function renderFeed() {
-            const feed = document.getElementById('feed');
-            feed.innerHTML = '';
-            
+        // ---- Вспомогательные функции ----
+        function showTab(tabId) {
+            // скрыть все
+            document.querySelectorAll('#mainContent > div').forEach(el => el.classList.add('hidden'));
+            // показать нужный
+            const target = document.getElementById(tabId);
+            if (target) target.classList.remove('hidden');
+            // обновить активный класс в навигации
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active-tab'));
+            document.querySelector(`.nav-link[data-tab="${tabId}"]`)?.classList.add('active-tab');
+        }
+
+        // Получить данные пользователя
+        async function getUserData(uid) {
+            const snap = await getDoc(doc(db, "users", uid));
+            if (snap.exists()) return snap.data();
+            return null;
+        }
+
+        // Обновить данные пользователя в Firestore
+        async function updateUserData(uid, data) {
+            await updateDoc(doc(db, "users", uid), data);
+        }
+
+        // Создать уведомление
+        async function createNotification(toUserId, type, fromUserId, postId = null) {
+            if (toUserId === fromUserId) return; // не отправлять себе
+            const fromData = await getUserData(fromUserId);
+            const fromName = fromData?.displayName || 'Пользователь';
+            const fromAvatar = fromData?.photoURL || '';
+            await setDoc(doc(collection(db, "notifications")), {
+                type: type, // 'like' или 'follow'
+                fromUserId: fromUserId,
+                toUserId: toUserId,
+                fromName: fromName,
+                fromAvatar: fromAvatar,
+                postId: postId,
+                timestamp: serverTimestamp(),
+                read: false
+            });
+        }
+
+        // ---- Рендер ленты ----
+        function renderFeed() {
             const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snapshot) => {
                 const scrollPos = window.scrollY;
-                feed.innerHTML = '';
+                feedEl.innerHTML = '';
                 snapshot.forEach(docSnap => {
                     const post = docSnap.data();
-                    const isFollowing = post.authorId !== currentUser.uid;
-                    
-                    const article = document.createElement('article');
-                    article.className = "bg-[#111] p-4 rounded-xl border border-gray-800";
-                    article.innerHTML = `
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-lg">${post.authorName || 'Пользователь'}</span>
-                            ${isFollowing ? `<button onclick="follow('${post.authorId}')" class="bg-primary px-3 py-1 rounded-full text-sm font-bold">+ Подписаться</button>` : ''}
-                        </div>
-                        <p class="text-white mb-2">${post.text}</p>
-                        <div class="flex gap-4">
-                            <button onclick="likePost('${docSnap.id}')" class="text-xl"><i class='bx bx-heart'></i> ${post.likes?.length || 0}</button>
-                            <button class="text-xl"><i class='bx bx-message-rounded'></i></button>
-                        </div>
-                    `;
-                    feed.appendChild(article);
+                    const postId = docSnap.id;
+                    const isOwn = post.authorId === currentUser.uid;
+                    const isFollowing = !isOwn; // показываем кнопку подписки для всех, кроме себя
+
+                    // Получаем данные автора (для аватара)
+                    getUserData(post.authorId).then(authorData => {
+                        const authorName = authorData?.displayName || post.authorName || 'Пользователь';
+                        const authorAvatar = authorData?.photoURL || '';
+
+                        const article = document.createElement('article');
+                        article.className = "post-card bg-[#111] p-4 rounded-xl border border-gray-800 relative";
+                        article.innerHTML = `
+                            <div class="flex items-center gap-3 mb-2">
+                                <img src="${authorAvatar}" alt="Аватар" class="avatar">
+                                <span class="font-bold text-lg">${authorName}</span>
+                            </div>
+                            <p class="text-white mb-2">${post.text}</p>
+                            <div class="flex gap-4">
+                                <button class="like-btn text-xl flex items-center gap-1" data-postid="${postId}">
+                                    <i class='bx bx-heart'></i> <span class="like-count">${post.likes?.length || 0}</span>
+                                </button>
+                                <button class="text-xl"><i class='bx bx-message-rounded'></i></button>
+                            </div>
+                            ${!isOwn ? `<button class="follow-btn" data-uid="${post.authorId}">+</button>` : ''}
+                        `;
+                        feedEl.appendChild(article);
+
+                        // Обработчик лайка
+                        const likeBtn = article.querySelector('.like-btn');
+                        likeBtn.addEventListener('click', async () => {
+                            const postRef = doc(db, "posts", postId);
+                            const postSnap = await getDoc(postRef);
+                            if (!postSnap.exists()) return;
+                            const data = postSnap.data();
+                            const likes = data.likes || [];
+                            const userLiked = likes.includes(currentUser.uid);
+                            let newLikes;
+                            if (userLiked) {
+                                newLikes = arrayRemove(currentUser.uid);
+                            } else {
+                                newLikes = arrayUnion(currentUser.uid);
+                                // Создать уведомление
+                                if (data.authorId !== currentUser.uid) {
+                                    await createNotification(data.authorId, 'like', currentUser.uid, postId);
+                                }
+                            }
+                            await updateDoc(postRef, { likes: newLikes });
+                        });
+
+                        // Обработчик подписки
+                        const followBtn = article.querySelector('.follow-btn');
+                        if (followBtn) {
+                            followBtn.addEventListener('click', async (e) => {
+                                e.stopPropagation();
+                                const targetId = followBtn.dataset.uid;
+                                if (targetId === currentUser.uid) return;
+                                // Проверим, подписан ли уже
+                                const userRef = doc(db, "users", currentUser.uid);
+                                const userSnap = await getDoc(userRef);
+                                const following = userSnap.data()?.following || [];
+                                if (following.includes(targetId)) {
+                                    // отписаться
+                                    await updateDoc(userRef, { following: arrayRemove(targetId) });
+                                    followBtn.textContent = '+';
+                                } else {
+                                    await updateDoc(userRef, { following: arrayUnion(targetId) });
+                                    followBtn.textContent = '✓';
+                                    // Создать уведомление
+                                    await createNotification(targetId, 'follow', currentUser.uid);
+                                }
+                                // Обновим счетчик подписчиков, если нужно
+                            });
+                            // Проверить начальное состояние
+                            getUserData(currentUser.uid).then(data => {
+                                const following = data?.following || [];
+                                if (following.includes(post.authorId)) {
+                                    followBtn.textContent = '✓';
+                                }
+                            });
+                        }
+                    });
                 });
                 window.scrollTo(0, scrollPos);
             });
         }
 
-        window.likePost = async (postId) => {
-            const ref = doc(db, "posts", postId);
-            await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
-        };
+        // ---- Рендер профиля ----
+        async function renderProfile() {
+            if (!currentUser) return;
+            const data = await getUserData(currentUser.uid);
+            currentUserData = data;
+            const displayName = data?.displayName || currentUser.displayName || 'Пользователь';
+            const email = currentUser.email || 'email не указан';
+            const avatar = data?.photoURL || currentUser.photoURL || '';
+            const followers = data?.followers?.length || 0;
 
-        window.follow = async (targetId) => {
-            if(targetId === currentUser.uid) return;
-            await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetId) });
-        };
+            profileName.textContent = displayName;
+            profileEmail.textContent = email;
+            profileAvatar.src = avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName) + '&background=2563eb&color=fff';
+            followersCount.textContent = followers;
+        }
 
+        // ---- Рендер уведомлений ----
+        function renderNotifications() {
+            const q = query(
+                collection(db, "notifications"),
+                where("toUserId", "==", currentUser.uid),
+                orderBy("timestamp", "desc")
+            );
+            onSnapshot(q, (snapshot) => {
+                notifList.innerHTML = '';
+                if (snapshot.empty) {
+                    notifList.innerHTML = '<p class="text-gray-400 p-4">Нет уведомлений</p>';
+                    return;
+                }
+                snapshot.forEach(docSnap => {
+                    const n = docSnap.data();
+                    const item = document.createElement('div');
+                    item.className = 'notif-item p-4 flex items-center gap-3';
+                    const avatar = n.fromAvatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(n.fromName) + '&background=2563eb&color=fff';
+                    let text = '';
+                    if (n.type === 'like') {
+                        text = `<strong>${n.fromName}</strong> лайкнул(а) ваш пост`;
+                    } else if (n.type === 'follow') {
+                        text = `<strong>${n.fromName}</strong> подписался(ась) на вас`;
+                    } else {
+                        text = `Новое уведомление от ${n.fromName}`;
+                    }
+                    item.innerHTML = `
+                        <img src="${avatar}" alt="avatar" class="avatar avatar-sm">
+                        <div class="flex-1">${text}</div>
+                        <span class="text-xs text-gray-500">${n.timestamp ? new Date(n.timestamp.seconds * 1000).toLocaleDateString() : ''}</span>
+                    `;
+                    notifList.appendChild(item);
+                });
+            });
+        }
+
+        // ---- Настройки ----
+        function renderSettings() {
+            if (!currentUserData) return;
+            const avatar = currentUserData?.photoURL || currentUser.photoURL || '';
+            settingsAvatar.src = avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUserData?.displayName || 'User') + '&background=2563eb&color=fff';
+            // цвет фона
+            const bg = currentUserData?.background || '#000000';
+            bgColorInput.value = bg;
+            document.body.style.backgroundColor = bg;
+        }
+
+        // Загрузка аватара
+        async function uploadAvatar(file) {
+            if (!file) return;
+            const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+            await uploadBytes(storageRef, file);
+            const url = await getDownloadURL(storageRef);
+            // Обновить в auth
+            await updateProfile(currentUser, { photoURL: url });
+            // Обновить в firestore
+            await updateUserData(currentUser.uid, { photoURL: url });
+            // Обновить отображение
+            settingsAvatar.src = url;
+            profileAvatar.src = url;
+            // перезагрузить ленту - onSnapshot обновит сам
+        }
+
+        // Применить фон
+        async function applyBackground(color) {
+            document.body.style.backgroundColor = color;
+            await updateUserData(currentUser.uid, { background: color });
+        }
+
+        // ---- Обработчики вкладок ----
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active-tab'));
-                link.classList.add('active-tab');
+                e.preventDefault();
+                const tab = link.dataset.tab;
+                showTab(tab);
+                if (tab === 'profile') renderProfile();
+                if (tab === 'notifications') renderNotifications();
+                if (tab === 'settings') renderSettings();
+                if (tab === 'feed') renderFeed(); // можно перерендерить, но onSnapshot уже работает
             });
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+        // ---- Выход ----
+        function handleLogout() {
+            signOut(auth);
+            // Перенаправим на страницу входа? Но у нас нет страницы входа, просто перезагрузим?
+            // Можно показать сообщение, но пока просто обновим страницу
+            window.location.reload();
+        }
+        logoutBtn.addEventListener('click', handleLogout);
+        logoutBtnSettings.addEventListener('click', handleLogout);
+
+        // ---- События настройки ----
+        avatarInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) uploadAvatar(file);
+        });
+
+        applyBgBtn.addEventListener('click', () => {
+            const color = bgColorInput.value;
+            applyBackground(color);
+        });
+
+        // ---- Инициализация ----
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Получить данные пользователя из Firestore (или создать)
+                const userRef = doc(db, "users", user.uid);
+                const snap = await getDoc(userRef);
+                if (!snap.exists()) {
+                    // Создать документ пользователя
+                    await setDoc(userRef, {
+                        displayName: user.displayName || 'Пользователь',
+                        email: user.email,
+                        photoURL: user.photoURL || '',
+                        following: [],
+                        followers: [],
+                        background: '#000000'
+                    });
+                }
+                // Загрузить данные
+                currentUserData = await getUserData(user.uid);
+                // Показать главную
+                showTab('feed');
+                renderFeed();
+                // Загрузить профиль (для фона)
+                if (currentUserData?.background) {
+                    document.body.style.backgroundColor = currentUserData.background;
+                }
+                // Загрузить аватарку в настройках
+                renderSettings();
+                // Обновить профиль при показе
+                // Также подпишемся на изменение данных пользователя (для обновления аватара)
+            } else {
+                // Не авторизован — перенаправить на страницу входа (пока просто перезагрузим)
+                // В реальном проекте нужно показать страницу входа. Здесь для простоты редирект на логин.
+                window.location.href = 'login.html'; // или просто сообщение
+            }
+        });
+
+        // ---- Дополнительно: сохранять активную вкладку ----
+        // Уже есть
+
+        // ---- Обновление количества подписчиков (для профиля) ----
+        // Подпишемся на изменения документа пользователя
+        if (currentUser) {
+            onSnapshot(doc(db, "users", currentUser.uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const followers = data.followers?.length || 0;
+                    followersCount.textContent = followers;
+                }
+            });
+        }
+
+        // ---- Экспорт для глобальных вызовов (не требуется) ----
+        console.log('MesWy улучшенная версия загружена!');
     </script>
 </body>
 </html>
